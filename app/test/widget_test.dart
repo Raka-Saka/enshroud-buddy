@@ -800,7 +800,7 @@ void main() {
       expect(db.items[t.fish.first.id], isNotNull);
     }
     final h = db.halls!;
-    expect(h.points.length % 3, 0);
+    expect(h.points.length % h.stride, 0);
     final inside = db.poi.where((p) => p.inside).toList();
     expect(inside.where((p) => p.cat == 'chest'), isNotEmpty);
     for (final p in inside) {
