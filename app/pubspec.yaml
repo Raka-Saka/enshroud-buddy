@@ -1,7 +1,7 @@
 name: ensh_companion
 description: "Enshrouded companion: offline game data, save reader, planner."
 publish_to: 'none'
-version: 0.34.4+47
+version: 0.34.5+48
 
 environment:
   sdk: ^3.7.0

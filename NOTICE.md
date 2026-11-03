@@ -2,8 +2,10 @@
 
 ## Enshrouded and its data
 
-**Enshrouded** is developed and published by **Keen Games GmbH**. Enshroud Buddy is an unofficial fan tool. It
-is not affiliated with, endorsed or sponsored by Keen Games.
+**Enshrouded** is developed and published by **Keen Games GmbH**. *Unofficial fan project. Not affiliated with or endorsed by Keen Games. Enshrouded and its content are the property of Keen Games GmbH.*
+
+Enshroud Buddy follows Keen Games' Enshrouded Fan Project Guidelines (November 2026): it is free for everyone,
+with nothing behind a payment.
 
 This repository includes data taken from the game's files, for personal, non-commercial use by players who own
 the game:
@@ -15,8 +17,9 @@ the game:
 - `app/assets/map/`, `app/assets/map_preview.jpg`, `height.png`, `shroud_levels.png`, `cold.png`: map imagery
   and grids rendered from the game's own map textures.
 
-All of it is © Keen Games GmbH, and it is not covered by this project's license. The repository is private
-while Keen Games is asked whether sharing it is fine. It will be taken down or changed on their request.
+All of it is © Keen Games GmbH, and it is not covered by this project's license. Keen Games tolerates this use
+under its Fan Project Guidelines and can withdraw that at any time; anything will be changed or removed on their
+request.
 
 ## Third-party works
 

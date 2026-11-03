@@ -155,7 +155,7 @@ class _SetupScreenState extends State<SetupScreen> {
             leading: const Icon(Icons.gavel_outlined),
             title: const Text('Licenses and credits'),
             subtitle: const Text(
-              'Enshrouded and its data © Keen Games; this is an unofficial fan tool',
+              'Unofficial fan project. Not affiliated with or endorsed by Keen Games.',
               style: TextStyle(color: Palette.ash, fontSize: 12),
             ),
             onTap:
@@ -163,8 +163,8 @@ class _SetupScreenState extends State<SetupScreen> {
                   context: context,
                   applicationName: 'Enshroud Buddy',
                   applicationLegalese:
-                      'Unofficial fan tool, not affiliated with Keen Games. Enshrouded and the game data, '
-                      'texts, icons and map art in this app © Keen Games GmbH. App code: MIT license.',
+                      'Unofficial fan project. Not affiliated with or endorsed by Keen Games. '
+                      'Enshrouded and its content are the property of Keen Games GmbH. App code: MIT license.',
                 ),
           ),
         ],

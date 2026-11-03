@@ -22,8 +22,9 @@ files and shows your game on the phone, while you play or away from the PC:
   stat it gives.
 - **Ask** (optional): questions about your game answered by Claude, from your save and the game data.
 
-> **Status: private preview.** The app carries data taken from the game's files (names, texts, icons, map
-> art), which belong to Keen Games. This repository stays private until Keen says whether sharing it is fine.
+> *Unofficial fan project. Not affiliated with or endorsed by Keen Games. Enshrouded and its content are the property of Keen Games GmbH.*
+>
+> Free for everyone, under Keen Games' Fan Project Guidelines. See [NOTICE.md](NOTICE.md).
 > Please don't pass the files on. See [NOTICE.md](NOTICE.md).
 
 ## What you need

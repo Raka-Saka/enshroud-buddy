@@ -1,4 +1,4 @@
-"""Enshrouded Companion PC agent: watches the saves and serves the live state on the LAN.
+"""Enshroud Buddy PC agent: watches the saves and serves the live state on the LAN.
 
     pythonw agent/agent.py                  # tray app (what agent.bat runs at login)
     python agent/agent.py --console         # no tray, log to the console
@@ -580,7 +580,7 @@ def run_tray(agent, stop):
         stop.set()
         icon.stop()
 
-    icon = pystray.Icon("ensh_agent", img, "Enshrouded Companion agent", pystray.Menu(
+    icon = pystray.Icon("ensh_agent", img, "Enshroud Buddy agent", pystray.Menu(
         pystray.MenuItem(lambda _i: address(), None, enabled=False),
         pystray.MenuItem(lambda _i: code(), None, enabled=False),
         pystray.MenuItem(lambda _i: reading(), None, enabled=False),

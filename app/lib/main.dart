@@ -85,7 +85,7 @@ class _CompanionAppState extends State<CompanionApp> {
       goals: goals,
       child: MaterialApp(
         scaffoldMessengerKey: messenger,
-        title: 'Enshrouded Companion',
+        title: 'Enshroud Buddy',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         home: FutureBuilder<GameDb>(
