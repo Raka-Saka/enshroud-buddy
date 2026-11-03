@@ -899,7 +899,7 @@ class GameDb {
         category == null
             ? sortedItems
             : sortedItems.where((i) => i.category == category);
-    if (q.isEmpty) return pool.take(200).toList();
+    if (q.isEmpty) return pool.toList();
     final ranked = <(int, Item)>[];
     for (final i in pool) {
       final n = i.name.toLowerCase();
@@ -913,6 +913,7 @@ class GameDb {
               ? a.$1.compareTo(b.$1)
               : a.$2.name.length.compareTo(b.$2.name.length),
     );
-    return [for (final r in ranked.take(200)) r.$2];
+    // every match: the list is lazy, and a cap here cut the Locked filter short (it filters after)
+    return [for (final r in ranked) r.$2];
   }
 }

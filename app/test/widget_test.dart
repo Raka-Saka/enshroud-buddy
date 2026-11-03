@@ -30,6 +30,8 @@ void main() {
 
   test('search ranks prefix matches first', () {
     expect(db.search('iron arrow').first.name, 'Iron Arrow');
+    // every item, not a first page (the Locked filter runs on the whole list)
+    expect(db.search('').length, db.items.length);
   });
 
   test('recipes link workshops and inputs', () {
