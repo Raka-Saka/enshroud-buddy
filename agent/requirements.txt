@@ -1,0 +1,7 @@
+# the PC agent's packages (Python 3.10 or newer): tray icon, save reader, live position.
+# Exact versions, the ones it was tested with, so an install never pulls in an untested release.
+pystray==0.19.5
+six==1.17.0
+Pillow==11.3.0
+psutil==5.9.5
+zstandard==0.25.0

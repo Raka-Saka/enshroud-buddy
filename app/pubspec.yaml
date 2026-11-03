@@ -1,0 +1,38 @@
+name: ensh_companion
+description: "Enshrouded companion: offline game data, save reader, planner."
+publish_to: 'none'
+version: 0.34.2+45
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  path_provider: 2.1.5
+  shared_preferences: ^2.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/game.json
+    - assets/map/
+    - assets/shroud_levels.png
+    - assets/cold.png
+    - assets/height.png
+    - assets/height.json
+    - assets/skilltree/
+    - assets/icons/
+    - assets/map_icons/
+    - assets/fonts/OFL.txt
+  fonts:
+    - family: Cinzel
+      fonts:
+        - asset: assets/fonts/Cinzel.ttf

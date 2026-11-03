@@ -1,0 +1,7 @@
+{
+  "id": "ensh_companion_poi",
+  "name": "Enshrouded Companion POI export",
+  "version": "0.1.0",
+  "description": "Exports map points (labels, lore notes, loot chests) in chunk batches. Export only. Driven by tools/export_poi.py.",
+  "capabilities": ["export"]
+}

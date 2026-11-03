@@ -1,0 +1,22 @@
+# what the agent writes while it runs (your saves' history, logs, settings): stays on your PC
+agent/agent.log
+agent/config.json
+agent/glide.json
+agent/walk.json
+agent/trace.jsonl
+agent/history/
+agent/history.jsonl
+agent/ask/
+__pycache__/
+*.pyc
+
+# Flutter and Android build output
+app/build/
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/local.properties
+app/android/.gradle/
+app/android/app/.cxx/
+*.iml
+.idea/

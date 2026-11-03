@@ -1,0 +1,7 @@
+{
+  "id": "ensh_companion_export",
+  "name": "Enshrouded Companion export",
+  "version": "0.1.0",
+  "description": "Exports game data (items, names) for the companion app. Export only, never patches.",
+  "capabilities": ["export"]
+}

@@ -1,0 +1,6 @@
+# Windows batch files need CRLF line endings (labels and goto break without them)
+*.bat text eol=crlf
+*.apk binary
+*.png binary
+*.jpg binary
+*.ttf binary
