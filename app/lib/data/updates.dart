@@ -23,7 +23,7 @@ class Release {
 class Updates {
   static const repo = String.fromEnvironment(
     'UPDATE_REPO',
-    defaultValue: 'Raka-Saka/enshrouded-app',
+    defaultValue: 'Raka-Saka/enshroud-buddy',
   );
   static const _channel = MethodChannel('ensh/app');
   static final available = ValueNotifier<Release?>(null);

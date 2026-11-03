@@ -22,6 +22,15 @@ files and shows your game on the phone, while you play or away from the PC:
   stat it gives.
 - **Ask** (optional): questions about your game answered by Claude, from your save and the game data.
 
+<p align="center">
+  <img src="docs/screenshots/home.png" width="160" alt="Home">
+  <img src="docs/screenshots/map.png" width="160" alt="Map with unique loot">
+  <img src="docs/screenshots/build.png" width="160" alt="Character build">
+  <img src="docs/screenshots/skill-tree.png" width="160" alt="Skill tree">
+  <img src="docs/screenshots/base-3d.png" width="160" alt="A base in 3D">
+  <img src="docs/screenshots/codex.png" width="160" alt="Codex">
+</p>
+
 > *Unofficial fan project. Not affiliated with or endorsed by Keen Games. Enshrouded and its content are the property of Keen Games GmbH.*
 >
 > Free for everyone, under Keen Games' Fan Project Guidelines. See [NOTICE.md](NOTICE.md).
