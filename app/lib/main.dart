@@ -8,6 +8,7 @@ import 'data/item_icons.dart';
 import 'data/live_state.dart';
 import 'data/pins.dart';
 import 'data/planner.dart';
+import 'data/updates.dart';
 import 'nav.dart';
 import 'screens/character_screen.dart';
 import 'screens/codex_screen.dart';
@@ -24,6 +25,7 @@ void main() {
     ], await rootBundle.loadString('assets/fonts/OFL.txt'));
   });
   runApp(const CompanionApp());
+  Updates.check();
 }
 
 class CompanionApp extends StatefulWidget {

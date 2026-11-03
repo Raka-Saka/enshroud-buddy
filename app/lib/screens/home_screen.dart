@@ -5,6 +5,7 @@ import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/survival.dart';
 import '../data/tasks.dart';
+import '../data/updates.dart';
 import '../data/where.dart';
 import '../nav.dart';
 import '../theme.dart';
@@ -115,6 +116,37 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: ValueListenableBuilder<Release?>(
+                valueListenable: Updates.available,
+                builder:
+                    (context, r, _) =>
+                        r == null
+                            ? const SizedBox.shrink()
+                            : Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                              child: Material(
+                                color: Palette.ember.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(Radii.tile),
+                                child: ListTile(
+                                  leading: const Icon(
+                                    Icons.system_update,
+                                    color: Palette.ember,
+                                  ),
+                                  title: Text('Version ${r.version} is out'),
+                                  subtitle: const Text(
+                                    'Download it, then open it to install over this one: nothing is lost.',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                  trailing: FilledButton.tonal(
+                                    onPressed: () => Updates.open(r),
+                                    child: const Text('Update'),
+                                  ),
+                                ),
+                              ),
+                            ),
+              ),
+            ),
             if (s != null && s.warnings.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
@@ -156,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.wifi_tethering_off,
                   title: 'Waiting for the PC agent',
                   message:
-                      'Start the agent on your PC (start.bat), then open Setup and enter the address and pairing code its tray menu shows. Your character appears within seconds.',
+                      'Install Enshroud Buddy on your PC and start it, then open Setup and scan the code it shows. Your character appears within seconds.',
                   actions: [
                     FilledButton.tonal(
                       onPressed: () => _push(context, const SetupScreen()),

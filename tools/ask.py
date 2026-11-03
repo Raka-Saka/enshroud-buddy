@@ -27,8 +27,9 @@ import threading
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-WORK = ROOT / "agent" / "ask"
-DB = ROOT / "app" / "assets" / "game.json"
+from paths import DATA, RES  # noqa: E402
+WORK = DATA / "ask"
+DB = RES / "app" / "assets" / "game.json"
 MODEL = os.environ.get("ENSH_ASK_MODEL", "sonnet")
 TIMEOUT = 240
 _lock = threading.Lock()

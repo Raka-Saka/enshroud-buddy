@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../data/live_state.dart';
 import '../theme.dart';
@@ -42,6 +43,58 @@ class _SetupScreenState extends State<SetupScreen> {
     if (mounted) setState(() => saves = _load());
   }
 
+  static const _scanner = MethodChannel('ensh/scan');
+
+  /// Google's code scanner (no camera permission: Play services shows its own camera screen), then pairing.
+  Future<void> _scan(Live live) async {
+    final messenger = ScaffoldMessenger.of(context);
+    String? code;
+    try {
+      code = await _scanner.invokeMethod<String>('qr');
+    } on PlatformException catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Couldn\'t scan: ${e.message}. Type the details below.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (code == null) return; // cancelled
+    if (Live.parsePairing(code) == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'That isn\'t the agent\'s code: on the PC, right-click the tray icon, Pair a phone.',
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() => busy = true);
+    final h = await live.pair(code);
+    if (!mounted) return;
+    setState(() {
+      busy = false;
+      if (h != null) {
+        host.text = h;
+        pairing.text = live.key;
+        saves = _load();
+      }
+    });
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          h != null
+              ? 'Paired with your PC'
+              : 'The PC didn\'t answer. Is the phone on the same Wi-Fi as the PC? On the PC, allow '
+                  'Enshroud Buddy on private networks if Windows asked.',
+        ),
+      ),
+    );
+  }
+
   Future<void> _use(Live live, SaveFolder f) async {
     setState(() => busy = true);
     final messenger = ScaffoldMessenger.of(context);
@@ -69,6 +122,21 @@ class _SetupScreenState extends State<SetupScreen> {
         padding: const EdgeInsets.only(bottom: 32),
         children: [
           const SectionTitle('PC agent'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: FilledButton.icon(
+              onPressed: busy ? null : () => _scan(live),
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Scan the PC\'s code'),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(
+              'On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:',
+              style: TextStyle(color: Palette.ash, fontSize: 12),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(

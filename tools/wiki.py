@@ -21,7 +21,8 @@ import urllib.parse
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "agent" / "ask" / "wiki"
+from paths import DATA  # noqa: E402
+OUT = DATA / "ask" / "wiki"
 API = "https://enshrouded.wiki.gg/api.php"
 SITE = "https://enshrouded.wiki.gg/wiki/"
 UA = "EnshroudedCompanion/0.17 (personal companion app; local wiki copy, weekly)"

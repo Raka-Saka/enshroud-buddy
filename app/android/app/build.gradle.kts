@@ -61,3 +61,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // QR pairing (MainActivity, channel "ensh/scan"): Google's scanner, no camera permission
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+}

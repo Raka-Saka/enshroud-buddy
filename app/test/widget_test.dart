@@ -11,6 +11,7 @@ import 'package:ensh_companion/data/hall_check.dart';
 import 'package:ensh_companion/data/hall_plan.dart';
 import 'package:ensh_companion/data/item_icons.dart';
 import 'package:ensh_companion/data/live_state.dart';
+import 'package:ensh_companion/data/updates.dart';
 import 'package:ensh_companion/data/mentions.dart';
 import 'package:ensh_companion/data/planner.dart';
 import 'package:ensh_companion/data/projection.dart';
@@ -1126,5 +1127,20 @@ void main() {
     });
     expect(heightNote(568, null, me), '568 m up · 40 m below you');
     expect(heightNote(610, null, me), '610 m up · level with you');
+  });
+
+  test('pairing QR code and update versions', () {
+    final p =
+        Live.parsePairing(
+          'enshroudbuddy:pair?a=192.168.1.20:4750,10.0.0.5:4750&k=ABCDEFGH',
+        )!;
+    expect(p.hosts, ['192.168.1.20:4750', '10.0.0.5:4750']);
+    expect(p.key, 'ABCDEFGH');
+    expect(Live.parsePairing('https://example.com/pair?a=x&k=y'), isNull);
+    expect(Live.parsePairing('enshroudbuddy:pair?a=&k=ABCD'), isNull);
+    expect(Updates.newer('0.35.0', '0.34.5'), isTrue);
+    expect(Updates.newer('0.34.10', '0.34.9'), isTrue);
+    expect(Updates.newer('0.34.5', '0.34.5+48'), isFalse);
+    expect(Updates.newer('0.34.4', '0.34.5'), isFalse);
   });
 }

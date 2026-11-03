@@ -429,7 +429,9 @@ String heightNote(double h, double? ground, PlayerPos? me) {
   if (me != null) {
     final c = (h - (me.height - GlideCheck.cameraHeight)).round();
     parts.add(
-      c.abs() < 4 ? 'level with you' : '${c.abs()} m ${c > 0 ? 'above' : 'below'} you',
+      c.abs() < 4
+          ? 'level with you'
+          : '${c.abs()} m ${c > 0 ? 'above' : 'below'} you',
     );
   }
   return parts.join(' · ');

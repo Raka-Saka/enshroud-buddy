@@ -528,6 +528,49 @@ class Live extends ChangeNotifier {
             : null;
   }
 
+  /// The addresses and pairing code in the agent's QR code ("enshroudbuddy:pair?a=IP:PORT,IP:PORT&k=CODE",
+  /// tray menu "Pair a phone"), or null for any other text.
+  static ({List<String> hosts, String key})? parsePairing(String text) {
+    final uri = Uri.tryParse(text.trim());
+    if (uri == null || uri.scheme != 'enshroudbuddy' || uri.path != 'pair') {
+      return null;
+    }
+    final hosts =
+        (uri.queryParameters['a'] ?? '')
+            .split(',')
+            .where((h) => h.isNotEmpty)
+            .toList();
+    final key = uri.queryParameters['k'] ?? '';
+    return hosts.isEmpty || key.isEmpty ? null : (hosts: hosts, key: key);
+  }
+
+  /// Pairs with the agent from its QR code: a PC can have several addresses, and only the one on the
+  /// phone's network answers, so each is tried in turn and the first that knows the code is kept. Returns
+  /// that address, or null when none answered.
+  Future<String?> pair(String code) async {
+    final p = parsePairing(code);
+    if (p == null) throw const FormatException('not an Enshroud Buddy code');
+    for (final h in p.hosts) {
+      final client =
+          HttpClient()..connectionTimeout = const Duration(seconds: 2);
+      try {
+        final req = await client.getUrl(Uri.parse('http://$h/health'));
+        req.headers.set('X-Buddy-Key', p.key);
+        final res = await req.close().timeout(const Duration(seconds: 4));
+        await res.drain<void>();
+        if (res.statusCode == 200) {
+          await setHost(h, pairing: p.key);
+          return h;
+        }
+      } catch (_) {
+        // not reachable from this network: try the next
+      } finally {
+        client.close(force: true);
+      }
+    }
+    return null;
+  }
+
   Future<void> setHost(String h, {String? pairing}) async {
     host = h.trim();
     if (pairing != null) {

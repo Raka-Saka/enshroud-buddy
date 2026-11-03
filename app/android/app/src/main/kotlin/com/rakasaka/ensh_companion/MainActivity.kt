@@ -2,10 +2,14 @@ package com.rakasaka.ensh_companion
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.view.WindowManager
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -13,7 +17,10 @@ import java.util.Locale
 
 /** Voice for Ask on channel "ensh/voice": "listen" (the phone's speech recognizer, returns the text or
  *  null), "speak" {text} and "stop" (text-to-speech; "spoken" is sent back when it finishes). English,
- *  as the game's names are. Channel "ensh/screen": "keepOn" {on} keeps the screen awake (the live map). */
+ *  as the game's names are. Channel "ensh/screen": "keepOn" {on} keeps the screen awake (the live map).
+ *  Channel "ensh/scan": "qr" scans a QR code with Google's code scanner (Play services draws the camera
+ *  screen, so the app needs no camera permission) and returns its text, or null when cancelled.
+ *  Channel "ensh/app": "version" (versionName) and "open" {url} (the browser, for an update). */
 class MainActivity : FlutterActivity() {
     private val listenCode = 4751
     private var pending: MethodChannel.Result? = null
@@ -47,6 +54,29 @@ class MainActivity : FlutterActivity() {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
             result.success(null)
+        }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "ensh/app").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "version" -> result.success(packageManager.getPackageInfo(packageName, 0).versionName)
+                "open" -> try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(call.argument<String>("url"))))
+                    result.success(null)
+                } catch (e: ActivityNotFoundException) {
+                    result.error("unavailable", "No browser", null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "ensh/scan").setMethodCallHandler { call, result ->
+            if (call.method != "qr") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+            val options = GmsBarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
+            GmsBarcodeScanning.getClient(this, options).startScan()
+                .addOnSuccessListener { result.success(it.rawValue) }
+                .addOnCanceledListener { result.success(null) }
+                .addOnFailureListener { result.error("unavailable", it.message ?: "no scanner", null) }
         }
     }
 

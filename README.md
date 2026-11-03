@@ -25,67 +25,71 @@ files and shows your game on the phone, while you play or away from the PC:
 > *Unofficial fan project. Not affiliated with or endorsed by Keen Games. Enshrouded and its content are the property of Keen Games GmbH.*
 >
 > Free for everyone, under Keen Games' Fan Project Guidelines. See [NOTICE.md](NOTICE.md).
-> Please don't pass the files on. See [NOTICE.md](NOTICE.md).
 
 ## What you need
 
 - A Windows PC with Enshrouded on Steam.
-- **Python 3.10 or newer** from [python.org](https://www.python.org/downloads/). Tick **"Add python.exe to PATH"**
-  in its installer.
-- An Android phone on the same home network as the PC.
+- An Android phone on the same home network (Wi-Fi) as the PC.
 
 ## Install
 
+Both files are on the **[latest release](../../releases/latest)** page.
+
 ### On the PC (once)
 
-1. Download this repository: **Code → Download ZIP** on GitHub, then unzip it somewhere that stays put (for
-   example `Documents\EnshroudBuddy`).
-2. Open the `agent` folder and run **`install.bat`**. It installs four Python packages, and can start the
-   agent with Windows.
-3. Run **`start.bat`**. A small round icon appears in the tray (bottom right, maybe under the `^` arrow).
-4. If Windows asks whether Python may use the network, allow **Private networks**. That's how the phone
-   reaches it.
-5. Right-click the tray icon. The first lines show the **Phone address**, something like `192.168.1.20:4750`,
-   and the **Pairing code**, like `K7PM-3QXD`. A PC on both cable and Wi-Fi shows two addresses; either can
-   work.
+1. Download **`EnshroudBuddy.exe`** and open it.
+2. Windows may say it "protected your PC", because the program isn't signed. Click **More info**, then
+   **Run anyway**.
+3. If Windows asks whether Enshroud Buddy may use the network, tick **Private networks** and allow it. That's
+   how the phone reaches it.
+4. A window shows a **QR code**. Keep it open for the phone.
+
+That's all: it starts with Windows from now on, as a small round icon in the tray (bottom right, maybe under
+the `^` arrow). To show the QR code again, click that icon. To remove it, right-click it, **Uninstall from this
+PC**.
 
 ### On the phone
 
-1. Get **`release/enshroudbuddy.apk`** onto the phone: download it from GitHub in the phone's browser (signed
-   in), or copy it over by cable or cloud drive.
-2. Open it and allow the install ("install unknown apps" for your browser or file app).
-3. Open the app, tap the **gear icon** on Home (Setup), enter the Phone address and the Pairing code, and
-   tap **Connect**.
+1. Open the release page in the phone's browser and tap **`EnshroudBuddy.apk`**.
+2. Open the download. Android asks once to allow installs from your browser: allow it, then **Install**.
+3. Open the app, tap the **gear icon** on Home (Setup), then **Scan the PC's code** and point the phone at the
+   QR code.
 4. In **Game save**, pick your world and character, then **Read this save**. The rest of the app fills in
    within seconds, and again after every game save (about every 30 s while you play).
+
+### Updates
+
+The app tells you on Home when a new version is out: tap **Update** and install over the old one, nothing is
+lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces the old one and starts again.
 
 ## Good to know
 
 - **Only your phone gets in.** The agent answers only devices on your home network that send its pairing code,
   so other devices, and web pages open in a browser, get nothing: no inventory, position or questions on your
-  Claude plan. The code is made once per PC and kept in `agent\config.json`. Delete that file to make a new one.
+  Claude plan. The code is made once per PC and kept in `config.json` (in `%LOCALAPPDATA%\EnshroudBuddy`, or
+  `agent\` from source). Delete that file to make a new one.
 
 - **The agent only reads.** It copies your save files and reads the copies; it never changes a save or the
   game's files.
 - **Live position** (your arrow on the map, the guide, glide measuring) reads the running game's memory,
   read-only, about once a second. It never writes to the game, injects anything or touches other players.
-  Whether Enshrouded's anti-cheat could mind this isn't known. If you'd rather not take that chance,
-  open `start.bat` in Notepad and add `--no-live` after both `agent.py`. Everything else keeps working from
-  your saves.
+  Whether Enshrouded's anti-cheat could mind this isn't known. If you'd rather not take that chance, start the
+  agent with `--no-live` (from source: add it after both `agent.py` in `start.bat`). Everything else keeps
+  working from your saves.
 - **Playing in a friend's world:** the world is saved on the host's PC, so your PC only has your character.
   You'll see your gear and map, but not their bases and chests.
 - **Ask** needs [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and signed in on the PC
   (it runs on your own Claude plan). The agent then keeps a local copy of the
   [Enshrouded wiki](https://enshrouded.wiki.gg) for it, refreshed weekly. Without Claude Code, Ask just says it
   isn't available.
-- **Privacy:** everything stays on your home network. Only Ask (through Claude Code) and the weekly wiki copy
-  go online.
+- **Privacy:** everything stays on your home network. Only Ask (through Claude Code), the weekly wiki copy and
+  the app's daily look for a new version on GitHub (which sends nothing about you) go online.
 
 ## Troubleshooting
 
-- **"Agent unreachable":** the agent must be running (tray icon), the phone on the same network, and the
-  address typed exactly with `:4750`. A PC with two addresses: try the other one. Check that Windows Firewall
-  allows Python on private networks.
+- **"Agent unreachable":** the agent must be running (tray icon) and the phone on the same Wi-Fi as the PC.
+  Scan the code again (click the tray icon). Check that Windows Firewall allows Enshroud Buddy (or Python, from
+  source) on private networks.
 - **Wrong character or world:** Setup → Game save.
 - **An amber notice on Home** means the save holds something new to the reader (often after a game patch).
   Most things keep working; a fix comes with the next version.
@@ -94,7 +98,8 @@ files and shows your game on the phone, while you play or away from the PC:
 ## For developers
 
 - `app/` is the Flutter app (`flutter build apk --release`).
-- `agent/agent.py` is the PC agent.
+- `agent/agent.py` is the PC agent. From source it needs Python 3.10 or newer: run `agent\install.bat` once,
+  then `agent\start.bat`. `python tools/build_agent.py` builds `EnshroudBuddy.exe`.
 - `tools/` holds the save reader (`ksd.py`, `state.py`) and the live position (`livepos.py`, `motion.py`,
   `glide.py`).
 - `tools/build_db.py` and `tools/build_map.py` turn a game-data export (`tools/eml-export`, run with the

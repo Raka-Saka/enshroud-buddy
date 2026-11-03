@@ -14,7 +14,8 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-INDEX = ROOT / "data" / "export" / "map" / "index.tsv"
+from paths import EXPORT  # noqa: E402
+INDEX = EXPORT / "map" / "index.tsv"
 
 
 def _read(index=INDEX):

@@ -48,6 +48,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
+from paths import DATA, EXPORT, FROZEN, RES  # noqa: E402
 import ask as ask_mod  # noqa: E402
 import glide as glide_mod  # noqa: E402
 import history as history_mod  # noqa: E402
@@ -75,13 +76,13 @@ class Agent:
         self.history = history_mod.History(history_path(saves, world, character))
         self.pos = None  # live position, None while the game isn't running
         self.glider = None  # the equipped glider's item id, for the glide calibration
-        self.glides = glide_mod.GlideLog(ROOT / "agent" / "glide.json", log=log)
+        self.glides = glide_mod.GlideLog(DATA / "glide.json", log=log)
         try:
-            ground = motion_mod.HeightMap(ROOT / "app" / "assets" / "height.png", ROOT / "app" / "assets" / "height.json")
+            ground = motion_mod.HeightMap(RES / "app" / "assets" / "height.png", RES / "app" / "assets" / "height.json")
         except (OSError, ValueError, KeyError):
             ground = None
-        self.motion = motion_mod.Motion(ground, ROOT / "agent" / "walk.json")
-        self.trace = motion_mod.Trace(ROOT / "agent" / "trace.jsonl")
+        self.motion = motion_mod.Motion(ground, DATA / "walk.json")
+        self.trace = motion_mod.Trace(DATA / "trace.jsonl")
         self.bases = []  # [name, map x, map y] for Ask's "nearest base"
 
     def files(self):
@@ -237,7 +238,7 @@ def render_fog(save):
     return tuple(out)
 
 
-CONFIG = ROOT / "agent" / "config.json"
+CONFIG = DATA / "config.json"
 
 
 def lan_ips():
@@ -308,8 +309,8 @@ def history_path(folder, world, character):
     The single agent/history.jsonl from before goes to whichever save is read first."""
     parts = pathlib.Path(folder).parts
     account = parts[-3] if saves_mod.APP_ID in parts else "local"
-    path = ROOT / "agent" / "history" / f"{account}_w{world}_c{character}.jsonl"
-    old = ROOT / "agent" / "history.jsonl"
+    path = DATA / "history" / f"{account}_w{world}_c{character}.jsonl"
+    old = DATA / "history.jsonl"
     path.parent.mkdir(exist_ok=True)
     if old.exists() and not path.exists():
         old.rename(path)
@@ -500,8 +501,8 @@ def make_handler(agent, key):
     return Handler
 
 
-LOG = ROOT / "agent" / "agent.log"
-DB = ROOT / "app" / "assets" / "game.json"
+LOG = DATA / "agent.log"
+DB = RES / "app" / "assets" / "game.json"
 
 
 def _gliders():
@@ -533,24 +534,125 @@ def log(msg):
         f.write(line + "\n")
 
 
+START_MENU = pathlib.Path(os.environ.get("APPDATA", "")) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
+EXE = DATA / "EnshroudBuddy.exe"  # where the one-file exe installs itself
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+
 def shortcut_path():
-    return pathlib.Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup" / "Enshrouded Companion Agent.lnk"
+    # from source the shortcut keeps its old name, so existing installs don't get a second one
+    return START_MENU / "Startup" / ("Enshroud Buddy.lnk" if FROZEN else "Enshrouded Companion Agent.lnk")
 
 
-def install_autostart():
-    bat = ROOT / "agent" / "start.bat"
-    if not bat.exists():  # older layout
-        bat = ROOT / "agent" / "agent.bat"
-    sc = shortcut_path()
+def make_shortcut(sc, target, workdir, minimized=False):
     def q(path):  # a PowerShell literal: nothing inside single quotes is expanded
         return "'" + str(path).replace("'", "''") + "'"
 
     ps = (f"$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut({q(sc)}); "
-          f"$sc.TargetPath = {q(bat)}; $sc.WorkingDirectory = {q(bat.parent)}; $sc.WindowStyle = 7; "
-          f"$sc.Description = 'Enshroud Buddy agent'; $sc.Save();")
-    r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True, text=True)
+          f"$sc.TargetPath = {q(target)}; $sc.WorkingDirectory = {q(workdir)}; "
+          f"{'$sc.WindowStyle = 7; ' if minimized else ''}$sc.Description = 'Enshroud Buddy agent'; $sc.Save();")
+    return subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True,
+                          text=True, creationflags=NO_WINDOW)
+
+
+def install_autostart():
+    if FROZEN:
+        target = EXE
+    else:
+        target = ROOT / "agent" / "start.bat"
+        if not target.exists():  # older layout
+            target = ROOT / "agent" / "agent.bat"
+    sc = shortcut_path()
+    r = make_shortcut(sc, target, target.parent, minimized=not FROZEN)
     print(f"installed {sc}" if r.returncode == 0 else f"failed: {r.stderr}")
     return r.returncode
+
+
+def message(text, ask=False):
+    """A Windows message box (the exe has no console); with ask, True when the answer is Yes."""
+    import ctypes
+
+    flags = 0x24 if ask else 0x40  # Yes/No with a question mark, else OK with an "i"
+    return ctypes.windll.user32.MessageBoxW(None, text, "Enshroud Buddy", flags | 0x10000) == 6
+
+
+def stop_installed():
+    """Ends a running installed copy, so a newer exe can replace it."""
+    import psutil
+
+    for p in psutil.process_iter(["exe"]):
+        try:
+            if p.pid != os.getpid() and p.info["exe"] and pathlib.Path(p.info["exe"]).resolve() == EXE.resolve():
+                p.terminate()
+                p.wait(10)
+        except (psutil.Error, OSError):
+            pass
+
+
+def self_install():
+    """The downloaded exe, run from anywhere but its install folder, installs or updates itself: it copies
+    itself to %LOCALAPPDATA%/EnshroudBuddy (replacing a running older copy), adds Start menu and Windows
+    startup shortcuts, and starts the installed copy, which shows the pairing QR code on a first install. No
+    admin rights needed; Windows asks once whether it may use the network. True when this process should end."""
+    here = pathlib.Path(sys.executable).resolve()
+    if not FROZEN or here == EXE.resolve():
+        return False
+    update = EXE.exists()
+    stop_installed()
+    for _ in range(20):
+        try:
+            shutil.copy2(here, EXE)
+            break
+        except OSError:
+            time.sleep(0.5)
+    else:
+        message("Enshroud Buddy couldn't be installed: its folder is in use. Restart the PC and try again.")
+        return True
+    make_shortcut(START_MENU / "Enshroud Buddy.lnk", EXE, DATA)
+    make_shortcut(shortcut_path(), EXE, DATA)
+    subprocess.Popen([str(EXE)] + ([] if update else ["--pair"]), cwd=DATA)
+    if update:
+        message("Enshroud Buddy is updated and running again (the round icon in the tray, bottom right).")
+    return True
+
+
+def uninstall():
+    """Removes the shortcuts and, a few seconds after this process ends, the install folder with its data."""
+    shortcut_path().unlink(missing_ok=True)
+    (START_MENU / "Enshroud Buddy.lnk").unlink(missing_ok=True)
+    if FROZEN:
+        subprocess.Popen(f'cmd /c ping -n 4 127.0.0.1 >nul & rmdir /s /q "{DATA}"',
+                         cwd=os.environ.get("TEMP"), creationflags=NO_WINDOW)
+
+
+def pair_text():
+    """What the pairing QR code holds: every address of this PC and the pairing code. The app tries the
+    addresses in turn and keeps the first that answers."""
+    return f"enshroudbuddy:pair?a={','.join(f'{ip}:{PORT}' for ip in lan_ips())}&k={pairing_key()}"
+
+
+def show_pairing():
+    """A small window with the QR code to scan in the app's Setup, and the same details to type instead."""
+    import tkinter as tk
+
+    import qrcode
+    from PIL import ImageTk
+
+    root = tk.Tk()
+    root.title("Enshroud Buddy: pair your phone")
+    root.configure(bg="white")
+    root.resizable(False, False)
+    photo = ImageTk.PhotoImage(qrcode.make(pair_text(), box_size=8, border=2).get_image().convert("RGB"))
+    tk.Label(root, text="In the app, open Setup (gear icon on Home) and tap Scan the PC's code.",
+             bg="white", font=("Segoe UI", 11), wraplength=360).pack(padx=16, pady=(16, 8))
+    tk.Label(root, image=photo, bg="white").pack(padx=16)
+    tk.Label(root, text="Or type it in:\n" + " or ".join(f"{ip}:{PORT}" for ip in lan_ips())
+             + f"\nPairing code {key_text(pairing_key())}", bg="white", font=("Segoe UI", 10),
+             justify="center").pack(padx=16, pady=8)
+    tk.Button(root, text="Close", command=root.destroy, width=12).pack(pady=(0, 16))
+    root.attributes("-topmost", True)
+    root.after(500, lambda: root.attributes("-topmost", False))
+    root.mainloop()
 
 
 def run_tray(agent, stop):
@@ -580,14 +682,23 @@ def run_tray(agent, stop):
         stop.set()
         icon.stop()
 
+    def uninstall_(icon, item):
+        if message("Remove Enshroud Buddy and its data from this PC? Your game saves stay as they are.", ask=True):
+            uninstall()
+            quit_(icon, item)
+
     icon = pystray.Icon("ensh_agent", img, "Enshroud Buddy agent", pystray.Menu(
         pystray.MenuItem(lambda _i: address(), None, enabled=False),
         pystray.MenuItem(lambda _i: code(), None, enabled=False),
         pystray.MenuItem(lambda _i: reading(), None, enabled=False),
         pystray.MenuItem(lambda _i: status(), None, enabled=False),
+        pystray.MenuItem("Pair a phone (QR code)", lambda i, it: threading.Thread(target=show_pairing,
+                                                                                    daemon=True).start(),
+                         default=True),
         pystray.MenuItem("Rebuild now", lambda i, it: threading.Thread(target=agent.rebuild, daemon=True).start()),
         pystray.MenuItem("Open state in browser", lambda i, it: os.startfile(f"http://localhost:{PORT}/health")),
         pystray.Menu.SEPARATOR,
+        pystray.MenuItem("Uninstall from this PC", uninstall_),
         pystray.MenuItem("Quit", quit_),
     ))
     icon.run()
@@ -599,14 +710,17 @@ def main():
     ap.add_argument("--saves", type=pathlib.Path)
     ap.add_argument("--world", type=int)
     ap.add_argument("--character", type=int)
-    ap.add_argument("--export", type=pathlib.Path, default=ROOT / "data" / "export")
+    ap.add_argument("--export", type=pathlib.Path, default=EXPORT)
     ap.add_argument("--port", type=int, default=PORT)
     ap.add_argument("--console", action="store_true")
     # live position reads the running game's memory (read-only); this leaves the game process alone entirely
     ap.add_argument("--no-live", action="store_true")
     ap.add_argument("--install-autostart", action="store_true")
     ap.add_argument("--uninstall-autostart", action="store_true")
+    ap.add_argument("--pair", action="store_true", help="show the pairing QR code once started")
     a = ap.parse_args()
+    if self_install():
+        return 0
     if a.install_autostart:
         return install_autostart()
     if a.uninstall_autostart:
@@ -618,10 +732,18 @@ def main():
     agent = Agent(folder, world, character, a.export)
     stop = threading.Event()
     key = pairing_key()
-    server = ThreadingHTTPServer(("0.0.0.0", a.port), make_handler(agent, key))
+    try:
+        server = ThreadingHTTPServer(("0.0.0.0", a.port), make_handler(agent, key))
+    except OSError:  # the port is taken: most likely the agent already runs, so show its code instead
+        if FROZEN:
+            show_pairing()
+            return 0
+        raise
     threading.Thread(target=server.serve_forever, daemon=True).start()
     threading.Thread(target=agent.watch, args=(stop,), daemon=True).start()
     threading.Thread(target=agent.wiki, args=(stop,), daemon=True).start()
+    if a.pair:
+        threading.Thread(target=show_pairing, daemon=True).start()
     if not a.no_live:
         threading.Thread(target=agent.live, args=(stop,), daemon=True).start()
     else:

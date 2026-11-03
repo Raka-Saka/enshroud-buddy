@@ -7,12 +7,12 @@
 Enshroud Buddy follows Keen Games' Enshrouded Fan Project Guidelines (November 2026): it is free for everyone,
 with nothing behind a payment.
 
-This repository includes data taken from the game's files, for personal, non-commercial use by players who own
-the game:
+This repository includes Keen Games' content, for free use by players who own the game:
 
 - `app/assets/game.json`, `data/export/`: item, recipe, skill, quest and lore names and texts, numbers and map
-  positions;
-- `app/assets/icons/`: item icons;
+  positions, taken from the game's files;
+- `app/assets/icons/`: item icons, the game's own art as kept on the [Enshrouded wiki](https://enshrouded.wiki.gg)
+  (the game draws most of them at runtime, so its files don't hold them);
 - `app/assets/skilltree/`: skill tree art;
 - `app/assets/map/`, `app/assets/map_preview.jpg`, `height.png`, `shroud_levels.png`, `cold.png`: map imagery
   and grids rendered from the game's own map textures.
