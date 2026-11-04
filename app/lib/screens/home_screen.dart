@@ -147,6 +147,24 @@ class HomeScreen extends StatelessWidget {
                             ),
               ),
             ),
+            if (s != null && Updates.agentBehind(live.agentVersion))
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Material(
+                    color: Palette.ember.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(Radii.tile),
+                    child: const ListTile(
+                      leading: Icon(Icons.computer, color: Palette.ember),
+                      title: Text('Update the PC program too'),
+                      subtitle: Text(
+                        'Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             if (s != null && s.warnings.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(

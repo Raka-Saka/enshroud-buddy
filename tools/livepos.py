@@ -27,7 +27,8 @@ ONES = struct.pack("<3f", 1.0, 1.0, 1.0)
 SIZE = 0x48  # position .. field of view
 NEAR_AT = 0x38
 CHUNK = 32 << 20
-FIND_EVERY = 60  # seconds between searches while the camera isn't found
+FIND_EVERY = 60  # seconds between searches while the camera isn't found, doubling after each miss
+FIND_MAX = 600  # at most this long between searches
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import world as W  # noqa: E402
 
@@ -95,6 +96,7 @@ class LivePos:
         self.handle = None
         self.addrs = []
         self.last_find = 0.0
+        self.misses = 0  # searches in a row that found nothing (menus, loading, or a patch moved things)
         self.buf = bytearray(CHUNK + SIZE)
 
     def close(self):
@@ -141,8 +143,10 @@ class LivePos:
                 view.release()
         return sorted(set(found))
 
-    def poll(self):
-        """Where the camera is now, or None (game not running, loading, or not found yet)."""
+    def poll(self, search=True):
+        """Where the camera is now, or None (game not running, loading, or not found yet). A search through the
+        game's memory takes seconds of CPU, so it runs only when search is true (the phone is watching), and ever
+        less often while it finds nothing; reading a camera already found is cheap."""
         if self.handle and not self._alive():
             self.log("live position: game closed")
             self.close()
@@ -155,13 +159,15 @@ class LivePos:
                 self.handle = None
                 return None
         if not self.addrs:
-            if time.time() - self.last_find < FIND_EVERY:
+            if not search or time.time() - self.last_find < min(FIND_EVERY * 2 ** self.misses, FIND_MAX):
                 return None
             self.last_find = time.time()
             t = time.time()
             self.addrs = self.find()
             if not self.addrs:
+                self.misses += 1
                 return None
+            self.misses = 0
             self.log(f"live position: camera found ({len(self.addrs)} copies, {time.time() - t:.0f} s)")
         return self._vote()
 

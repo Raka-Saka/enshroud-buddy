@@ -29,6 +29,9 @@ Endpoints (port 4750):
     POST /ask/stream  the same, answered as it is written: one JSON object per line ({"status"}, {"reset"},
                     {"delta"}, then {"done", "answer", "session", "seconds"} or {"error"})
 
+Every request is signed with the pairing code (class Guard): the code itself never crosses the network, and
+replies carry X-Buddy-Reply so the phone can tell they came from this agent.
+
 The agent never writes to the save folder: it copies the files it reads into a temp folder first.
 """
 import argparse
@@ -56,7 +59,6 @@ import livepos as livepos_mod  # noqa: E402
 import motion as motion_mod  # noqa: E402
 import saves as saves_mod  # noqa: E402
 import state as state_mod  # noqa: E402
-import wiki as wiki_mod  # noqa: E402
 from ksd import Save  # noqa: E402
 
 PORT = 4750
@@ -75,6 +77,8 @@ class Agent:
         self.last_sig = None
         self.history = history_mod.History(history_path(saves, world, character))
         self.pos = None  # live position, None while the game isn't running
+        self.pos_wanted = 0.0  # when the phone last asked for it (GET /pos)
+        self.live_on = load_config().get("live", True)  # the tray's switch, kept in config.json
         self.glider = None  # the equipped glider's item id, for the glide calibration
         self.glides = glide_mod.GlideLog(DATA / "glide.json", log=log)
         try:
@@ -98,7 +102,7 @@ class Agent:
         with tempfile.TemporaryDirectory(prefix="ensh_agent_") as tmp:
             tmp = pathlib.Path(tmp)
             for f in self.files():
-                shutil.copy2(f, tmp / f.name)
+                saves_mod.copy_shared(f, tmp / f.name)
             st = state_mod.build(tmp, self.world, self.character, self.export)
             if self.history.add(history_mod.snapshot(st, self.export)):
                 log(f"history: {len(self.history.rows)} snapshots")
@@ -128,23 +132,19 @@ class Agent:
         for w in st.get("warnings", []):
             log(f"save reader warning: {w}")
 
-    def wiki(self, stop):
-        """Keep Ask's copy of the wiki at most a week old (checked daily); only where Ask can run (Claude Code
-        installed), as nothing else reads it."""
-        while not stop.is_set():
-            try:
-                if ask_mod.claude_cmd():
-                    wiki_mod.fetch(log=log)
-            except Exception as e:
-                log(f"wiki refresh failed: {e}")
-            stop.wait(86400)
-
     def live(self, stop):
-        """Read the player's position from the running game once a second."""
+        """Read the player's position from the running game once a second, while the tray's switch is on. The
+        costly search for the camera runs only while the phone shows the map (asked in the last 2 minutes)."""
         lp, failed = livepos_mod.LivePos(log=log), False
         while not stop.is_set():
+            if not self.live_on:
+                lp.close()
+                with self.lock:
+                    self.pos = None
+                stop.wait(2)
+                continue
             try:
-                pos = lp.poll()
+                pos = lp.poll(search=time.time() - self.pos_wanted < 120)
                 failed = False
             except Exception:
                 if not failed:
@@ -267,10 +267,17 @@ def load_config():
         return {}
 
 
+def write_config(conf):
+    """Whole or not at all (a temp file, then a rename): a cut-off write would lose the pairing code."""
+    tmp = CONFIG.with_suffix(".tmp")
+    tmp.write_text(json.dumps(conf), encoding="utf-8")
+    os.replace(tmp, CONFIG)
+
+
 def save_config(folder, world, character):
     conf = load_config()
     conf.update({"folder": str(folder), "world": int(world), "character": int(character)})
-    CONFIG.write_text(json.dumps(conf), encoding="utf-8")
+    write_config(conf)
 
 
 def pairing_key():
@@ -283,7 +290,7 @@ def pairing_key():
     if not conf.get("key"):
         alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
         conf["key"] = "".join(secrets.choice(alphabet) for _ in range(8))
-        CONFIG.write_text(json.dumps(conf), encoding="utf-8")
+        write_config(conf)
     return conf["key"]
 
 
@@ -317,11 +324,79 @@ def history_path(folder, world, character):
     return path
 
 
-def make_handler(agent, key):
+AUTH_WINDOW = 120  # seconds a signed request stays valid (phone and PC clocks may differ this much)
+
+
+def sign(key, *parts):
+    """HMAC-SHA256 of the parts, with the pairing code as the key: what the phone sends instead of the code."""
+    import hashlib
     import hmac
+
+    return hmac.new(key.encode(), "\n".join(str(p) for p in parts).encode(), hashlib.sha256).hexdigest()
+
+
+class Guard:
+    """Signed requests (X-Buddy-Time, X-Buddy-Nonce, X-Buddy-Sig = sign(code, method, path, time, nonce)): the
+    pairing code itself never crosses the network, so someone listening on the Wi-Fi can't learn it, and a
+    nonce seen before is refused, so a captured request can't be replayed. Wrong signatures are slowed down
+    and, past a few a minute from anywhere, refused outright for a minute."""
+
+    def __init__(self, key):
+        self.key = key
+        self.lock = threading.Lock()
+        self.nonces = {}  # nonce -> time seen, kept for AUTH_WINDOW
+        self.fails = []  # times of recent failures
+        self.warned = 0.0
+
+    def blocked(self):
+        with self.lock:
+            now = time.time()
+            self.fails = [t for t in self.fails if now - t < 60]
+            return len(self.fails) >= 20
+
+    def check(self, method, path, headers):
+        import hmac
+
+        try:
+            t = int(headers.get("X-Buddy-Time") or "")
+        except ValueError:
+            return False
+        nonce = headers.get("X-Buddy-Nonce") or ""
+        sig = headers.get("X-Buddy-Sig") or ""
+        now = time.time()
+        ok = (abs(now - t) <= AUTH_WINDOW and 16 <= len(nonce) <= 64
+              and hmac.compare_digest(sig.encode(), sign(self.key, method, path, t, nonce).encode()))
+        with self.lock:
+            if ok:
+                self.nonces = {n: at for n, at in self.nonces.items() if now - at <= 2 * AUTH_WINDOW}
+                if nonce in self.nonces:
+                    ok = False
+                else:
+                    self.nonces[nonce] = now
+            if not ok:
+                self.fails.append(now)
+                if len(self.fails) >= 20 and now - self.warned > 600:
+                    self.warned = now
+                    log("many requests with a wrong pairing code: something on the network is guessing")
+        return ok
+
+
+def agent_version():
+    """This agent's version: the app's, as both are released together (app/pubspec.yaml, bundled in the exe)."""
+    try:
+        for line in (RES / "app" / "pubspec.yaml").read_text(encoding="utf-8").splitlines():
+            if line.startswith("version:"):
+                return line.split(":", 1)[1].strip().split("+")[0]
+    except OSError:
+        pass
+    return None
+
+
+def make_handler(agent, key):
     import ipaddress
 
     saves_cache = {"at": 0.0, "body": None}
+    guard = Guard(key)
 
     class Handler(BaseHTTPRequestHandler):
         timeout = 30  # seconds a connection may sit idle or trickle (a slow client can't hold threads forever)
@@ -342,12 +417,22 @@ def make_handler(agent, key):
             if not local or not by_ip:
                 self.send_error(403)
                 return False
-            sent = (self.headers.get("X-Buddy-Key") or "").replace("-", "").strip().upper()
-            if not hmac.compare_digest(sent.encode(), key.encode()):
+            if guard.blocked():
+                self.send_error(429)
+                return False
+            if not guard.check(self.command, self.path.split("?")[0], self.headers):
                 time.sleep(0.5)  # guessing 8 characters one request at a time takes forever
-                self.reply({"error": "pairing code needed", "pairing": True}, 401)
+                # the PC's clock, so a phone whose clock is off can sign with the right time next
+                self.reply({"error": "pairing code needed", "pairing": True, "now": int(time.time())}, 401)
                 return False
             return True
+
+        def signed(self, body):
+            """Signs a reply for the request's nonce, so the phone can tell it came from this agent: a device
+            on the network can't slip it fake game data."""
+            import hashlib
+
+            return sign(key, self.headers.get("X-Buddy-Nonce") or "", hashlib.sha256(body).hexdigest())
 
         def reply(self, obj, status=200):
             data = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -365,7 +450,7 @@ def make_handler(agent, key):
             with agent.lock:
                 routes = {
                     "/state": (agent.state_json, "application/json; charset=utf-8"),
-                    "/health": (json.dumps(agent.health).encode(), "application/json"),
+                    "/health": (json.dumps({**agent.health, "version": agent_version()}).encode(), "application/json"),
                     "/fog.png": (agent.fog_png, "image/png"),
                     "/fog_overlay.png": (agent.fog_overlay_png, "image/png"),
                     "/history": (agent.history.json(), "application/json"),
@@ -386,11 +471,14 @@ def make_handler(agent, key):
             if path not in routes:
                 self.send_error(404)
                 return
+            if path == "/pos":
+                agent.pos_wanted = time.time()
             body, ctype = routes[path]
             self.send_response(200)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Buddy-Reply", self.signed(body))
             self.end_headers()
             self.wfile.write(body)
 
@@ -527,11 +615,21 @@ def db_version():
 
 
 def log(msg):
+    """One line to agent.log (and the console). The log rolls over at 1 MB, one old file kept, and a failed
+    write (disk full, a locked file) is ignored rather than breaking the thread that logs."""
     line = f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}"
     if sys.stdout:
-        print(line, flush=True)
-    with LOG.open("a", encoding="utf-8") as f:
-        f.write(line + "\n")
+        try:
+            print(line, flush=True)
+        except (OSError, ValueError):
+            pass
+    try:
+        if LOG.exists() and LOG.stat().st_size > 1_000_000:
+            os.replace(LOG, LOG.with_suffix(".old.log"))
+        with LOG.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass
 
 
 START_MENU = pathlib.Path(os.environ.get("APPDATA", "")) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
@@ -544,15 +642,27 @@ def shortcut_path():
     return START_MENU / "Startup" / ("Enshroud Buddy.lnk" if FROZEN else "Enshrouded Companion Agent.lnk")
 
 
-def make_shortcut(sc, target, workdir, minimized=False):
-    def q(path):  # a PowerShell literal: nothing inside single quotes is expanded
-        return "'" + str(path).replace("'", "''") + "'"
+SYSTEM32 = pathlib.Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
 
-    ps = (f"$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut({q(sc)}); "
-          f"$sc.TargetPath = {q(target)}; $sc.WorkingDirectory = {q(workdir)}; "
-          f"{'$sc.WindowStyle = 7; ' if minimized else ''}$sc.Description = 'Enshroud Buddy agent'; $sc.Save();")
-    return subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True,
-                          text=True, creationflags=NO_WINDOW)
+
+def powershell(script, **paths):
+    """Runs a PowerShell script with paths handed over as environment variables ($env:EB_<NAME>), never
+    pasted into its text, so no character in a path can change the script. PowerShell by its full path:
+    a powershell.exe sitting next to the downloaded exe (in Downloads) is never the one run."""
+    env = {**os.environ, **{f"EB_{k.upper()}": str(v) for k, v in paths.items()}}
+    exe = SYSTEM32 / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    return subprocess.Popen([str(exe), "-NoProfile", "-NonInteractive", "-Command", script], env=env,
+                            cwd=str(SYSTEM32), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                            creationflags=NO_WINDOW)
+
+
+def make_shortcut(sc, target, workdir, minimized=False):
+    script = ("$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut($env:EB_SC); "
+              "$sc.TargetPath = $env:EB_TARGET; $sc.WorkingDirectory = $env:EB_WORKDIR; "
+              f"{'$sc.WindowStyle = 7; ' if minimized else ''}$sc.Description = 'Enshroud Buddy agent'; $sc.Save()")
+    proc = powershell(script, sc=sc, target=target, workdir=workdir)
+    out, err = proc.communicate(timeout=60)
+    return subprocess.CompletedProcess(proc.args, proc.returncode, out, err)
 
 
 def install_autostart():
@@ -576,15 +686,58 @@ def message(text, ask=False):
     return ctypes.windll.user32.MessageBoxW(None, text, "Enshroud Buddy", flags | 0x10000) == 6
 
 
+QUIT_EVENT = "Local\\EnshroudBuddyQuit"
+
+
+def quit_signal():
+    """A named event the running agent watches: set, it quits cleanly (config written, temp files removed)."""
+    import ctypes
+
+    k32 = ctypes.windll.kernel32
+    k32.CreateEventW.restype = ctypes.c_void_p
+    return k32.CreateEventW(None, True, False, QUIT_EVENT)
+
+
+def watch_quit(stop, on_quit):
+    import ctypes
+
+    k32 = ctypes.windll.kernel32
+    k32.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+    handle = quit_signal()
+    k32.ResetEvent(ctypes.c_void_p(handle))
+    while not stop.is_set():
+        if k32.WaitForSingleObject(handle, 1000) == 0:
+            log("asked to quit (an update is replacing this copy)")
+            on_quit()
+            return
+
+
 def stop_installed():
-    """Ends a running installed copy, so a newer exe can replace it."""
+    """Ends a running installed copy, so a newer exe can replace it: first by asking it to quit, and only
+    if it hasn't within 10 s by ending the process (that copy's, by its exact path, never anything else)."""
+    import ctypes
+
     import psutil
 
-    for p in psutil.process_iter(["exe"]):
+    def ours():
+        out = []
+        for p in psutil.process_iter(["exe"]):
+            try:
+                if p.pid != os.getpid() and p.info["exe"] and pathlib.Path(p.info["exe"]).resolve() == EXE.resolve():
+                    out.append(p)
+            except (psutil.Error, OSError):
+                pass
+        return out
+
+    running = ours()
+    if not running:
+        return
+    ctypes.windll.kernel32.SetEvent(ctypes.c_void_p(quit_signal()))
+    _, alive = psutil.wait_procs(running, timeout=10)
+    for p in alive:
         try:
-            if p.pid != os.getpid() and p.info["exe"] and pathlib.Path(p.info["exe"]).resolve() == EXE.resolve():
-                p.terminate()
-                p.wait(10)
+            p.terminate()
+            p.wait(10)
         except (psutil.Error, OSError):
             pass
 
@@ -620,9 +773,8 @@ def uninstall():
     """Removes the shortcuts and, a few seconds after this process ends, the install folder with its data."""
     shortcut_path().unlink(missing_ok=True)
     (START_MENU / "Enshroud Buddy.lnk").unlink(missing_ok=True)
-    if FROZEN:
-        subprocess.Popen(f'cmd /c ping -n 4 127.0.0.1 >nul & rmdir /s /q "{DATA}"',
-                         cwd=os.environ.get("TEMP"), creationflags=NO_WINDOW)
+    if FROZEN and DATA.name == "EnshroudBuddy":  # only ever its own folder
+        powershell("Start-Sleep -Seconds 4; Remove-Item -LiteralPath $env:EB_DIR -Recurse -Force", dir=DATA)
 
 
 def pair_text():
@@ -649,13 +801,65 @@ def show_pairing():
     tk.Label(root, text="Or type it in:\n" + " or ".join(f"{ip}:{PORT}" for ip in lan_ips())
              + f"\nPairing code {key_text(pairing_key())}", bg="white", font=("Segoe UI", 10),
              justify="center").pack(padx=16, pady=8)
-    tk.Button(root, text="Close", command=root.destroy, width=12).pack(pady=(0, 16))
+    tk.Button(root, text="Close", command=root.destroy, width=12).pack(pady=(0, 8))
+    tk.Label(root, text="Unofficial fan project. Not affiliated with or endorsed by Keen Games.\nEnshrouded and "
+             "its content are the property of Keen Games GmbH.", bg="white", fg="#666666", font=("Segoe UI", 8),
+             justify="center").pack(padx=16, pady=(0, 12))
     root.attributes("-topmost", True)
     root.after(500, lambda: root.attributes("-topmost", False))
     root.mainloop()
 
 
-def run_tray(agent, stop):
+def set_live(agent, on):
+    agent.live_on = bool(on)
+    conf = load_config()
+    conf["live"] = agent.live_on
+    write_config(conf)
+    log(f"live position {'on' if on else 'off: the game is left alone'}")
+
+
+def single_instance():
+    """True when no other agent runs for this Windows user: a named mutex, held until this process ends."""
+    import ctypes
+
+    k32 = ctypes.windll.kernel32
+    k32.CreateMutexW.restype = ctypes.c_void_p
+    single_instance.handle = k32.CreateMutexW(None, False, "Local\\EnshroudBuddyAgent")
+    return k32.GetLastError() != 183  # ERROR_ALREADY_EXISTS
+
+
+class Server(ThreadingHTTPServer):
+    """The agent's HTTP server: the port is its own (Windows would otherwise let a second program share it),
+    and at most 32 requests are handled at once, so slow or many connections can't exhaust the PC."""
+
+    allow_reuse_address = False
+    daemon_threads = True
+
+    def __init__(self, *a, **kw):
+        self.slots = threading.BoundedSemaphore(32)
+        super().__init__(*a, **kw)
+
+    def server_bind(self):
+        import socket
+
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+    def process_request(self, request, client_address):
+        if not self.slots.acquire(blocking=False):
+            self.shutdown_request(request)
+            return
+        super().process_request(request, client_address)
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self.slots.release()
+
+
+def run_tray(agent, stop, quit_now=None):
     import pystray
     from PIL import Image, ImageDraw
 
@@ -682,6 +886,9 @@ def run_tray(agent, stop):
         stop.set()
         icon.stop()
 
+    if quit_now is not None:
+        quit_now.append(lambda: quit_(icon, None))
+
     def uninstall_(icon, item):
         if message("Remove Enshroud Buddy and its data from this PC? Your game saves stay as they are.", ask=True):
             uninstall()
@@ -695,7 +902,12 @@ def run_tray(agent, stop):
         pystray.MenuItem("Pair a phone (QR code)", lambda i, it: threading.Thread(target=show_pairing,
                                                                                     daemon=True).start(),
                          default=True),
-        pystray.MenuItem("Rebuild now", lambda i, it: threading.Thread(target=agent.rebuild, daemon=True).start()),
+        pystray.MenuItem("Live position (reads the game's memory)", lambda i, it: set_live(agent, not agent.live_on),
+                         checked=lambda _i: agent.live_on),
+        pystray.MenuItem("Rebuild now", lambda i, it: setattr(agent, "last_sig", None)),  # the watch loop rebuilds
+        pystray.MenuItem("Open log folder", lambda i, it: os.startfile(DATA)),
+        pystray.MenuItem("Licences", lambda i, it: os.startfile(RES / "THIRD_PARTY_LICENSES.txt"),
+                         visible=(RES / "THIRD_PARTY_LICENSES.txt").exists()),
         pystray.MenuItem("Open state in browser", lambda i, it: os.startfile(f"http://localhost:{PORT}/health")),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem("Uninstall from this PC", uninstall_),
@@ -728,26 +940,38 @@ def main():
         print("removed")
         return 0
 
+    if not single_instance():  # already running: opening it again shows the pairing code
+        if FROZEN:
+            show_pairing()
+            return 0
+        print("the agent is already running")
+        return 1
+
     folder, world, character = pick_save(a.saves, a.world, a.character)
     agent = Agent(folder, world, character, a.export)
     stop = threading.Event()
     key = pairing_key()
     try:
-        server = ThreadingHTTPServer(("0.0.0.0", a.port), make_handler(agent, key))
-    except OSError:  # the port is taken: most likely the agent already runs, so show its code instead
+        server = Server(("0.0.0.0", a.port), make_handler(agent, key))
+    except OSError:  # the port is taken by another program
+        log(f"port {a.port} is in use by another program")
         if FROZEN:
-            show_pairing()
-            return 0
+            message(f"Enshroud Buddy can't start: another program uses port {a.port}.")
+            return 1
         raise
     threading.Thread(target=server.serve_forever, daemon=True).start()
     threading.Thread(target=agent.watch, args=(stop,), daemon=True).start()
-    threading.Thread(target=agent.wiki, args=(stop,), daemon=True).start()
+    quit_now = []  # the tray sets this to its own quit; without a tray, stopping the loop is enough
+    threading.Thread(target=watch_quit, args=(stop, lambda: (quit_now[0]() if quit_now else stop.set())),
+                     daemon=True).start()
+    if FROZEN:  # Ask reads wiki pages as needed now; drop a bulk copy an older version kept
+        shutil.rmtree(DATA / "ask" / "wiki", ignore_errors=True)
     if a.pair:
         threading.Thread(target=show_pairing, daemon=True).start()
-    if not a.no_live:
-        threading.Thread(target=agent.live, args=(stop,), daemon=True).start()
-    else:
+    if a.no_live:
+        agent.live_on = False  # for this run; the tray's switch can still turn it on
         log("live position off (--no-live): the game's memory isn't read")
+    threading.Thread(target=agent.live, args=(stop,), daemon=True).start()
     log(f"agent listening on {', '.join(lan_ips())} port {a.port}, reading world{world} and character{character} "
         f"in {folder}")
     try:
@@ -755,7 +979,7 @@ def main():
             while not stop.wait(1):
                 pass
         else:
-            run_tray(agent, stop)
+            run_tray(agent, stop, quit_now)
     except KeyboardInterrupt:
         pass
     server.shutdown()

@@ -28,13 +28,21 @@ class Updates {
   static const _channel = MethodChannel('ensh/app');
   static final available = ValueNotifier<Release?>(null);
 
+  /// The installed app's version, once [check] ran.
+  static String? mine;
+
+  /// Whether the PC agent is older than this app (they are released together): its version comes with
+  /// GET /health, and agents before 0.36 send none.
+  static bool agentBehind(String? agent) =>
+      mine != null && (agent == null || newer(mine!, agent));
+
   static Future<void> check() async {
+    mine = await appVersion();
     if (Live.defaultHost.isNotEmpty) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final now = DateTime.now().millisecondsSinceEpoch;
       final last = prefs.getInt('update_checked') ?? 0;
-      final mine = await _channel.invokeMethod<String>('version') ?? '';
       var release = _decode(prefs.getString('update_latest'));
       if (now - last > const Duration(hours: 20).inMilliseconds) {
         release = await _latest() ?? release;
@@ -46,7 +54,7 @@ class Updates {
           );
         }
       }
-      if (release != null && newer(release.version, mine)) {
+      if (release != null && newer(release.version, mine ?? '')) {
         available.value = release;
       }
     } catch (_) {
@@ -57,7 +65,19 @@ class Updates {
   static Release? _decode(String? s) {
     if (s == null) return null;
     final l = jsonDecode(s) as List;
-    return Release(l[0] as String, l[1] as String);
+    final url = l[1] as String;
+    return url.startsWith('https://github.com/')
+        ? Release(l[0] as String, url)
+        : null;
+  }
+
+  /// The installed app's version (like 0.36.0), null off Android.
+  static Future<String?> appVersion() async {
+    try {
+      return await _channel.invokeMethod<String>('version');
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<Release?> _latest() async {
@@ -77,13 +97,17 @@ class Updates {
           if ((a['name'] as String? ?? '').endsWith('.apk'))
             a['browser_download_url'] as String,
       ];
+      // only a download from GitHub itself is ever opened
+      apk.removeWhere((u) => !u.startsWith('https://github.com/'));
+      final page = j['html_url'] as String? ?? '';
+      if (!page.startsWith('https://github.com/')) return null;
       final tag = (j['tag_name'] as String? ?? '').replaceFirst(
         RegExp('^v'),
         '',
       );
       return tag.isEmpty
           ? null
-          : Release(tag, apk.isNotEmpty ? apk.first : j['html_url'] as String);
+          : Release(tag, apk.isNotEmpty ? apk.first : page);
     } finally {
       client.close(force: true);
     }

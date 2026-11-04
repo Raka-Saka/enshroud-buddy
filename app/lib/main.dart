@@ -23,6 +23,19 @@ void main() {
     yield LicenseEntryWithLineBreaks([
       'Cinzel font',
     ], await rootBundle.loadString('assets/fonts/OFL.txt'));
+    // the Android libraries the app is built with, which Flutter doesn't list itself
+    yield LicenseEntryWithLineBreaks([
+      'AndroidX',
+      'Kotlin standard library',
+    ], await rootBundle.loadString('assets/licenses/apache-2.0.txt'));
+    yield const LicenseEntryWithLineBreaks(
+      ['Google code scanner'],
+      'QR pairing uses Google Play services\' code scanner (com.google.android.gms:'
+      'play-services-code-scanner), under the Google APIs Terms of Service and the ML Kit Terms: '
+      'https://developers.google.com/terms and https://developers.google.com/ml-kit/terms. Google may '
+      'collect usage metrics for the scanner, as its privacy notice describes: '
+      'https://policies.google.com/privacy',
+    );
   });
   runApp(const CompanionApp());
   Updates.check();

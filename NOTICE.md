@@ -29,17 +29,24 @@ request.
 | [flutter_map](https://github.com/fleaflet/flutter_map) | the app's map | BSD-3-Clause |
 | [latlong2](https://github.com/jifalops/dart-latlong) | map coordinates | Apache-2.0 |
 | [Cinzel](https://github.com/NDISCOVER/Cinzel) font, © 2020 The Cinzel Project Authors | skill tree titles | SIL Open Font License 1.1 (`app/assets/fonts/OFL.txt`) |
-| [pystray](https://github.com/moses-palmer/pystray) | the agent's tray icon (installed by `install.bat`, not included) | LGPL-3.0 |
-| [Pillow](https://python-pillow.org) | images in the agent and tools (installed, not included) | MIT-CMU (HPND) |
-| [psutil](https://github.com/giampaolo/psutil) | finding the running game (installed, not included) | BSD-3-Clause |
-| [python-zstandard](https://github.com/indygreg/python-zstandard) | unpacking save files (installed, not included) | BSD-3-Clause |
+| [pystray](https://github.com/moses-palmer/pystray) | the agent's tray icon | LGPL-3.0 |
+| [Pillow](https://python-pillow.org) | images in the agent and tools | MIT-CMU (HPND) |
+| [psutil](https://github.com/giampaolo/psutil) | finding the running game | BSD-3-Clause |
+| [python-zstandard](https://github.com/indygreg/python-zstandard) | unpacking save files | BSD-3-Clause |
+| [qrcode](https://github.com/lincolnloop/python-qrcode), [six](https://github.com/benjaminp/six) | the pairing QR code | BSD, MIT |
+| [Python](https://www.python.org), Tcl/Tk, [PyInstaller](https://pyinstaller.org) bootloader | run the agent as `EnshroudBuddy.exe` | PSF, Tcl/Tk, GPL with bootloader exception |
+| AndroidX, Kotlin standard library | the Android app | Apache-2.0 |
+| [Google code scanner](https://developers.google.com/ml-kit/vision/barcode-scanning/code-scanner) (Play services) | QR pairing in the app | Google APIs Terms, ML Kit Terms |
 | [NumPy](https://numpy.org), [SciPy](https://scipy.org) | map building tools only (not included) | BSD-3-Clause |
 | [kfc-parser / EML](https://github.com/Brabb3l/kfc-parser) | runs `tools/eml-export` to export the game data (not included) | GPL-3.0 |
-| [Enshrouded Wiki](https://enshrouded.wiki.gg) | text Ask may quote. Downloaded to your PC at runtime, not included | CC BY-SA 4.0 |
+| [Enshrouded Wiki](https://enshrouded.wiki.gg) | pages Ask reads when a question needs them (not included); the item icons' source | the wiki's own terms (its Copyrights page); the icons are Keen Games' art |
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) by Anthropic | answers Ask questions on your own plan (not included) | Anthropic's terms |
 
-Each Flutter package's full license text is also in the app, under Home → Setup → licenses (Flutter's
-license page).
+The packages above go into the release files as follows. `EnshroudBuddy.exe` bundles Python, Tcl/Tk and the
+agent's packages; their full licence texts are in `THIRD_PARTY_LICENSES.txt`, inside the exe (tray menu →
+Licences) and next to it on each release (pystray's source: its link above; the exe can be rebuilt with another
+version of it, `python tools/build_agent.py`). The app's licences, Flutter's packages and the Android libraries
+included, are under Home → Setup → Licenses and credits.
 
 ## Thanks
 

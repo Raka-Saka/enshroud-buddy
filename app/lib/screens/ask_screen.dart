@@ -313,7 +313,7 @@ class _AskScreenState extends State<AskScreen> {
                                   ? 'Ask about your game'
                                   : 'Ask about ${widget.topic}',
                           message:
-                              'Claude Code on your PC answers from your latest save, the game data and the wiki. Tap a name in an answer to open it, plan it or find it on the map. Or tap the mic and ask out loud: the answer is read back.',
+                              'Claude Code on your PC answers from your latest save, the game data and the wiki. It uses your Claude plan, and your question with what it needs from your save goes to Anthropic. Tap a name in an answer to open it, plan it or find it on the map. Or tap the mic and ask out loud: the answer is read back.',
                         ),
                         Wrap(
                           spacing: 8,

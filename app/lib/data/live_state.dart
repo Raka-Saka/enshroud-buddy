@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'buddy_auth.dart';
 import 'game_db.dart';
 import 'history.dart';
 
@@ -381,11 +382,15 @@ class Live extends ChangeNotifier {
   static const defaultKey = String.fromEnvironment('AGENT_KEY');
   String key = defaultKey;
 
-  void _auth(HttpClientRequest req) => req.headers.set('X-Buddy-Key', key);
+  /// Signs a request (BuddyAuth); returns its nonce.
+  String _auth(HttpClientRequest req) => BuddyAuth.apply(req, key);
   String host = defaultHost;
   LiveState? state;
   String? error;
   String? _builtAt;
+
+  /// The PC agent's version (GET /health), null for agents older than 0.36.
+  String? agentVersion;
 
   /// Progress snapshots, oldest first (GET /history).
   List<Snapshot> history = const [];
@@ -528,6 +533,17 @@ class Live extends ChangeNotifier {
             : null;
   }
 
+  /// A private (home network) IPv4 address with a port, the only kind the agent listens for: a code
+  /// pointing anywhere else is ignored.
+  static bool _homeAddress(String h) {
+    final m = RegExp(r'^(\d+)\.(\d+)\.(\d+)\.(\d+):(\d+)$').firstMatch(h);
+    if (m == null) return false;
+    final a = int.parse(m[1]!), b = int.parse(m[2]!);
+    return a == 10 ||
+        (a == 172 && b >= 16 && b <= 31) ||
+        (a == 192 && b == 168);
+  }
+
   /// The addresses and pairing code in the agent's QR code ("enshroudbuddy:pair?a=IP:PORT,IP:PORT&k=CODE",
   /// tray menu "Pair a phone"), or null for any other text.
   static ({List<String> hosts, String key})? parsePairing(String text) {
@@ -538,7 +554,7 @@ class Live extends ChangeNotifier {
     final hosts =
         (uri.queryParameters['a'] ?? '')
             .split(',')
-            .where((h) => h.isNotEmpty)
+            .where((h) => h.isNotEmpty && _homeAddress(h))
             .toList();
     final key = uri.queryParameters['k'] ?? '';
     return hosts.isEmpty || key.isEmpty ? null : (hosts: hosts, key: key);
@@ -554,13 +570,19 @@ class Live extends ChangeNotifier {
       final client =
           HttpClient()..connectionTimeout = const Duration(seconds: 2);
       try {
-        final req = await client.getUrl(Uri.parse('http://$h/health'));
-        req.headers.set('X-Buddy-Key', p.key);
-        final res = await req.close().timeout(const Duration(seconds: 4));
-        await res.drain<void>();
-        if (res.statusCode == 200) {
-          await setHost(h, pairing: p.key);
-          return h;
+        for (var attempt = 0; attempt < 2; attempt++) {
+          final req = await client.getUrl(Uri.parse('http://$h/health'));
+          final nonce = BuddyAuth.apply(req, p.key);
+          final res = await req.close().timeout(const Duration(seconds: 4));
+          if (res.statusCode == 401 && await BuddyAuth.learnClock(res))
+            continue;
+          final body = await res.fold<List<int>>([], (a, c) => a..addAll(c));
+          if (res.statusCode == 200 &&
+              BuddyAuth.replyOk(p.key, nonce, res, body)) {
+            await setHost(h, pairing: p.key);
+            return h;
+          }
+          break;
         }
       } catch (_) {
         // not reachable from this network: try the next
@@ -699,15 +721,26 @@ class Live extends ChangeNotifier {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
     try {
       final req = await client.getUrl(Uri.parse('http://$host$path'));
-      _auth(req);
+      final nonce = _auth(req);
       final res = await req.close().timeout(const Duration(seconds: 10));
       if (res.statusCode == 401) {
+        if (await BuddyAuth.learnClock(res)) {
+          throw StateError(
+            'the phone\'s clock is off from the PC\'s; trying again',
+          );
+        }
         throw StateError(
-          'the pairing code is missing or wrong: Setup, then the code from the agent\'s tray menu',
+          'the pairing code is missing or wrong: Setup, then scan the agent\'s code',
         );
       }
       if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
-      return await res.transform(utf8.decoder).join();
+      final body = await res.fold<List<int>>([], (a, c) => a..addAll(c));
+      if (!BuddyAuth.replyOk(key, nonce, res, body)) {
+        throw StateError(
+          'the reply didn\'t come from your agent (or it is older than this app)',
+        );
+      }
+      return utf8.decode(body);
     } finally {
       client.close(force: true);
     }
@@ -719,14 +752,19 @@ class Live extends ChangeNotifier {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
     try {
       final req = await client.getUrl(Uri.parse('http://$host$path'));
-      _auth(req);
+      final nonce = _auth(req);
       final res = await req.close().timeout(const Duration(seconds: 10));
+      if (res.statusCode == 401) await BuddyAuth.learnClock(res);
       if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
       final b = BytesBuilder(copy: false);
       await for (final chunk in res) {
         b.add(chunk);
       }
-      return b.takeBytes();
+      final body = b.takeBytes();
+      if (!BuddyAuth.replyOk(key, nonce, res, body)) {
+        throw StateError('the reply didn\'t come from your agent');
+      }
+      return body;
     } finally {
       client.close(force: true);
     }
@@ -739,6 +777,7 @@ class Live extends ChangeNotifier {
     final stateBefore = state, errorBefore = error;
     try {
       final health = jsonDecode(await _get('/health')) as Map<String, dynamic>;
+      agentVersion = health['version'] as String?;
       if (health['ok'] != true)
         throw StateError(health['error'] ?? 'agent not ready');
       if (!onlyIfNew || health['built_at'] != _builtAt || state == null) {

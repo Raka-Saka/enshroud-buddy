@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'buddy_auth.dart';
 import 'game_db.dart';
 
 /// Game data that can be newer than the app: the PC agent serves the latest build (GET /db, from
@@ -56,7 +57,7 @@ class DbStore {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
     Future<String> get(String path) async {
       final req = await client.getUrl(Uri.parse('http://$host$path'));
-      req.headers.set('X-Buddy-Key', key);
+      final nonce = BuddyAuth.apply(req, key);
       final res = await req.close().timeout(const Duration(seconds: 90));
       if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
       // never more than [maxBytes]: something posing as the agent can't fill the phone's memory
@@ -66,7 +67,12 @@ class DbStore {
         if (b.length > maxBytes)
           throw const HttpException('game data too large');
       }
-      return utf8.decode(b.takeBytes());
+      final body = b.takeBytes();
+      // only the agent can sign it: data from anything else on the network is never kept
+      if (!BuddyAuth.replyOk(key, nonce, res, body)) {
+        throw const HttpException('not signed by the agent');
+      }
+      return utf8.decode(body);
     }
 
     try {

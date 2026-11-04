@@ -7,6 +7,7 @@ its slot in the game's menus.
 
     python tools/saves.py    lists every folder with its worlds and characters
 """
+import os
 import pathlib
 import shutil
 import struct
@@ -17,6 +18,32 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from ksd import Save  # noqa: E402
 
 APP_ID = "1203620"  # Enshrouded on Steam
+
+
+def copy_shared(src, dst):
+    """Copies a save like shutil.copy2, but opened with every share flag (read, write and delete): while it
+    reads, the game can still write, delete or rename the file (its backup rotation), which Python's own
+    open() would block on Windows. The copy keeps the original's modified time."""
+    src, dst = pathlib.Path(src), pathlib.Path(dst)
+    if sys.platform != "win32":
+        shutil.copy2(src, dst)
+        return
+    import ctypes
+    import msvcrt
+    from ctypes import wintypes as wt
+
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.CreateFileW.restype = wt.HANDLE
+    k32.CreateFileW.argtypes = [wt.LPCWSTR, wt.DWORD, wt.DWORD, wt.LPVOID, wt.DWORD, wt.DWORD, wt.HANDLE]
+    h = k32.CreateFileW(str(src), 0x80000000, 0x7, None, 3, 0x80, None)  # GENERIC_READ, share all, OPEN_EXISTING
+    if h in (None, wt.HANDLE(-1).value):
+        raise OSError(ctypes.get_last_error(), "can't open", str(src))
+    fd = msvcrt.open_osfhandle(h, os.O_RDONLY | os.O_BINARY)
+    with open(fd, "rb") as f:
+        data = f.read()
+    dst.write_bytes(data)
+    st = src.stat()
+    os.utime(dst, ns=(st.st_atime_ns, st.st_mtime_ns))
 
 
 def steam_dir():
@@ -73,7 +100,7 @@ def listing(folder):
                     continue
                 try:
                     copy = pathlib.Path(tmp) / path.name
-                    shutil.copy2(path, copy)
+                    copy_shared(path, copy)
                     save = Save(copy)
                     out[kind + "s"].append({"slot": slot, "name": _name(save, kind),
                                             "saved_at": save.saved_at.isoformat(timespec="seconds")})

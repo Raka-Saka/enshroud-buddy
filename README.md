@@ -42,7 +42,7 @@ files and shows your game on the phone, while you play or away from the PC:
 
 ## Install
 
-Both files are on the **[latest release](../../releases/latest)** page.
+Both files are on the **[latest release](../../releases/latest)** page. What changed in each version: [patch notes](CHANGELOG.md).
 
 ### On the PC (once)
 
@@ -50,7 +50,8 @@ Both files are on the **[latest release](../../releases/latest)** page.
 2. Windows may say it "protected your PC", because the program isn't signed. Click **More info**, then
    **Run anyway**.
 3. If Windows asks whether Enshroud Buddy may use the network, tick **Private networks** and allow it. That's
-   how the phone reaches it.
+   how the phone reaches it. (If your home Wi-Fi is set to "Public" in Windows, switch it to Private first:
+   Settings → Network → your Wi-Fi → Private network.)
 4. A window shows a **QR code**. Keep it open for the phone.
 
 That's all: it starts with Windows from now on, as a small round icon in the tray (bottom right, maybe under
@@ -73,26 +74,34 @@ lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces 
 
 ## Good to know
 
-- **Only your phone gets in.** The agent answers only devices on your home network that send its pairing code,
-  so other devices, and web pages open in a browser, get nothing: no inventory, position or questions on your
-  Claude plan. The code is made once per PC and kept in `config.json` (in `%LOCALAPPDATA%\EnshroudBuddy`, or
-  `agent\` from source). Delete that file to make a new one.
+- **Only your phone gets in.** The agent answers only devices on your home network whose requests are signed
+  with its pairing code. The code itself never crosses the network, so others on your Wi-Fi can't pick it up,
+  and web pages open in a browser get nothing. The code is made once per PC and kept in `config.json` (in
+  `%LOCALAPPDATA%\EnshroudBuddy`, or `agent\` from source). Delete that file to make a new one.
 
 - **The agent only reads.** It copies your save files and reads the copies; it never changes a save or the
   game's files.
 - **Live position** (your arrow on the map, the guide, glide measuring) reads the running game's memory,
-  read-only, about once a second. It never writes to the game, injects anything or touches other players.
-  Whether Enshrouded's anti-cheat could mind this isn't known. If you'd rather not take that chance, start the
-  agent with `--no-live` (from source: add it after both `agent.py` in `start.bat`). Everything else keeps
-  working from your saves.
+  read-only, about once a second, and searches it only while the phone shows the map. It never writes to the
+  game, injects anything or touches other players. Enshrouded has no anti-cheat today, but Keen's terms of use
+  don't allow tools of this kind in general, and a future patch could change things. To leave the game alone,
+  untick **Live position** in the tray menu; it stays off, also after updates. Everything else keeps working
+  from your saves.
 - **Playing in a friend's world:** the world is saved on the host's PC, so your PC only has your character.
   You'll see your gear and map, but not their bases and chests.
-- **Ask** needs [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and signed in on the PC
-  (it runs on your own Claude plan). The agent then keeps a local copy of the
-  [Enshrouded wiki](https://enshrouded.wiki.gg) for it, refreshed weekly. Without Claude Code, Ask just says it
-  isn't available.
-- **Privacy:** everything stays on your home network. Only Ask (through Claude Code), the weekly wiki copy and
-  the app's daily look for a new version on GitHub (which sends nothing about you) go online.
+- **Ask** needs [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and signed in on the PC.
+  It uses your Claude plan's usage (never an API key, even if one is set on the PC), and reads pages of the
+  [Enshrouded wiki](https://enshrouded.wiki.gg) when a question needs them. Without Claude Code, Ask just says
+  it isn't available.
+- **Privacy:** your saves, position and everything the app shows stay on your home network. What goes online:
+  - **Ask:** your question, and what Claude needs from your save to answer it (character, gear, chests, bases,
+    where you are), go to Anthropic through Claude Code, under Anthropic's terms and privacy policy.
+  - **Voice Ask:** the mic uses your phone's speech recognition (Google's on most phones).
+  - **QR pairing:** Google Play services' code scanner reads the code on the phone; Google may collect usage
+    metrics for it ([Google's privacy policy](https://policies.google.com/privacy)). Nothing about you or the
+    code is sent.
+  - **Updates:** once a day the app asks GitHub for the latest release, sending nothing about you.
+  Nobody else, us included, gets anything: there are no accounts, ads or analytics.
 
 ## Troubleshooting
 
@@ -102,7 +111,10 @@ lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces 
 - **Wrong character or world:** Setup → Game save.
 - **An amber notice on Home** means the save holds something new to the reader (often after a game patch).
   Most things keep working; a fix comes with the next version.
-- The agent writes a log to `agent\agent.log`.
+- The agent writes a log to `agent.log` in `%LOCALAPPDATA%\EnshroudBuddy` (tray menu → Open log folder), or
+  `agent\` from source.
+- **Windows or an antivirus warns about the exe:** it isn't signed, as signing costs money each year. It is
+  built from this repository's code by `tools/build_agent.py`; you can build it yourself if you prefer.
 
 ## For developers
 

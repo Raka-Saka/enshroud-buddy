@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:ensh_companion/data/buddy_auth.dart';
 import 'package:ensh_companion/data/build.dart';
 import 'package:ensh_companion/data/clusters.dart';
 import 'package:ensh_companion/data/db_store.dart';
@@ -1142,5 +1143,20 @@ void main() {
     expect(Updates.newer('0.34.10', '0.34.9'), isTrue);
     expect(Updates.newer('0.34.5', '0.34.5+48'), isFalse);
     expect(Updates.newer('0.34.4', '0.34.5'), isFalse);
+  });
+
+  test('signed requests match the agent (agent.py sign)', () {
+    final nonce = '00' * 16;
+    expect(
+      BuddyAuth.sign('ABCDEFGH', ['GET', '/health', 1700000000, nonce]),
+      '4fe868bb30d88461cdd0946453bb927c8beb2c6f72492c0afe3a9169cb842ca2',
+    );
+    expect(
+      BuddyAuth.sign('ABCDEFGH', [
+        nonce,
+        '44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a',
+      ]),
+      '94aebefdb7722f6743ce03a646443a4503dbc73b6cebfea47b8ba68147201beb',
+    );
   });
 }

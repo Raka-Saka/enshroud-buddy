@@ -21,8 +21,8 @@ SHIP = [
     "app/analysis_options.yaml", "app/.metadata", "app/.gitignore",
     "agent/agent.py", "agent/start.bat", "agent/install.bat", "agent/requirements.txt",
     "tools/ask.py", "tools/build_agent.py", "tools/build_db.py", "tools/build_map.py", "tools/export_poi.py", "tools/glide.py",
-    "tools/history.py", "tools/icons.py", "tools/ksd.py", "tools/livepos.py", "tools/motion.py", "tools/paths.py", "tools/release.py",
-    "tools/saves.py", "tools/state.py", "tools/wiki.py", "tools/world.py", "tools/eml-export", "tools/eml-poi",
+    "tools/history.py", "tools/icons.py", "tools/ksd.py", "tools/licences_dump.py", "tools/livepos.py", "tools/motion.py", "tools/paths.py", "tools/release.py",
+    "tools/saves.py", "tools/state.py", "tools/world.py", "tools/eml-export", "tools/eml-poi",
     # what the agent reads at runtime (tools/state.py, history.py, world.py)
     "data/export/items.jsonl", "data/export/recipes.jsonl", "data/export/skills.jsonl",
     "data/export/item_stats.jsonl", "data/export/balancing.json", "data/export/map/index.tsv",
@@ -40,9 +40,29 @@ def keep(path):
     return not (set(path.parts) & SKIP_DIRS or path.name in SKIP_FILES or path.suffix in SKIP_SUFFIXES)
 
 
+def public_export(src, dst):
+    """A data/export .jsonl as it ships: without the developers' internal names (debug_name) and without
+    leftovers the game never uses (_UNUSED, with no name). Everything the agent reads stays."""
+    import json
+
+    rows = []
+    for line in src.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if "_UNUSED" in (r.get("debug_name") or "") and not r.get("name"):
+            continue
+        r.pop("debug_name", None)
+        rows.append(json.dumps(r, ensure_ascii=False, separators=(",", ":")))
+    dst.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+
 def copy(src, dst):
     dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
+    if src.suffix == ".jsonl" and src.parent.name == "export":
+        public_export(src, dst)
+    else:
+        shutil.copy2(src, dst)
 
 
 def main():

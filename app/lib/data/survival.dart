@@ -19,12 +19,22 @@ class Survival {
     return neg ? '-$t' : t;
   }
 
-  /// "1 min", "30 s", "20" (plain seconds, as oxygen food lists it) -> seconds.
+  /// "1 min", "+30 s", "1 min 30 s", "20" (plain seconds, as oxygen food lists it) -> seconds.
   static int seconds(String v) {
-    final m = RegExp(r'^(-?\d+(?:\.\d+)?)\s*(min|s)?$').firstMatch(v.trim());
+    final m = RegExp(
+      r'^\+?(-?\d+(?:\.\d+)?)\s*(min|s)?(?:\s+(\d+)\s*s)?$',
+    ).firstMatch(v.trim());
     if (m == null) return 0;
     final n = double.parse(m.group(1)!);
-    return (m.group(2) == 'min' ? n * 60 : n).round();
+    final extra = int.tryParse(m.group(3) ?? '') ?? 0;
+    return (m.group(2) == 'min' ? n * 60 + extra : n).round();
+  }
+
+  /// A world setting's factor, or 1 when it reads as something no world can be set to (a game patch that
+  /// moved the setting would otherwise promise far more time in the Shroud than there is).
+  double _factor(String key) {
+    final v = state.settings[key];
+    return v == null || v < 0.25 || v > 4 ? 1.0 : v;
   }
 
   int _gearSeconds(List<String> labels) => state.equipment.fold(0, (a, o) {
@@ -40,7 +50,7 @@ class Survival {
     final b = db.balancing;
     if (b == null) return 0;
     return ((b.fogBase + b.fogPerFlame * state.flameLevel) *
-                (state.settings['shroud_time'] ?? 1.0))
+                _factor('shroud_time'))
             .round() +
         _gearSeconds(shroudLabels);
   }
@@ -49,7 +59,7 @@ class Survival {
   int get oxygenSeconds {
     final b = db.balancing;
     if (b == null) return 0;
-    return (b.oxygen * (state.settings['diving_time'] ?? 1.0)).round() +
+    return (b.oxygen * _factor('diving_time')).round() +
         _gearSeconds(const ['Maximum Oxygen']);
   }
 

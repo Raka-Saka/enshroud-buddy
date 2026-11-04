@@ -8,11 +8,11 @@ backfills from the game's own rolling backups (<save folder>/backup/*.ksd.backup
 import argparse
 import json
 import pathlib
-import shutil
 import sys
 import tempfile
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import saves as saves_mod  # noqa: E402
 import state as state_mod  # noqa: E402
 from ksd import Save  # noqa: E402
 
@@ -73,8 +73,8 @@ def backfill(saves, world, character, export):
         wf = min(worlds, key=lambda f: abs(f.stat().st_mtime - cf.stat().st_mtime))
         with tempfile.TemporaryDirectory(prefix="ensh_hist_") as tmp:
             tmp = pathlib.Path(tmp)
-            shutil.copy2(cf, tmp / f"character{character}.ksd")
-            shutil.copy2(wf, tmp / f"world{world}.ksd")
+            saves_mod.copy_shared(cf, tmp / f"character{character}.ksd")
+            saves_mod.copy_shared(wf, tmp / f"world{world}.ksd")
             try:
                 snap = snapshot(state_mod.build(tmp, world, character, export), export)
             except Exception:  # a backup from another game version, or half written
@@ -114,7 +114,16 @@ class History:
             self.add(s)
 
     def json(self):
-        return json.dumps(self.rows, separators=(",", ":")).encode("utf-8")
+        """What the phone gets: every change of level, Flame, skills, recipes, bases or gear, but experience
+        alone (which moves with nearly every save) at most once per 10 minutes, so the download stays small
+        however long the timeline gets."""
+        out = []
+        for r in self.rows:
+            if out and r is not self.rows[-1] and {k: v for k, v in r.items() if k not in ("t", "xp")} == {
+                    k: v for k, v in out[-1].items() if k not in ("t", "xp")} and r["t"][:15] == out[-1]["t"][:15]:
+                continue
+            out.append(r)
+        return json.dumps(out, separators=(",", ":")).encode("utf-8")
 
 
 def main():
