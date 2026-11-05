@@ -20,7 +20,7 @@ DIST = ROOT / "dist"
 WORK = ROOT / "build" / "agent"
 VENV = ROOT / "build" / "agent-venv"
 TOOLS = ["pyinstaller==6.17.0", "qrcode==8.2"]
-DATA = ["app/pubspec.yaml", "app/assets/game.json", "app/assets/height.png", "app/assets/height.json",
+DATA = ["app/pubspec.yaml", "app/assets/game.json", "app/assets/height.png", "app/assets/height.json", "app/assets/fonts/Cinzel.ttf", "app/assets/fonts/OFL.txt",
         "data/export/items.jsonl", "data/export/recipes.jsonl", "data/export/skills.jsonl",
         "data/export/item_stats.jsonl", "data/export/balancing.json", "data/export/map/index.tsv"]
 

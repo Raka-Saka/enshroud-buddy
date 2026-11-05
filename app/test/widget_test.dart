@@ -12,6 +12,7 @@ import 'package:ensh_companion/data/hall_check.dart';
 import 'package:ensh_companion/data/hall_plan.dart';
 import 'package:ensh_companion/data/item_icons.dart';
 import 'package:ensh_companion/data/live_state.dart';
+import 'package:ensh_companion/data/tracker.dart';
 import 'package:ensh_companion/data/updates.dart';
 import 'package:ensh_companion/data/mentions.dart';
 import 'package:ensh_companion/data/planner.dart';
@@ -1158,5 +1159,46 @@ void main() {
       ]),
       '94aebefdb7722f6743ce03a646443a4503dbc73b6cebfea47b8ba68147201beb',
     );
+    // a signed body (POST /target), as agent.py set_target checks it
+    expect(
+      BuddyAuth.bodySig('ABCD1234', 'n0nce', utf8.encode('{"x":1}')),
+      '2187b3790a2dbf0797daf753537493f87d9fb1e90f38253865fa4a961c87018c',
+    );
+  });
+
+  test('overlay tracker: next tasks, completion, nearest missing', () {
+    final s = LiveState({
+      'character': {
+        'name': 'Test',
+        'level': 30,
+        'skills': [],
+        'recipes_unlocked': [],
+        'knowledge': [],
+        'equipment': [],
+        'bag': [],
+      },
+      'world': {'name': 'Test', 'bases': [], 'containers': []},
+    });
+    expect(trackerOf(db, null, const [], null, null), isNull);
+    final spot = db.poi.firstWhere((p) => !p.inside && p.loot.isNotEmpty);
+    final here = PlayerPos({
+      'map': [spot.x + 0.5, spot.y],
+      'heading': 0,
+      'y': 100,
+    });
+    final idle = trackerOf(db, s, const [], null, here)!;
+    expect(idle['lines'], isEmpty);
+    final done = (idle['done'] as List).cast<Map>();
+    expect(done.map((c) => c['label']), ['Lore', 'Unique loot']);
+    expect(done.every((c) => c['have'] == 0 && (c['of'] as int) > 100), isTrue);
+    // nothing had yet: the nearest missing place is the one we stand by
+    final t = idle['target'] as Map;
+    expect((t['x'] as double) - spot.x, closeTo(0, 3));
+    final arrow = db.search('iron arrow').first;
+    final plan = trackerOf(db, s, [Goal(arrow.id, 20)], null, here)!;
+    expect(plan['title'], arrow.name);
+    expect((plan['lines'] as List).length, inInclusiveRange(1, 5));
+    expect(plan['open'], greaterThanOrEqualTo((plan['lines'] as List).length));
+    expect(plan['target'], isNotNull);
   });
 }

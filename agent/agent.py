@@ -57,6 +57,7 @@ import glide as glide_mod  # noqa: E402
 import history as history_mod  # noqa: E402
 import livepos as livepos_mod  # noqa: E402
 import motion as motion_mod  # noqa: E402
+import overlay as overlay_mod  # noqa: E402
 import saves as saves_mod  # noqa: E402
 import state as state_mod  # noqa: E402
 from ksd import Save  # noqa: E402
@@ -79,12 +80,17 @@ class Agent:
         self.pos = None  # live position, None while the game isn't running
         self.pos_wanted = 0.0  # when the phone last asked for it (GET /pos)
         self.live_on = load_config().get("live", True)  # the tray's switch, kept in config.json
+        self.overlay_on = load_config().get("overlay", True)  # the guide over the game (tools/overlay.py)
+        self.target = None  # the phone guide's target, {"title", "x", "y", "h"} (POST /target)
+        self.tracker = None  # the phone plan's next tasks, {"title", "open", "lines", "target"} (POST /tracker)
+        self.lp = livepos_mod.LivePos(log=log)
         self.glider = None  # the equipped glider's item id, for the glide calibration
         self.glides = glide_mod.GlideLog(DATA / "glide.json", log=log)
         try:
             ground = motion_mod.HeightMap(RES / "app" / "assets" / "height.png", RES / "app" / "assets" / "height.json")
         except (OSError, ValueError, KeyError):
             ground = None
+        self.ground = ground
         self.motion = motion_mod.Motion(ground, DATA / "walk.json")
         self.trace = motion_mod.Trace(DATA / "trace.jsonl")
         self.bases = []  # [name, map x, map y] for Ask's "nearest base"
@@ -135,7 +141,7 @@ class Agent:
     def live(self, stop):
         """Read the player's position from the running game once a second, while the tray's switch is on. The
         costly search for the camera runs only while the phone shows the map (asked in the last 2 minutes)."""
-        lp, failed = livepos_mod.LivePos(log=log), False
+        lp, failed = self.lp, False
         while not stop.is_set():
             if not self.live_on:
                 lp.close()
@@ -144,7 +150,8 @@ class Agent:
                 stop.wait(2)
                 continue
             try:
-                pos = lp.poll(search=time.time() - self.pos_wanted < 120)
+                # the overlay showing a target counts as watching
+                pos = lp.poll(search=time.time() - self.pos_wanted < 120 or bool(self.overlay_on and (self.target or self.tracker)))
                 failed = False
             except Exception:
                 if not failed:
@@ -392,6 +399,31 @@ def agent_version():
     return None
 
 
+def overlay_target(req):
+    """A target from the phone, checked: {"title", "x", "y", "h"} in map pixels and metres, or None."""
+    if not req:
+        return None
+    h = req.get("h")
+    t = {"title": str(req.get("title") or "")[:80], "x": float(req["x"]), "y": float(req["y"]),
+         "h": None if h is None else float(h)}
+    if not all(map(math.isfinite, [t["x"], t["y"]] + ([] if h is None else [t["h"]]))):
+        raise ValueError("bad target")
+    return t
+
+
+def overlay_tracker(req):
+    """The plan's tracker from the phone, checked: title, open tasks, up to 5 lines, completion counts, a
+    target; or None."""
+    if not req:
+        return None
+    return {"title": str(req.get("title") or "")[:80], "open": int(req.get("open") or 0),
+            "lines": [{"t": str(ln.get("t") or "")[:100], "n": str(ln.get("n") or "")[:100]}
+                      for ln in list(req.get("lines") or [])[:5]],
+            "done": [{"label": str(c.get("label") or "")[:40], "have": int(c.get("have") or 0),
+                      "of": int(c.get("of") or 0)} for c in list(req.get("done") or [])[:4]],
+            "target": overlay_target(req.get("target"))}
+
+
 def make_handler(agent, key):
     import ipaddress
 
@@ -538,10 +570,13 @@ def make_handler(agent, key):
 
         def do_POST(self):
             path = self.path.split("?")[0]
-            if path not in ("/ask", "/ask/stream", "/select"):
+            if path not in ("/ask", "/ask/stream", "/select", "/target", "/tracker"):
                 self.send_error(404)
                 return
             if not self.allowed():
+                return
+            if path in ("/target", "/tracker"):
+                self.set_overlay(path)
                 return
             if path == "/select":
                 try:
@@ -582,6 +617,27 @@ def make_handler(agent, key):
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
+
+        def set_overlay(self, path):
+            """What the overlay shows (tools/overlay.py): the phone guide's target, or the plan's tracker; {}
+            clears it. The body is signed too (X-Buddy-Body = sign(code, nonce, sha256 of the body)), so nobody
+            on the network can swap what it shows."""
+            import hashlib
+            import hmac
+
+            try:
+                body = self.read_body(8000)
+                want = sign(key, self.headers.get("X-Buddy-Nonce") or "", hashlib.sha256(body).hexdigest())
+                if not hmac.compare_digest((self.headers.get("X-Buddy-Body") or "").encode(), want.encode()):
+                    raise ValueError("unsigned body")
+                req = json.loads(body or b"{}")
+                if path == "/target":
+                    agent.target = overlay_target(req)
+                else:
+                    agent.tracker = overlay_tracker(req)
+                self.reply({"ok": True})
+            except (ValueError, KeyError, TypeError, AttributeError) as e:
+                self.reply({"ok": False, "error": str(e)[:200]}, 400)
 
         def log_message(self, fmt, *args):
             pass
@@ -810,6 +866,14 @@ def show_pairing():
     root.mainloop()
 
 
+def set_overlay(agent, on):
+    agent.overlay_on = bool(on)
+    conf = load_config()
+    conf["overlay"] = agent.overlay_on
+    write_config(conf)
+    log(f"guide over the game {'on' if on else 'off'}")
+
+
 def set_live(agent, on):
     agent.live_on = bool(on)
     conf = load_config()
@@ -904,6 +968,8 @@ def run_tray(agent, stop, quit_now=None):
                          default=True),
         pystray.MenuItem("Live position (reads the game's memory)", lambda i, it: set_live(agent, not agent.live_on),
                          checked=lambda _i: agent.live_on),
+        pystray.MenuItem("Guide over the game", lambda i, it: set_overlay(agent, not agent.overlay_on),
+                         checked=lambda _i: agent.overlay_on, enabled=lambda _i: agent.live_on),
         pystray.MenuItem("Rebuild now", lambda i, it: setattr(agent, "last_sig", None)),  # the watch loop rebuilds
         pystray.MenuItem("Open log folder", lambda i, it: os.startfile(DATA)),
         pystray.MenuItem("Licences", lambda i, it: os.startfile(RES / "THIRD_PARTY_LICENSES.txt"),
@@ -972,6 +1038,11 @@ def main():
         agent.live_on = False  # for this run; the tray's switch can still turn it on
         log("live position off (--no-live): the game's memory isn't read")
     threading.Thread(target=agent.live, args=(stop,), daemon=True).start()
+    threading.Thread(target=overlay_mod.run, daemon=True, kwargs=dict(
+        stop=stop, camera=agent.lp.peek, target=lambda: agent.target, tracker=lambda: agent.tracker,
+        game_pid=lambda: agent.lp.pid,
+        enabled=lambda: agent.overlay_on and agent.live_on, fonts_dir=RES / "app" / "assets" / "fonts",
+        ground=agent.ground, log=log)).start()
     log(f"agent listening on {', '.join(lan_ips())} port {a.port}, reading world{world} and character{character} "
         f"in {folder}")
     try:

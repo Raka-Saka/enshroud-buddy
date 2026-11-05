@@ -21,7 +21,7 @@ SHIP = [
     "app/analysis_options.yaml", "app/.metadata", "app/.gitignore",
     "agent/agent.py", "agent/start.bat", "agent/install.bat", "agent/requirements.txt",
     "tools/ask.py", "tools/build_agent.py", "tools/build_db.py", "tools/build_map.py", "tools/export_poi.py", "tools/glide.py",
-    "tools/history.py", "tools/icons.py", "tools/ksd.py", "tools/licences_dump.py", "tools/livepos.py", "tools/motion.py", "tools/paths.py", "tools/release.py",
+    "tools/history.py", "tools/icons.py", "tools/ksd.py", "tools/licences_dump.py", "tools/livepos.py", "tools/motion.py", "tools/overlay.py", "tools/paths.py", "tools/release.py",
     "tools/saves.py", "tools/state.py", "tools/world.py", "tools/eml-export", "tools/eml-poi",
     # what the agent reads at runtime (tools/state.py, history.py, world.py)
     "data/export/items.jsonl", "data/export/recipes.jsonl", "data/export/skills.jsonl",

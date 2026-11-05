@@ -3,6 +3,19 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.37.0 (2026-11-05)
+
+- **Guide over the game:** pick a place on the phone's map (a missing unique piece, a chest, anything the guide
+  can lead to) and the PC marks it on your game screen: a gold marker on the spot, or an arrow at the edge when
+  it's out of view, with its name, distance and height. It is a see-through window that clicks pass through,
+  shown only while the game is in front. Needs the game in borderless or windowed mode and Live position on;
+  tray menu → Guide over the game turns it off.
+- **Plan tracker over the game:** the Plan tab's next tasks show in a corner of the game screen, like the
+  game's quest list ("Take 12 × Iron Bar · Here: Large Chest #3"), and the marker points to the next thing to
+  gather.
+- **Completion:** lore pages and unique loot found so far ("Lore 212 / 340"), and with nothing else to do, the
+  marker leads to the nearest lore page or unique piece you're still missing.
+
 ## 0.36.0 (2026-11-04)
 
 Update both the app and the PC program: the new app only talks to the new PC program.

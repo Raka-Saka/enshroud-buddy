@@ -640,6 +640,56 @@ class Live extends ChangeNotifier {
     }
   }
 
+  /// What the PC's overlay shows (tools/overlay.py), by path: the guide's target (POST /target, {"title",
+  /// "x", "y", "h"} in map pixels and metres) and the plan's tracker (POST /tracker, tracker.dart). Each is
+  /// sent when it changes, and again once the link comes back if it was missed.
+  final _overlay = <String, String>{};
+  final _overlayUnsent = <String>{};
+
+  void setTarget(Map<String, Object?>? t) => _overlaySet('/target', t);
+  void setTracker(Map<String, Object?>? t) => _overlaySet('/tracker', t);
+
+  void _overlaySet(String path, Map<String, Object?>? payload) {
+    final body = jsonEncode(payload ?? const {});
+    if (_overlay[path] == body && !_overlayUnsent.contains(path)) return;
+    _overlay[path] = body;
+    _overlayUnsent.add(path);
+    _overlayPush(path);
+  }
+
+  void _overlayPushAll() {
+    for (final p in _overlayUnsent.toList()) {
+      _overlayPush(p);
+    }
+  }
+
+  Future<void> _overlayPush(String path) async {
+    final body = _overlay[path];
+    if (body == null || host.isEmpty) return;
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    try {
+      final req = await client.postUrl(Uri.parse('http://$host$path'));
+      final nonce = _auth(req);
+      final payload = utf8.encode(body);
+      req.headers
+        ..contentType = ContentType.json
+        ..set('X-Buddy-Body', BuddyAuth.bodySig(key, nonce, payload));
+      req.contentLength = payload.length;
+      req.add(payload);
+      final res = await req.close().timeout(const Duration(seconds: 10));
+      await res.drain<void>();
+      // 404: an agent without the overlay; nothing to retry
+      if (_overlay[path] == body &&
+          (res.statusCode == 200 || res.statusCode == 404)) {
+        _overlayUnsent.remove(path);
+      }
+    } catch (_) {
+      // unreachable: refresh() tries again once the agent answers
+    } finally {
+      client.close(force: true);
+    }
+  }
+
   Future<(String, String?)> ask(
     String question, {
     String? session,
@@ -797,6 +847,7 @@ class Live extends ChangeNotifier {
       error = null;
       _failures = 0;
       _fetchFog();
+      _overlayPushAll();
       if (_posTimer == null) _pollPos();
     } catch (e) {
       // one missed 5 s check on a busy Wi-Fi isn't news: say so from the second in a row

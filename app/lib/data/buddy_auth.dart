@@ -34,6 +34,11 @@ class BuddyAuth {
     return nonce;
   }
 
+  /// Signs a request's [body] for [nonce] (X-Buddy-Body): the agent checks it where the body matters
+  /// (POST /target), so nobody on the network can swap it.
+  static String bodySig(String key, String nonce, List<int> body) =>
+      sign(key, [nonce, sha256.convert(body).toString()]);
+
   /// Whether [body] is the agent's own reply to the request signed with [nonce].
   static bool replyOk(
     String key,

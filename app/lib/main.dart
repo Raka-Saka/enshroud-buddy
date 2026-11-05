@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'data/db_store.dart';
 import 'data/game_db.dart';
+import 'data/guide.dart';
 import 'data/item_icons.dart';
 import 'data/live_state.dart';
 import 'data/pins.dart';
 import 'data/planner.dart';
+import 'data/tracker.dart';
 import 'data/updates.dart';
+import 'data/where.dart';
 import 'nav.dart';
 import 'screens/character_screen.dart';
 import 'screens/codex_screen.dart';
@@ -68,11 +73,45 @@ class _CompanionAppState extends State<CompanionApp> {
   void initState() {
     super.initState();
     live.addListener(_maybeUpdate);
+    navTarget.addListener(_sendTarget);
+    _sendTarget();
+    for (final l in [goals, live, live.pos]) {
+      l.addListener(_trackSoon);
+    }
+    _trackSoon();
+  }
+
+  Timer? _trackTimer;
+
+  /// The plan's next tasks go to the PC's overlay too, at most every 2 s (moving changes what's close by).
+  void _trackSoon() =>
+      _trackTimer ??= Timer(const Duration(seconds: 2), _track);
+
+  Future<void> _track() async {
+    final current = await db;
+    final terrain = await Terrain.instance;
+    _trackTimer = null;
+    live.setTracker(
+      trackerOf(current, live.state, goals.all, terrain, live.pos.value),
+    );
+  }
+
+  /// The guide's target goes to the PC as well, which marks it over the game (tools/overlay.py).
+  void _sendTarget() {
+    final t = navTarget.value;
+    live.setTarget(
+      t == null ? null : {'title': t.title, 'x': t.x, 'y': t.y, 'h': t.height},
+    );
   }
 
   @override
   void dispose() {
     live.removeListener(_maybeUpdate);
+    navTarget.removeListener(_sendTarget);
+    for (final l in [goals, live, live.pos]) {
+      l.removeListener(_trackSoon);
+    }
+    _trackTimer?.cancel();
     super.dispose();
   }
 

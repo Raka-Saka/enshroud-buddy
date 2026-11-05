@@ -67,8 +67,9 @@ def _game_pid():
     return None
 
 
-def decode(raw):
-    """The camera as {"x", "y", "z", "heading", "map"}, or None when the bytes aren't a camera."""
+def decode(raw, full=False):
+    """The camera as {"x", "y", "z", "heading", "map"}, or None when the bytes aren't a camera. full adds its
+    rotation ("q": x, y, z, w) and field of view ("fov", radians), for the overlay (tools/overlay.py)."""
     if len(raw) < SIZE or raw[NEAR_AT:NEAR_AT + 4] != NEAR or raw[0x28:0x34] != ONES:
         return None
     x, y, z = (v / 2 ** 32 for v in struct.unpack_from("<3q", raw, 0))
@@ -81,19 +82,23 @@ def decode(raw):
     # local +z turned by the quaternion: where the camera looks
     fx = 2 * (qx * qz + qw * qy)
     fz = 1 - 2 * (qx * qx + qy * qy)
-    return {
+    cam = {
         "x": round(x, 2),
         "y": round(y, 2),
         "z": round(z, 2),
         "heading": round(math.degrees(math.atan2(fx, fz)) % 360, 1),  # 0 = north, 90 = east
         "map": [round(v, 1) for v in W.map_from_m(x, z)],  # pixel of the map grid
     }
+    if full:
+        cam.update(x=x, y=y, z=z, q=(qx, qy, qz, qw), fov=fov)
+    return cam
 
 
 class LivePos:
     def __init__(self, log=print):
         self.log = log
         self.handle = None
+        self.pid = None  # the game's process, for the overlay's "is the game in front"
         self.addrs = []
         self.last_find = 0.0
         self.misses = 0  # searches in a row that found nothing (menus, loading, or a patch moved things)
@@ -102,7 +107,7 @@ class LivePos:
     def close(self):
         if self.handle:
             _k32.CloseHandle(self.handle)
-        self.handle, self.addrs = None, []
+        self.handle, self.addrs, self.pid = None, [], None
 
     def _alive(self):
         code = wt.DWORD()
@@ -158,6 +163,7 @@ class LivePos:
             if not self.handle:
                 self.handle = None
                 return None
+            self.pid = pid
         if not self.addrs:
             if not search or time.time() - self.last_find < min(FIND_EVERY * 2 ** self.misses, FIND_MAX):
                 return None
@@ -170,6 +176,18 @@ class LivePos:
             self.misses = 0
             self.log(f"live position: camera found ({len(self.addrs)} copies, {time.time() - t:.0f} s)")
         return self._vote()
+
+    def peek(self):
+        """The camera with its rotation, read now from a copy already found (cheap, about 20 times a second for
+        the overlay); None until poll() has found one. Safe beside poll() in another thread: it only reads."""
+        handle, buf, done = self.handle, (ctypes.c_char * SIZE)(), ctypes.c_size_t()  # its own buffer
+        for a in list(self.addrs):
+            ok = handle and _k32.ReadProcessMemory(handle, a, buf, SIZE, ctypes.byref(done))
+            raw = bytes(buf) if ok and done.value == SIZE else None
+            cam = decode(raw, full=True) if raw else None
+            if cam:
+                return cam
+        return None
 
     def _vote(self):
         """The camera most copies agree on; copies that stop reading as a camera (scratch buffers) are dropped."""
