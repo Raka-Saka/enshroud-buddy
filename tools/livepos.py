@@ -27,8 +27,8 @@ ONES = struct.pack("<3f", 1.0, 1.0, 1.0)
 SIZE = 0x48  # position .. field of view
 NEAR_AT = 0x38
 CHUNK = 32 << 20
-FIND_EVERY = 60  # seconds between searches while the camera isn't found, doubling after each miss
-FIND_MAX = 600  # at most this long between searches
+FIND_EVERY = 20  # seconds between searches while the camera isn't found, doubling after each miss
+FIND_MAX = 120  # at most this long between searches (the game sits in its menus a while before a world loads)
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import world as W  # noqa: E402
 
@@ -176,6 +176,11 @@ class LivePos:
             self.misses = 0
             self.log(f"live position: camera found ({len(self.addrs)} copies, {time.time() - t:.0f} s)")
         return self._vote()
+
+    def hurry(self):
+        """Search at the next poll: the game just saved, so a world is loaded and its camera is there to find."""
+        if not self.addrs:
+            self.misses, self.last_find = 0, 0.0
 
     def peek(self):
         """The camera with its rotation, read now from a copy already found (cheap, about 20 times a second for

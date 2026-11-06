@@ -14,6 +14,7 @@ program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 - **Share build:** Character → Build → Share build makes a picture of your build and gear for Discord or a chat,
   with the same in words.
 - Time in the Shroud now counts the Inner Fires skill.
+- Live position shows up much sooner after the game starts (it could take up to 10 minutes).
 - Read aloud and voice questions now use the app's language instead of always English.
 
 ## 0.38.0 (2026-11-06)

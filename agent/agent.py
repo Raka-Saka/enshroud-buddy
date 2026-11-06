@@ -234,6 +234,7 @@ class Agent:
                     try:
                         self.rebuild()
                         self.last_sig = sig
+                        self.lp.hurry()  # a save means a world is loaded: look for the camera now
                     except Exception as e:  # keep serving the last good state
                         with self.lock:
                             self.health = {**self.health, "error": f"{type(e).__name__}: {e}"}
