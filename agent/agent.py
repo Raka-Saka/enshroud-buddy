@@ -10,13 +10,17 @@ Endpoints (port 4750):
     GET /saves      every save folder on this PC with its worlds and characters (tools/saves.py), and the
                     one being read: {"folders": [{"folder", "label", "worlds", "characters"}], "current":
                     {"folder", "world", "character"}}
-    POST /select    {"folder", "world", "character"}: read that world and character from now on (kept in
+    POST /select    {"folder", "world", "character", "flame"?}: read that world and character from now on; world
+                    -1 is a guest in a friend's world, flame its host's Flame strength (kept in
                     agent/config.json); LAN clients only
     GET /fog.png    explored map, 1280x1280, white = explored
     GET /fog_overlay.png  the same as a dark veil over unexplored ground (RGBA), for the app's map
     GET /history    progress snapshots, oldest first (agent/history.jsonl, seeded from the game's backups)
     GET /db/version {"built"} of the game data the phone should use (app/assets/game.json, from tools/build_db.py)
     GET /db         that game data, so data fixes reach the phone without reinstalling the app
+    GET /app/       the app as a web page (tools/build_web.py, tools/webapp.py) for an iPhone, a tablet or a
+                    browser on the PC; not signed, as it holds nothing of the player's, and its own requests
+                    are signed like the phone's
     GET /pos        where the player is right now, read from the running game's memory (tools/livepos.py,
                     read-only), once a second: {"live": true, "x", "y", "z" (metres), "heading" (degrees,
                     0 = north), "map" [x, y on the 1280 px map], "at", "glider" (item id), "glide" {"ratio",
@@ -24,6 +28,8 @@ Endpoints (port 4750):
                     tools/motion.py "mode" ("foot", "air", "fall"), "speed" and "vs" (m/s across, and up),
                     "course" (degrees of travel), "above" (metres over the map's ground), "walk" {"speed"}}
                     or {"live": false}
+    POST /target, /tracker  what the overlay over the game shows (tools/overlay.py): the guide's target and
+                    the plan's tracker; {} clears it
     POST /ask       {"q", "session"?, "context"?} -> {"answer", "session", "seconds"}: headless Claude Code on this
                     PC (tools/ask.py), read-only over the live character and the game data; LAN clients only
     POST /ask/stream  the same, answered as it is written: one JSON object per line ({"status"}, {"reset"},
@@ -62,6 +68,7 @@ import pc_text  # noqa: E402
 from pc_text import t  # noqa: E402
 import saves as saves_mod  # noqa: E402
 import state as state_mod  # noqa: E402
+import webapp as webapp_mod  # noqa: E402
 from ksd import Save  # noqa: E402
 
 PORT = 4750
@@ -72,6 +79,7 @@ SETTLE_SECONDS = 2  # the game writes several files per save; wait for them to s
 class Agent:
     def __init__(self, saves, world, character, export):
         self.saves, self.world, self.character, self.export = saves, world, character, export
+        self.guest_flame = int(load_config().get("guest_flame", 1))  # the host's Flame, for a guest (state.GUEST)
         self.lock = threading.Lock()
         self.state_json = b"{}"
         self.fog_png = b""
@@ -98,7 +106,8 @@ class Agent:
         self.bases = []  # [name, map x, map y] for Ask's "nearest base"
 
     def files(self):
-        return [self.saves / f"world{self.world}.ksd", self.saves / f"character{self.character}.ksd"]
+        char = self.saves / f"character{self.character}.ksd"
+        return [char] if self.world == state_mod.GUEST else [self.saves / f"world{self.world}.ksd", char]
 
     def signature(self):
         try:
@@ -111,7 +120,7 @@ class Agent:
             tmp = pathlib.Path(tmp)
             for f in self.files():
                 saves_mod.copy_shared(f, tmp / f.name)
-            st = state_mod.build(tmp, self.world, self.character, self.export)
+            st = state_mod.build(tmp, self.world, self.character, self.export, self.guest_flame)
             if self.history.add(history_mod.snapshot(st, self.export)):
                 log(f"history: {len(self.history.rows)} snapshots")
             try:
@@ -132,7 +141,7 @@ class Agent:
                 "built_at": st["built_at"],
                 "saved_at": st["character"]["saved_at"],
                 "character": st["character"]["name"],
-                "world": st["world"]["name"],
+                "world": st["world"]["name"] or t("a friend's world"),
                 "error": None,
                 "warnings": st.get("warnings", []),  # what the save reader met but couldn't read (tools/state.py)
             }
@@ -181,8 +190,9 @@ class Agent:
         with self.lock:
             return {**self.pos, "bases": self.bases} if self.pos else None
 
-    def select(self, folder, world, character):
-        """Read another world and character from now on (the phone's setup, POST /select)."""
+    def select(self, folder, world, character, flame=None):
+        """Read another world and character from now on (the phone's setup, POST /select). World state.GUEST:
+        a guest in a friend's world, with the host's Flame strength."""
         # only a folder the agent found itself (tools/saves.py): a path from the network, say \\host\share,
         # would make Windows connect out (and offer the user's credentials) before any check
         # compared as text (normpath, normcase): the asked path itself is never opened or resolved
@@ -190,19 +200,22 @@ class Agent:
         folder = next((f for f in saves_mod.folders() if os.path.normcase(os.path.normpath(str(f))) == want), None)
         if folder is None:
             raise ValueError("not a save folder on this PC")
-        if not (folder / f"world{world}.ksd").exists() or not (folder / f"character{character}.ksd").exists():
+        guest = int(world) == state_mod.GUEST
+        if not (guest or (folder / f"world{world}.ksd").exists()) or not (folder / f"character{character}.ksd").exists():
             raise ValueError("no such world or character in that folder")
+        if guest and flame is not None:
+            self.guest_flame = max(0, min(int(flame), 20))
         with self.lock:
             self.saves, self.world, self.character = folder, int(world), int(character)
             self.history = history_mod.History(history_path(folder, world, character))
             self.health = {"ok": False, "built_at": None, "saved_at": None, "error": "switching saves"}
             self.last_sig = None  # the watch loop rebuilds within seconds
-        save_config(folder, world, character)
-        log(f"reading world{world} and character{character} in {folder}")
+        save_config(folder, world, character, self.guest_flame)
+        log(f"reading {'a guest world' if guest else f'world{world}'} and character{character} in {folder}")
 
     def seed_history(self):
         """A new world and character: start their timeline from what the game's own backups remember (once)."""
-        if self.history.rows or getattr(self.history, "tried_seed", False):
+        if self.history.rows or getattr(self.history, "tried_seed", False) or self.world == state_mod.GUEST:
             return
         self.history.tried_seed = True
         try:
@@ -283,9 +296,10 @@ def write_config(conf):
     os.replace(tmp, CONFIG)
 
 
-def save_config(folder, world, character):
+def save_config(folder, world, character, guest_flame=1):
     conf = load_config()
-    conf.update({"folder": str(folder), "world": int(world), "character": int(character)})
+    conf.update({"folder": str(folder), "world": int(world), "character": int(character),
+                 "guest_flame": int(guest_flame)})
     write_config(conf)
 
 
@@ -436,9 +450,9 @@ def make_handler(agent, key):
     class Handler(BaseHTTPRequestHandler):
         timeout = 30  # seconds a connection may sit idle or trickle (a slow client can't hold threads forever)
 
-        def allowed(self):
+        def local(self):
             """Home network only, addressed by IP (a web page that renamed itself to this PC by DNS can't reach
-            it), and with the pairing code. Answers the refusal itself; returns whether to go on."""
+            it). Answers the refusal itself; returns whether to go on."""
             try:
                 ip = ipaddress.ip_address(self.client_address[0].split("%")[0])
                 local = ip.is_private or ip.is_loopback or ip.is_link_local
@@ -452,6 +466,12 @@ def make_handler(agent, key):
             if not local or not by_ip:
                 self.send_error(403)
                 return False
+            return True
+
+        def allowed(self):
+            """local(), and with the pairing code. Answers the refusal itself; returns whether to go on."""
+            if not self.local():
+                return False
             if guard.blocked():
                 self.send_error(429)
                 return False
@@ -460,6 +480,9 @@ def make_handler(agent, key):
                 # the PC's clock, so a phone whose clock is off can sign with the right time next
                 self.reply({"error": "pairing code needed", "pairing": True, "now": int(time.time())}, 401)
                 return False
+            reached = self.connection.getsockname()[0]
+            if not reached.startswith("127."):
+                REACHED[0] = reached
             return True
 
         def signed(self, body):
@@ -479,9 +502,13 @@ def make_handler(agent, key):
             self.wfile.write(data)
 
         def do_GET(self):
+            path = self.path.split("?")[0]
+            if path in ("/", "/app") or path.startswith("/app/"):
+                if self.local():
+                    self.web(path)
+                return
             if not self.allowed():
                 return
-            path = self.path.split("?")[0]
             with agent.lock:
                 routes = {
                     "/state": (agent.state_json, "application/json; charset=utf-8"),
@@ -493,7 +520,8 @@ def make_handler(agent, key):
                     "/pos": (json.dumps({"live": True, **agent.pos} if agent.pos else {"live": False}).encode(),
                              "application/json"),
                 }
-                current = {"folder": str(agent.saves), "world": agent.world, "character": agent.character}
+                current = {"folder": str(agent.saves), "world": agent.world, "character": agent.character,
+                           "guest_flame": agent.guest_flame}
             if path == "/saves":
                 # listing copies and unpacks every save: at most every 15 s, however often it's asked
                 if saves_cache["body"] is None or time.time() - saves_cache["at"] > 15:
@@ -516,6 +544,44 @@ def make_handler(agent, key):
             self.send_header("X-Buddy-Reply", self.signed(body))
             self.end_headers()
             self.wfile.write(body)
+
+        def web(self, path):
+            """The web app (tools/webapp.py): the app itself, nothing of the player's, so no pairing code; its
+            requests for the game state are signed like the phone's (the code comes from the QR link)."""
+            if not path.startswith("/app/"):
+                self.send_response(302)
+                self.send_header("Location", "/app/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            gz = "gzip" in (self.headers.get("Accept-Encoding") or "")
+            got = WEB.get(path[len("/app/"):], gz) if WEB.ok else None
+            if got is None:
+                log(f"web: no {path[:120]}")
+                self.send_error(404, explain=None if WEB.ok else "this agent was built without the web app")
+                return
+            body, ctype, tag, packed = got
+            if packed:
+                tag = tag[:-1] + '-gz"'  # another body, another tag
+            if self.headers.get("If-None-Match") == tag:
+                self.send_response(304)
+                self.send_header("ETag", tag)
+                self.end_headers()
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("ETag", tag)
+            self.send_header("Cache-Control", "no-cache")  # kept, but checked against the ETag each time
+            self.send_header("X-Content-Type-Options", "nosniff")
+            if packed:
+                self.send_header("Content-Encoding", "gzip")
+                self.send_header("Vary", "Accept-Encoding")
+            self.end_headers()
+            try:
+                self.wfile.write(body)
+            except OSError as e:  # the browser hung up mid-file: worth knowing when a page won't load
+                log(f"web: {path[:120]} cut off ({e.__class__.__name__})")
 
         def read_body(self, limit=20000):
             """The request body, sized or chunked (Dart's HttpClient sends chunked unless told the length), never
@@ -585,7 +651,7 @@ def make_handler(agent, key):
             if path == "/select":
                 try:
                     req = json.loads(self.read_body() or b"{}")
-                    agent.select(req["folder"], int(req["world"]), int(req["character"]))
+                    agent.select(req["folder"], int(req["world"]), int(req["character"]), req.get("flame"))
                     body = {"ok": True}
                 except (ValueError, KeyError, TypeError) as e:
                     body = {"ok": False, "error": str(e)[:200]}
@@ -652,6 +718,7 @@ def make_handler(agent, key):
 
 LOG = DATA / "agent.log"
 DB = RES / "app" / "assets" / "game.json"
+WEB = webapp_mod.WebApp(RES / "app" / "build" / "web", RES / "build" / "web.zip")
 
 
 def _gliders():
@@ -844,6 +911,20 @@ def pair_text():
     return f"enshroudbuddy:pair?a={','.join(f'{ip}:{PORT}' for ip in lan_ips())}&k={pairing_key()}"
 
 
+REACHED = [None]  # the address a paired phone last reached this PC by: the one on the home Wi-Fi
+
+
+def web_ips():
+    """This PC's addresses for the web app's link, the one a phone last reached first."""
+    ips = lan_ips()
+    return sorted(ips, key=lambda ip: ip != REACHED[0])
+
+
+def web_link(host=None):
+    """The web app's address with the pairing code after the # (a browser never sends that part)."""
+    return f"http://{host or web_ips()[0]}:{PORT}/app/#k={pairing_key()}"
+
+
 def show_pairing():
     """A small window with the QR code to scan in the app's Setup, and the same details to type instead."""
     import tkinter as tk
@@ -855,13 +936,39 @@ def show_pairing():
     root.title(t("Enshroud Buddy: pair your phone"))
     root.configure(bg="white")
     root.resizable(False, False)
-    photo = ImageTk.PhotoImage(qrcode.make(pair_text(), box_size=8, border=2).get_image().convert("RGB"))
-    tk.Label(root, text=t("In the app, open Setup (gear icon on Home) and tap Scan the PC's code."),
-             bg="white", font=("Segoe UI", 11), wraplength=360).pack(padx=16, pady=(16, 8))
-    tk.Label(root, image=photo, bg="white").pack(padx=16)
+    codes = tk.Frame(root, bg="white")
+    codes.pack(padx=8, pady=(12, 0))
+
+    def qr(text):
+        return ImageTk.PhotoImage(qrcode.make(text, box_size=6, border=2).get_image().convert("RGB"))
+
+    photos = [qr(pair_text())]
+    for col, title in enumerate([t("In the app, open Setup (gear icon on Home) and tap Scan the PC's code."),
+                                 t("iPhone, iPad or any browser: scan this with the camera to open the app there.")]):
+        tk.Label(codes, text=title, bg="white", font=("Segoe UI", 10), wraplength=230,
+                 justify="center").grid(row=0, column=col, padx=8, sticky="s")
+    tk.Label(codes, image=photos[0], bg="white").grid(row=1, column=0, padx=8, pady=4)
+    web = tk.Label(codes, bg="white")
+    web.grid(row=1, column=1, padx=8, pady=4)
+    where = tk.Label(codes, bg="white", font=("Segoe UI", 9))
+    where.grid(row=2, column=1)
+    ips = web_ips()
+
+    def show(i):
+        # a PC can have several addresses, and only one is on the phone's Wi-Fi: each can be shown in turn
+        photos[1:] = [qr(web_link(ips[i % len(ips)]))]
+        web.configure(image=photos[1])
+        where.configure(text=f"http://{ips[i % len(ips)]}:{PORT}/app/")
+        if len(ips) > 1:
+            nxt.configure(command=lambda: show(i + 1))
+
+    nxt = tk.Button(codes, text=t("Other address"), font=("Segoe UI", 9))
+    if len(ips) > 1:
+        nxt.grid(row=3, column=1, pady=(2, 0))
+    show(0)
     tk.Label(root, text=t("Or type it in:") + "\n" + t(" or ").join(f"{ip}:{PORT}" for ip in lan_ips())
-             + "\n" + t("Pairing code {code}", code=key_text(pairing_key())), bg="white", font=("Segoe UI", 10),
-             justify="center").pack(padx=16, pady=8)
+             + "\n" + t("Pairing code {code}", code=key_text(pairing_key())),
+             bg="white", font=("Segoe UI", 10), justify="center").pack(padx=16, pady=8)
     tk.Button(root, text=t("Close"), command=root.destroy, width=12).pack(pady=(0, 8))
     tk.Label(root, text=t("Unofficial fan project. Not affiliated with or endorsed by Keen Games.") + "\n"
              + t("Enshrouded and its content are the property of Keen Games GmbH."), bg="white", fg="#666666", font=("Segoe UI", 8),
@@ -989,7 +1096,8 @@ def run_tray(agent, stop, quit_now=None):
         pystray.MenuItem(lambda _i: t("Open log folder"), lambda i, it: os.startfile(DATA)),
         pystray.MenuItem(lambda _i: t("Licences"), lambda i, it: os.startfile(RES / "THIRD_PARTY_LICENSES.txt"),
                          visible=(RES / "THIRD_PARTY_LICENSES.txt").exists()),
-        pystray.MenuItem(lambda _i: t("Open state in browser"), lambda i, it: os.startfile(f"http://localhost:{PORT}/health")),
+        pystray.MenuItem(lambda _i: t("Open the app in the browser"),
+                         lambda i, it: os.startfile(web_link("127.0.0.1")), visible=WEB.ok),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem(lambda _i: t("Uninstall from this PC"), uninstall_),
         pystray.MenuItem(lambda _i: t("Quit"), quit_),

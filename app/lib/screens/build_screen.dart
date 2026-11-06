@@ -10,6 +10,7 @@ import 'gear_screen.dart';
 import 'item_screen.dart';
 import 'plans_screen.dart';
 import 'projections_screen.dart';
+import 'share_screen.dart';
 import 'skill_tree_screen.dart';
 import 'widgets.dart';
 
@@ -133,6 +134,17 @@ class _BuildScreenState extends State<BuildScreen> {
           onTap: () => _push(ProjectionsScreen(db: db)),
         ),
       ),
+      Card(
+        child: ListTile(
+          leading: const Icon(Icons.share_outlined, color: Palette.flame),
+          title: Text(tr('Share build')),
+          subtitle: Text(
+            tr('A picture of your build and gear for Discord or a chat'),
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _push(ShareBuildScreen(db: db)),
+        ),
+      ),
       DashCard(
         title: tr('Build target'),
         icon: Icons.track_changes,
@@ -143,7 +155,9 @@ class _BuildScreenState extends State<BuildScreen> {
           children: [
             Text(
               classes
-                  .map((e) => '${classLabel(e.key)} ${(e.value * 100).round()}%')
+                  .map(
+                    (e) => '${classLabel(e.key)} ${(e.value * 100).round()}%',
+                  )
                   .join(' · '),
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),

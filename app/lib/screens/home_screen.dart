@@ -505,7 +505,8 @@ class _BuildCard extends StatelessWidget {
             spacing: 6,
             runSpacing: 6,
             children: [
-              for (final w in t.topWeapons) Pill(weaponLabel(w), color: Palette.flame),
+              for (final w in t.topWeapons)
+                Pill(weaponLabel(w), color: Palette.flame),
               for (final v in t.topTraits.take(4)) Pill(v),
             ],
           ),

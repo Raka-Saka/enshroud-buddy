@@ -118,11 +118,7 @@ _completion(GameDb db, LiveState state, PlayerPos? here) {
         'have': pages.where((p) => p.done?.likely(k) ?? false).length,
         'of': pages.length,
       },
-      {
-        'label': tr('Unique loot'),
-        'have': had.length,
-        'of': uniques.length,
-      },
+      {'label': tr('Unique loot'), 'have': had.length, 'of': uniques.length},
     ],
     nearest: nearest,
   );

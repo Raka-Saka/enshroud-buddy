@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -30,6 +29,7 @@ import 'ask_screen.dart';
 import 'gear_screen.dart';
 import 'item_screen.dart';
 import 'lore_screen.dart';
+import '../data/background.dart';
 
 /// Map grid (World.mapPx, as in the save) to map coordinates: CrsSimple spans 0..1.
 LatLng gridToLatLng(double x, double y) =>
@@ -241,7 +241,7 @@ class _MapScreenState extends State<MapScreen> {
     final color = _hallColors[k % _hallColors.length].toARGB32();
     final ground = Palette.shroud.toARGB32(), on = Palette.bone.toARGB32();
     final near = Palette.parchment.toARGB32(), far = Palette.ash.toARGB32();
-    Isolate.run(
+    background(
       () => HallPlan.build(
         pts,
         k,
@@ -803,7 +803,8 @@ class _MapScreenState extends State<MapScreen> {
                           tr('inside the Hollow Halls, {height} m up', {
                             'height': p.height!.round(),
                           }),
-                        if (done) p.cat == 'lore' ? tr('found') : tr('completed'),
+                        if (done)
+                          p.cat == 'lore' ? tr('found') : tr('completed'),
                       ].join(' · '),
                       style: TextStyle(
                         color: done ? Palette.spring : Palette.ash,
@@ -972,7 +973,9 @@ class _MapScreenState extends State<MapScreen> {
                           'n': setting.poolSize,
                           'kinds': (setting.categories.entries.toList()
                                 ..sort((a, b) => b.value.compareTo(a.value)))
-                              .map((e) => '${e.value} ${gt(e.key).toLowerCase()}')
+                              .map(
+                                (e) => '${e.value} ${gt(e.key).toLowerCase()}',
+                              )
                               .join(', '),
                         }),
                         style: const TextStyle(color: Palette.ash),
@@ -997,7 +1000,9 @@ class _MapScreenState extends State<MapScreen> {
                               {
                                 'level': p.areaLevel,
                                 'chest':
-                                    gt(p.title).split(' · ').first.toLowerCase(),
+                                    gt(
+                                      p.title,
+                                    ).split(' · ').first.toLowerCase(),
                               },
                             )
                             : tr(
@@ -1437,7 +1442,9 @@ class _MapScreenState extends State<MapScreen> {
                           contentPadding: EdgeInsets.zero,
                           title: Text(tr('Hide completed places')),
                           subtitle: Text(
-                            tr('Cleared camps, claimed Shroud Roots, found lore'),
+                            tr(
+                              'Cleared camps, claimed Shroud Roots, found lore',
+                            ),
                           ),
                           value: hideDone,
                           onChanged: (v) => flip(() => hideDone = v),
@@ -1446,7 +1453,10 @@ class _MapScreenState extends State<MapScreen> {
                           tr(
                             'Tip: tap the map for the Shroud level or cold there; long-press to drop a pin.',
                           ),
-                          style: const TextStyle(color: Palette.ash, fontSize: 12),
+                          style: const TextStyle(
+                            color: Palette.ash,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -2118,7 +2128,10 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.search, color: Palette.flame),
+                                  const Icon(
+                                    Icons.search,
+                                    color: Palette.flame,
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     tr('Search places and loot'),
@@ -2240,7 +2253,10 @@ class _MapScreenState extends State<MapScreen> {
                   if (lootOnly) ...[
                     const SizedBox(height: 8),
                     _LootBar(
-                      title: lootTitle == null ? tr('Unique loot') : gt(lootTitle!),
+                      title:
+                          lootTitle == null
+                              ? tr('Unique loot')
+                              : gt(lootTitle!),
                       places: shown.length,
                       missing: s == null ? null : lootMissingIds.length,
                       missingOnly: lootMissing,

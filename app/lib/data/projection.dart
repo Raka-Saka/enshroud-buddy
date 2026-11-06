@@ -74,6 +74,7 @@ class Projection {
     'exploration',
     'passives',
   ];
+
   /// Axis names, for display.
   static Map<String, String> get axisNames => {
     'damage': tr('Damage'),
@@ -88,6 +89,7 @@ class Projection {
 
   static const _melee1h = ['Sword', 'Axe', 'Mace'];
   static const _melee2h = ['Greatsword', 'Hammer', 'Two-handed axe'];
+
   /// The build directions to project, with display names (they are only shown).
   static List<BuildGoal> get goals => [
     BuildGoal(

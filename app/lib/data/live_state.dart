@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +11,7 @@ import '../l10n.dart';
 import 'buddy_auth.dart';
 import 'game_db.dart';
 import 'history.dart';
+import 'net.dart';
 
 /// One item stack from the save.
 class Owned {
@@ -114,8 +114,7 @@ class Base {
 
   /// Objects placed in this base by item id (stations, chests, decorations) and how many.
   final Map<String, int> placed;
-  String get label =>
-      name ?? tr('Unnamed base ({n})', {'n': id.substring(4)});
+  String get label => name ?? tr('Unnamed base ({n})', {'n': id.substring(4)});
 
   /// Side of the cubic build zone, from the box in the save ("120 m").
   String get zone => tr('{n} m', {'n': (size[0] / 2).round()});
@@ -144,7 +143,8 @@ class LiveState {
     final c = j['character'] as Map<String, dynamic>;
     final w = j['world'] as Map<String, dynamic>;
     character = c['name'];
-    world = w['name'];
+    guest = w['guest'] == true;
+    _world = w['name'] ?? '';
     savedAt = DateTime.tryParse(c['saved_at'] ?? '');
     final worn = [for (final r in c['equipment'] ?? const []) Owned(r)];
     equipment = [
@@ -187,7 +187,13 @@ class LiveState {
   /// Every item the character has ever had: the game's own collection (sets, blocks).
   late final Set<String> itemsKnown;
 
-  late final String character, world;
+  late final String character, _world;
+
+  /// The world's name; for a guest, "a friend's world" in the app's language.
+  String get world => guest ? tr('a friend\'s world') : _world;
+
+  /// A guest in a friend's world: the character only (its chests and bases are on the host's PC).
+  late final bool guest;
   late final DateTime? savedAt;
 
   /// Worn gear (what counts for stats); the cosmetic slots' pieces are in [cosmetics].
@@ -372,9 +378,13 @@ class SaveList {
         folder: (j['current']?['folder'] ?? '') as String,
         world: (j['current']?['world'] ?? 0) as int,
         character: (j['current']?['character'] ?? 0) as int,
+        guestFlame: (j['current']?['guest_flame'] ?? 1) as int,
       );
   final List<SaveFolder> folders;
-  final ({String folder, int world, int character}) current;
+  final ({String folder, int world, int character, int guestFlame}) current;
+
+  /// The world number for a guest in a friend's world (tools/state.py GUEST).
+  static const guest = -1;
 }
 
 /// One save folder (a Steam account, or Saved Games) with its worlds and characters, newest first.
@@ -408,8 +418,6 @@ class Live extends ChangeNotifier {
   static const defaultKey = String.fromEnvironment('AGENT_KEY');
   String key = defaultKey;
 
-  /// Signs a request (BuddyAuth); returns its nonce.
-  String _auth(HttpClientRequest req) => BuddyAuth.apply(req, key);
   String host = defaultHost;
   LiveState? state;
   String? error;
@@ -443,7 +451,7 @@ class Live extends ChangeNotifier {
       _fogFor = at;
       fogOverlay.value = bytes;
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_fog', base64Encode(bytes));
+      await _keep(prefs, 'last_fog', base64Encode(bytes));
     } catch (_) {} // keep the one we have; the next save tries again
   }
 
@@ -514,11 +522,29 @@ class Live extends ChangeNotifier {
     }
   }
 
+  /// Keeps a copy for the next start; a browser's storage (a few MB) may refuse it, which only costs that.
+  static Future<void> _keep(SharedPreferences prefs, String k, String v) async {
+    try {
+      await prefs.setString(k, v);
+    } catch (_) {}
+  }
+
   Future<void> start() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       host = prefs.getString('agent_host') ?? defaultHost;
       key = prefs.getString('agent_key') ?? defaultKey;
+      if (kIsWeb) {
+        // the web app is served by the agent itself: its address is the page's, and the pairing code comes
+        // from the link in the agent's QR code (http://IP:4750/app/#k=CODE; the part after # never leaves
+        // the browser), else from Setup
+        host = Uri.base.authority;
+        final k = Uri.splitQueryString(Uri.base.fragment)['k'];
+        if (k != null && k.isNotEmpty) {
+          key = k.replaceAll('-', '').toUpperCase();
+          await prefs.setString('agent_key', key);
+        }
+      }
       if (prefs.getString('agent_key') == null && key.isNotEmpty) {
         await prefs.setString('agent_key', key);
       }
@@ -593,30 +619,38 @@ class Live extends ChangeNotifier {
     final p = parsePairing(code);
     if (p == null) throw const FormatException('not an Enshroud Buddy code');
     for (final h in p.hosts) {
-      final client =
-          HttpClient()..connectionTimeout = const Duration(seconds: 2);
-      try {
-        for (var attempt = 0; attempt < 2; attempt++) {
-          final req = await client.getUrl(Uri.parse('http://$h/health'));
-          final nonce = BuddyAuth.apply(req, p.key);
-          final res = await req.close().timeout(const Duration(seconds: 4));
-          if (res.statusCode == 401 && await BuddyAuth.learnClock(res))
-            continue;
-          final body = await res.fold<List<int>>([], (a, c) => a..addAll(c));
-          if (res.statusCode == 200 &&
-              BuddyAuth.replyOk(p.key, nonce, res, body)) {
-            await setHost(h, pairing: p.key);
-            return h;
-          }
-          break;
-        }
-      } catch (_) {
-        // not reachable from this network: try the next
-      } finally {
-        client.close(force: true);
+      if (await _knows(h, p.key)) {
+        await setHost(h, pairing: p.key);
+        return h;
       }
     }
     return null;
+  }
+
+  /// Whether the agent at [h] answers to the pairing code [k] (a signed GET /health).
+  static Future<bool> _knows(String h, String k) async {
+    try {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        final a = BuddyAuth.headers(k, 'GET', '/health');
+        final res = await Net.send(
+          'GET',
+          Uri.parse('http://$h/health'),
+          headers: a.headers,
+          timeout: const Duration(seconds: 4),
+        );
+        if (res.status == 401 && BuddyAuth.learnClock(res.body)) continue;
+        return res.status == 200 &&
+            BuddyAuth.replyOk(
+              k,
+              a.nonce,
+              res.header('X-Buddy-Reply'),
+              res.body,
+            );
+      }
+    } catch (_) {
+      // not reachable from this network
+    }
+    return false;
   }
 
   Future<void> setHost(String h, {String? pairing}) async {
@@ -632,32 +666,62 @@ class Live extends ChangeNotifier {
     await refresh();
   }
 
-  /// Ask the companion (POST /ask): headless Claude Code on the PC answers from the save and the game
-  /// data. Returns (answer, session id for follow-ups); throws with a short reason.
   /// Every save on the agent's PC, and the one it reads.
   Future<SaveList> saves() async =>
       SaveList(jsonDecode(await _get('/saves')) as Map<String, dynamic>);
 
-  /// Have the agent read another world and character; the state follows within seconds.
-  Future<void> select(String folder, int world, int character) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+  /// A signed POST of [json] to [path]; with [signBody] the body is signed too (X-Buddy-Body), where the
+  /// agent checks it.
+  Future<Streamed> _post(
+    String path,
+    Object json, {
+    Duration timeout = const Duration(seconds: 10),
+    bool signBody = false,
+  }) {
+    final a = BuddyAuth.headers(key, 'POST', path);
+    final payload = utf8.encode(jsonEncode(json));
+    return Net.open(
+      'POST',
+      Uri.parse('http://$host$path'),
+      headers: {
+        ...a.headers,
+        'Content-Type': 'application/json',
+        if (signBody) 'X-Buddy-Body': BuddyAuth.bodySig(key, a.nonce, payload),
+      },
+      body: payload,
+      timeout: timeout,
+    );
+  }
+
+  /// A signed POST whose whole reply is JSON.
+  Future<Map<String, dynamic>> _postJson(
+    String path,
+    Object json, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final s = await _post(path, json, timeout: timeout);
     try {
-      final req = await client.postUrl(Uri.parse('http://$host/select'));
-      _auth(req);
-      req.headers.contentType = ContentType.json;
-      final payload = utf8.encode(
-        jsonEncode({'folder': folder, 'world': world, 'character': character}),
-      );
-      req.contentLength = payload.length;
-      req.add(payload);
-      final res = await req.close().timeout(const Duration(seconds: 10));
-      final body =
-          jsonDecode(await res.transform(utf8.decoder).join())
-              as Map<String, dynamic>;
-      if (body['ok'] != true) throw StateError(body['error'] ?? 'refused');
+      return jsonDecode(await utf8.decodeStream(s.body))
+          as Map<String, dynamic>;
     } finally {
-      client.close(force: true);
+      s.close();
     }
+  }
+
+  /// Have the agent read another world and character; the state follows within seconds.
+  Future<void> select(
+    String folder,
+    int world,
+    int character, {
+    int? flame,
+  }) async {
+    final body = await _postJson('/select', {
+      'folder': folder,
+      'world': world,
+      'character': character,
+      if (flame != null) 'flame': flame,
+    });
+    if (body['ok'] != true) throw StateError(body['error'] ?? 'refused');
     // the agent rebuilds in a few seconds: look then, and again a little later
     _builtAt = null;
     _fogFor = null;
@@ -692,59 +756,37 @@ class Live extends ChangeNotifier {
   Future<void> _overlayPush(String path) async {
     final body = _overlay[path];
     if (body == null || host.isEmpty) return;
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
     try {
-      final req = await client.postUrl(Uri.parse('http://$host$path'));
-      final nonce = _auth(req);
-      final payload = utf8.encode(body);
-      req.headers
-        ..contentType = ContentType.json
-        ..set('X-Buddy-Body', BuddyAuth.bodySig(key, nonce, payload));
-      req.contentLength = payload.length;
-      req.add(payload);
-      final res = await req.close().timeout(const Duration(seconds: 10));
-      await res.drain<void>();
+      final s = await _post(path, jsonDecode(body) as Object, signBody: true);
+      try {
+        await s.body.drain<void>();
+      } finally {
+        s.close();
+      }
       // 404: an agent without the overlay; nothing to retry
-      if (_overlay[path] == body &&
-          (res.statusCode == 200 || res.statusCode == 404)) {
+      if (_overlay[path] == body && (s.status == 200 || s.status == 404)) {
         _overlayUnsent.remove(path);
       }
     } catch (_) {
       // unreachable: refresh() tries again once the agent answers
-    } finally {
-      client.close(force: true);
     }
   }
 
+  /// Ask the companion (POST /ask): headless Claude Code on the PC answers from the save and the game
+  /// data. Returns (answer, session id for follow-ups); throws with a short reason.
   Future<(String, String?)> ask(
     String question, {
     String? session,
     String? context,
   }) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
-    try {
-      final req = await client.postUrl(Uri.parse('http://$host/ask'));
-      _auth(req);
-      req.headers.contentType = ContentType.json;
-      final payload = utf8.encode(
-        jsonEncode({
-          'q': question,
-          'lang': L10n.lang.name,
-          if (session != null) 'session': session,
-          if (context != null) 'context': context,
-        }),
-      );
-      req.contentLength = payload.length; // a sized body, not chunked
-      req.add(payload);
-      final res = await req.close().timeout(const Duration(seconds: 260));
-      final body =
-          jsonDecode(await res.transform(utf8.decoder).join())
-              as Map<String, dynamic>;
-      if (body['error'] != null) throw StateError(body['error']);
-      return (body['answer'] as String, body['session'] as String?);
-    } finally {
-      client.close(force: true);
-    }
+    final body = await _postJson('/ask', {
+      'q': question,
+      'lang': L10n.lang.name,
+      if (session != null) 'session': session,
+      if (context != null) 'context': context,
+    }, timeout: const Duration(seconds: 260));
+    if (body['error'] != null) throw StateError(body['error']);
+    return (body['answer'] as String, body['session'] as String?);
   }
 
   /// The same as [ask], answered as it is written (POST /ask/stream): events {"status"}, {"reset"},
@@ -755,33 +797,24 @@ class Live extends ChangeNotifier {
     String? session,
     String? context,
   }) async* {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    // the reply starts within 20 s ("Reading your question"); then up to 150 s between two parts
+    final s = await _post('/ask/stream', {
+      'q': question,
+      'lang': L10n.lang.name,
+      if (session != null) 'session': session,
+      if (context != null) 'context': context,
+    }, timeout: const Duration(seconds: 150));
     try {
-      final req = await client.postUrl(Uri.parse('http://$host/ask/stream'));
-      _auth(req);
-      req.headers.contentType = ContentType.json;
-      final payload = utf8.encode(
-        jsonEncode({
-          'q': question,
-          'lang': L10n.lang.name,
-          if (session != null) 'session': session,
-          if (context != null) 'context': context,
-        }),
-      );
-      req.contentLength = payload.length;
-      req.add(payload);
-      final res = await req.close().timeout(const Duration(seconds: 20));
-      if (res.statusCode == 404) {
-        await res.drain<void>();
-        final (a, s) = await ask(question, session: session, context: context);
-        yield {'done': true, 'answer': a, 'session': s};
+      if (s.status == 404) {
+        await s.body.drain<void>();
+        final (a, id) = await ask(question, session: session, context: context);
+        yield {'done': true, 'answer': a, 'session': id};
         return;
       }
-      if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
-      final lines = res
+      if (s.status != 200) throw StateError('HTTP ${s.status}');
+      final lines = s.body
           .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .timeout(const Duration(seconds: 150));
+          .transform(const LineSplitter());
       await for (final line in lines) {
         if (line.trim().isEmpty) continue;
         final ev = jsonDecode(line) as Map<String, dynamic>;
@@ -791,66 +824,55 @@ class Live extends ChangeNotifier {
       }
       throw StateError(tr('the PC stopped answering'));
     } finally {
-      client.close(force: true);
+      s.close();
     }
   }
 
-  Future<String> _get(String path) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
-    try {
-      final req = await client.getUrl(Uri.parse('http://$host$path'));
-      final nonce = _auth(req);
-      final res = await req.close().timeout(const Duration(seconds: 10));
-      if (res.statusCode == 401) {
-        if (await BuddyAuth.learnClock(res)) {
-          throw StateError(
-            tr('the phone\'s clock is off from the PC\'s; trying again'),
-          );
-        }
+  /// A signed GET, its reply checked to be the agent's own.
+  Future<Uint8List> _getBytes(String path, {bool explain = false}) async {
+    final a = BuddyAuth.headers(key, 'GET', path);
+    final res = await Net.send(
+      'GET',
+      Uri.parse('http://$host$path'),
+      headers: a.headers,
+    );
+    if (res.status == 401) {
+      final clockOff = BuddyAuth.learnClock(res.body);
+      if (explain && clockOff) {
+        throw StateError(
+          tr('the phone\'s clock is off from the PC\'s; trying again'),
+        );
+      }
+      if (explain) {
         throw StateError(
           tr(
             'the pairing code is missing or wrong: Setup, then scan the agent\'s code',
           ),
         );
       }
-      if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
-      final body = await res.fold<List<int>>([], (a, c) => a..addAll(c));
-      if (!BuddyAuth.replyOk(key, nonce, res, body)) {
-        throw StateError(
-          tr(
-            'the reply didn\'t come from your agent (or it is older than this app)',
-          ),
-        );
-      }
-      return utf8.decode(body);
-    } finally {
-      client.close(force: true);
     }
+    if (res.status != 200) throw StateError('HTTP ${res.status}');
+    if (!BuddyAuth.replyOk(
+      key,
+      a.nonce,
+      res.header('X-Buddy-Reply'),
+      res.body,
+    )) {
+      throw StateError(
+        explain
+            ? tr(
+              'the reply didn\'t come from your agent (or it is older than this app)',
+            )
+            : tr('the reply didn\'t come from your agent'),
+      );
+    }
+    return res.body;
   }
+
+  Future<String> _get(String path) async =>
+      utf8.decode(await _getBytes(path, explain: true));
 
   int _failures = 0;
-
-  Future<Uint8List> _getBytes(String path) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
-    try {
-      final req = await client.getUrl(Uri.parse('http://$host$path'));
-      final nonce = _auth(req);
-      final res = await req.close().timeout(const Duration(seconds: 10));
-      if (res.statusCode == 401) await BuddyAuth.learnClock(res);
-      if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
-      final b = BytesBuilder(copy: false);
-      await for (final chunk in res) {
-        b.add(chunk);
-      }
-      final body = b.takeBytes();
-      if (!BuddyAuth.replyOk(key, nonce, res, body)) {
-        throw StateError(tr('the reply didn\'t come from your agent'));
-      }
-      return body;
-    } finally {
-      client.close(force: true);
-    }
-  }
 
   Future<void> refresh({bool onlyIfNew = false}) async {
     if (loading) return;
@@ -869,11 +891,11 @@ class Live extends ChangeNotifier {
         );
         _builtAt = health['built_at'];
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('last_state', raw);
+        await _keep(prefs, 'last_state', raw);
         try {
           final hist = await _get('/history');
           history = _history(hist);
-          await prefs.setString('last_history', hist);
+          await _keep(prefs, 'last_history', hist);
         } catch (_) {} // an older agent without /history
       }
       error = null;

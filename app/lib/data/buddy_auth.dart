@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
@@ -19,19 +18,27 @@ class BuddyAuth {
         utf8.encode(key),
       ).convert(utf8.encode(parts.join('\n'))).toString();
 
-  /// Signs [req] with [key]; returns the nonce, to check the reply with.
-  static String apply(HttpClientRequest req, String key) {
+  /// The headers that sign a [method] request for [path] with [key], and their nonce (to check the reply
+  /// with).
+  static ({Map<String, String> headers, String nonce}) headers(
+    String key,
+    String method,
+    String path,
+  ) {
     final t = DateTime.now().millisecondsSinceEpoch ~/ 1000 + skew;
     final nonce =
         [
           for (var i = 0; i < 16; i++)
             _rand.nextInt(256).toRadixString(16).padLeft(2, '0'),
         ].join();
-    req.headers
-      ..set('X-Buddy-Time', '$t')
-      ..set('X-Buddy-Nonce', nonce)
-      ..set('X-Buddy-Sig', sign(key, [req.method, req.uri.path, t, nonce]));
-    return nonce;
+    return (
+      headers: {
+        'X-Buddy-Time': '$t',
+        'X-Buddy-Nonce': nonce,
+        'X-Buddy-Sig': sign(key, [method, path, t, nonce]),
+      },
+      nonce: nonce,
+    );
   }
 
   /// Signs a request's [body] for [nonce] (X-Buddy-Body): the agent checks it where the body matters
@@ -39,25 +46,17 @@ class BuddyAuth {
   static String bodySig(String key, String nonce, List<int> body) =>
       sign(key, [nonce, sha256.convert(body).toString()]);
 
-  /// Whether [body] is the agent's own reply to the request signed with [nonce].
-  static bool replyOk(
-    String key,
-    String nonce,
-    HttpClientResponse res,
-    List<int> body,
-  ) {
-    final got = res.headers.value('X-Buddy-Reply');
+  /// Whether [body] is the agent's own reply to the request signed with [nonce] ([got]: its X-Buddy-Reply).
+  static bool replyOk(String key, String nonce, String? got, List<int> body) {
     return got != null &&
         got == sign(key, [nonce, sha256.convert(body).toString()]);
   }
 
   /// After a 401: the PC's clock from its body, so the next request is signed with the right time.
   /// True when the clocks were off (then a retry can succeed).
-  static Future<bool> learnClock(HttpClientResponse res) async {
+  static bool learnClock(List<int> body) {
     try {
-      final j =
-          jsonDecode(await res.transform(utf8.decoder).join())
-              as Map<String, dynamic>;
+      final j = jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
       final now = j['now'];
       if (now is! int) return false;
       final s = now - DateTime.now().millisecondsSinceEpoch ~/ 1000;

@@ -129,7 +129,10 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
                         Wrap(
                           spacing: 6,
                           runSpacing: 6,
-                          children: [for (final w in p.goal.weapons) Pill(weaponLabel(w))],
+                          children: [
+                            for (final w in p.goal.weapons)
+                              Pill(weaponLabel(w)),
+                          ],
                         ),
                       ],
                       const SizedBox(height: 10),

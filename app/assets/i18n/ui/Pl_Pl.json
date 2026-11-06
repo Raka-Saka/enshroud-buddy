@@ -9,36 +9,38 @@
  "(estimate until you glide a bit)": "(szacunek, dopóki trochę nie poszybujesz)",
  "+5 min each, used on pickup.": "+5 min każda, zużywana przy podniesieniu.",
  "+{n} Elixir Wells cleared": {
-  "one": "+{n} oczyszczona Studnia Eliksiru",
   "few": "+{n} oczyszczone Studnie Eliksiru",
   "many": "+{n} oczyszczonych Studni Eliksiru",
+  "one": "+{n} oczyszczona Studnia Eliksiru",
   "other": "+{n} oczyszczonych Studni Eliksiru"
  },
  "+{n} Shroud Roots claimed": {
-  "one": "+{n} zniszczony Korzeń Mgły",
   "few": "+{n} zniszczone Korzenie Mgły",
   "many": "+{n} zniszczonych Korzeni Mgły",
+  "one": "+{n} zniszczony Korzeń Mgły",
   "other": "+{n} zniszczonych Korzeni Mgły"
  },
  "+{n} discoveries": {
-  "one": "+{n} odkrycie",
   "few": "+{n} odkrycia",
   "many": "+{n} odkryć",
+  "one": "+{n} odkrycie",
   "other": "+{n} odkryć"
  },
  "+{n} levels": "+{n} poz.",
  "+{n} recipes": {
-  "one": "+{n} receptura",
   "few": "+{n} receptury",
   "many": "+{n} receptur",
+  "one": "+{n} receptura",
   "other": "+{n} receptur"
  },
  "+{n} skill ranks": {
-  "one": "+{n} stopień umiejętności",
   "few": "+{n} stopnie umiejętności",
   "many": "+{n} stopni umiejętności",
+  "one": "+{n} stopień umiejętności",
   "other": "+{n} stopni umiejętności"
  },
+ "A friend's world (I play as a guest)": "Świat znajomego (gram jako gość)",
+ "A picture of your build and gear for Discord or a chat": "Obrazek twojego buildu i sprzętu na Discorda lub czat",
  "A place, a piece of unique loot (\"{garb}\"), or a whole set (\"{set}\"): the map then shows only where it lies.": "Miejsce, unikatowy łup („{garb}”) albo cały zestaw („{set}”): mapa pokaże wtedy tylko, gdzie się znajduje.",
  "About": "O aplikacji",
  "Active skill": "Umiejętność aktywna",
@@ -149,6 +151,7 @@
  "Could not load game data\n{error}": "Nie udało się wczytać danych gry\n{error}",
  "Couldn't answer: {error}": "Nie udało się odpowiedzieć: {error}",
  "Couldn't scan: {error}. Type the details below.": "Nie udało się zeskanować: {error}. Wpisz dane poniżej.",
+ "Couldn't share the build": "Nie udało się udostępnić buildu",
  "Couldn't switch: {error}": "Nie udało się przełączyć: {error}",
  "Craft at {station}": "Stwórz przy: {station}",
  "Craft at {station} (locked)": "Stwórz przy: {station} (zablokowane)",
@@ -166,12 +169,14 @@
  "Details": "Szczegóły",
  "Done": "Gotowe",
  "Download it, then open it to install over this one: nothing is lost.": "Pobierz ją i otwórz, by zainstalować na obecnej: nic nie przepadnie.",
+ "Download picture and copy text": "Pobierz obrazek i skopiuj tekst",
  "Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.": "Pobierz nowy EnshroudBuddy.exe ze strony wydania i otwórz go: zastąpi stary.",
  "Durability {have}/{max}": "Trwałość {have}/{max}",
  "Edit pin": "Edytuj pinezkę",
  "Eleven directions with the skills to take, scored on damage, area, survival, gathering, building and passives": "Jedenaście kierunków z umiejętnościami do wzięcia, oceniane pod kątem obrażeń, obszaru, przetrwania, zbierania, budowania i pasywnych",
  "Empty": "Puste",
  "End the route": "Zakończ trasę",
+ "Enshroud Buddy · unofficial fan app, not affiliated with Keen Games": "Enshroud Buddy · nieoficjalna aplikacja fanowska, niepowiązana z Keen Games",
  "Equipped": "W użyciu",
  "Everything I own, per slot": "Wszystko, co mam, według miejsca",
  "Everything is in hand: craft away.": "Masz wszystko: do dzieła.",
@@ -249,6 +254,7 @@
  "Hollow take more from {weak} and resist {strong}.": "Upadli otrzymują więcej obrażeń od: {weak}, a są odporni na: {strong}.",
  "Hollow take more from {weak}.": "Upadli otrzymują więcej obrażeń od: {weak}.",
  "Home": "Start",
+ "Host's Flame strength: {n}": "Siła Płomienia gospodarza: {n}",
  "Hourglass capsules · {n} on the map": "Kapsuły klepsydry · na mapie: {n}",
  "How do I make {item}?": "Jak zrobić {item}?",
  "How to get it": "Jak to zdobyć",
@@ -285,10 +291,12 @@
  "Learned": "Wyuczone",
  "Learned: rank {rank} of {max}": "Wyuczone: stopień {rank} z {max}",
  "Legs": "Nogi",
+ "Less": "Mniej",
  "Level": "Poziom",
  "Level since {day}": "Poziom od {day}",
  "Level with you": "Na twojej wysokości",
  "Level {from}–{to}": "Poziom {from}–{to}",
+ "Level {level} · Flame strength {flame}": "Poziom {level} · Siła Płomienia {flame}",
  "Level {level} · {spent} of {total} points spent · {free} free": "Poziom {level} · wydane punkty: {spent} z {total} · wolne: {free}",
  "Level {n}": "Poziom {n}",
  "Level {n} (+{up})": "Poziom {n} (+{up})",
@@ -322,6 +330,7 @@
  "Milestones": "Kamienie milowe",
  "Mine": "Moje",
  "Missing gear": "Brakujący sprzęt",
+ "More": "Więcej",
  "More of what your build already does": "Więcej tego, co twoja konfiguracja już robi",
  "My build": "Moja konfiguracja",
  "My gear by slot": "Mój sprzęt według miejsca",
@@ -367,6 +376,7 @@
  "Oct": "paź",
  "Offline · saved {ago}": "Offline · zapisano {ago}",
  "On foot": "Pieszo",
+ "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone, and scan the browser code with this device's camera. Or type the pairing code:": "Na PC: kliknij prawym przyciskiem ikonę Enshroud Buddy w zasobniku, Sparuj telefon, i zeskanuj kod z przeglądarki aparatem tego urządzenia. Albo wpisz kod parowania:",
  "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:": "Na PC: kliknij prawym przyciskiem ikonę Enshroud Buddy w zasobniku, Sparuj telefon. Albo wpisz dane:",
  "One fewer": "O jeden mniej",
  "One more": "O jeden więcej",
@@ -391,6 +401,7 @@
  "Phone language": "Język telefonu",
  "Phone language ({lang})": "Język telefonu ({lang})",
  "Pick something to make or find; the plan works out unlocks, stations, gathering and crafting.": "Wybierz coś do zrobienia lub znalezienia; plan rozpisze odblokowania, stanowiska, zbieranie i tworzenie.",
+ "Picture downloaded, and the build is on the clipboard": "Obrazek pobrany, a build jest w schowku",
  "Pin \"{title}\" deleted": "Usunięto pinezkę „{title}”",
  "Place": "Miejsce",
  "Places": "Miejsca",
@@ -402,7 +413,7 @@
  "Plan this skill": "Zaplanuj tę umiejętność",
  "Plan {item}": "Zaplanuj: {item}",
  "Plan: {nodes} nodes, {points} points": "Plan: węzły: {nodes}, punkty: {points}",
- "Playing in a friend's world? The world is saved on the host's PC, so only your character is on yours: pick a world you host to see bases and chests.": "Grasz w świecie znajomego? Świat jest zapisany na PC gospodarza, więc na twoim jest tylko twoja postać: wybierz świat, który hostujesz, by zobaczyć bazy i skrzynie.",
+ "Playing in a friend's world? Pick \"A friend's world\" above: the world is saved on the host's PC, so the app reads your character and where you are.": "Grasz w świecie znajomego? Wybierz wyżej „Świat znajomego”: świat jest zapisany na PC gospodarza, więc aplikacja odczytuje twoją postać i to, gdzie jesteś.",
  "Points per area": "Punkty według obszaru",
  "Prepare": "Przygotuj się",
  "Produce to collect · {n}": "Plony do zebrania · {n}",
@@ -456,6 +467,9 @@
  "Sets · {n}": "Zestawy · {n}",
  "Setup": "Ustawienia",
  "Setup: PC agent and game save": "Ustawienia: agent PC i zapis gry",
+ "Share": "Udostępnij",
+ "Share build": "Udostępnij build",
+ "Shared from Enshroud Buddy, an unofficial Enshrouded companion": "Udostępnione z Enshroud Buddy, nieoficjalnego towarzysza Enshrouded",
  "Shield": "Tarcza",
  "Shock": "Porażenie",
  "Shopping": "Zakupy",
@@ -542,9 +556,9 @@
  "Unique loot": "Unikatowy łup",
  "Unique loot only": "Tylko unikatowy łup",
  "Unique loot: {n} spots on the map": {
-  "one": "Unikatowy łup: {n} miejsce na mapie",
   "few": "Unikatowy łup: {n} miejsca na mapie",
   "many": "Unikatowy łup: {n} miejsc na mapie",
+  "one": "Unikatowy łup: {n} miejsce na mapie",
   "other": "Unikatowy łup: {n} miejsc na mapie"
  },
  "Unknown station": "Nieznane stanowisko",
@@ -587,6 +601,7 @@
  "World setting ×{factor}": "Ustawienie świata ×{factor}",
  "Worn": "Noszone",
  "Worn armour and weapons are level {lo} to {hi}, all at or above {level}.": "Noszony pancerz i broń mają poziom od {lo} do {hi}, wszystko co najmniej {level}.",
+ "Worn: {items}": "Założone: {items}",
  "You are level {you}; its enemies are level {level}.": "Masz poziom {you}; wrogowie tutaj mają poziom {level}.",
  "You can stay": "Możesz zostać",
  "You carry {items}.": "Nosisz: {items}.",
@@ -602,10 +617,12 @@
  "Your bag and chests appear after the PC agent reads a save.": "Twój plecak i skrzynie pojawią się, gdy agent PC odczyta zapis.",
  "Your build": "Twoja konfiguracja",
  "Your build appears after the PC agent reads a save.": "Twoja konfiguracja pojawi się, gdy agent PC odczyta zapis.",
+ "Your character only: the world's chests and bases are on the host's PC": "Tylko twoja postać: skrzynie i bazy świata są na PC gospodarza",
  "Your journey starts here": "Twoja podróż zaczyna się tutaj",
  "Your time in the Shroud: {time}.": "Twój czas w Mgle: {time}.",
  "Zone: {zone}": "Strefa: {zone}",
  "Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).": "Strefy powyżej twojego Poziomu infiltracji Mgły są na mapie czerwone (warstwa Mgła).",
+ "a friend's world": "świat znajomego",
  "agent not ready": "agent niegotowy",
  "all found": "wszystko znalezione",
  "area level {level}": "poziom obszaru {level}",
@@ -639,9 +656,9 @@
  "ice": "lód",
  "in the Shroud": "w Mgle",
  "in {n} animals": {
-  "one": "w {n} zwierzęciu",
   "few": "w {n} zwierzętach",
   "many": "w {n} zwierzętach",
+  "one": "w {n} zwierzęciu",
   "other": "w {n} zwierzętach"
  },
  "in {n} chests": "w skrzyniach: {n}",
@@ -695,9 +712,9 @@
  "{base} · altar {level}": "{base} · ołtarz {level}",
  "{base}: altar {n} ({zone} zone)": "{base}: ołtarz {n} (strefa {zone})",
  "{category} · {n} pieces on the map": {
-  "one": "{category} · {n} element na mapie",
   "few": "{category} · {n} elementy na mapie",
   "many": "{category} · {n} elementów na mapie",
+  "one": "{category} · {n} element na mapie",
   "other": "{category} · {n} elementów na mapie"
  },
  "{container} #{n}": "{container} #{n}",
@@ -716,9 +733,9 @@
  "{hall}, level {level}. The game keeps every hall's inside in one far corner of the world; the map shows this one there with its chests, notes and save points. Inside, it follows you: your floor bright, the others faint.": "{hall}, poziom {level}. Gra trzyma wnętrza wszystkich grobowców w jednym odległym rogu świata; mapa pokazuje to wnętrze tam, wraz ze skrzyniami, notatkami i punktami zapisu. W środku podąża za tobą: twoje piętro jasne, pozostałe blade.",
  "{items} +{n}": "{items} +{n}",
  "{items} deal {damage}, which they resist.": {
-  "one": "{items} zadaje obrażenia typu {damage}, na które są odporni.",
   "few": "{items} zadają obrażenia typu {damage}, na które są odporni.",
   "many": "{items} zadają obrażenia typu {damage}, na które są odporni.",
+  "one": "{items} zadaje obrażenia typu {damage}, na które są odporni.",
   "other": "{items} zadają obrażenia typu {damage}, na które są odporni."
  },
  "{item} (worn)": "{item} (noszone)",
@@ -733,66 +750,66 @@
  "{m} min": "{m} min",
  "{m} min {s} s": "{m} min {s} s",
  "{n} Fell": {
-  "one": "{n} Splugawiony",
   "few": "{n} Splugawionych",
   "many": "{n} Splugawionych",
+  "one": "{n} Splugawiony",
   "other": "{n} Splugawionych"
  },
  "{n} Fell inside, the Shroud's creatures.": {
-  "one": "W środku {n} Splugawiony, stwór Mgły.",
   "few": "W środku {n} Splugawionych, stworów Mgły.",
   "many": "W środku {n} Splugawionych, stworów Mgły.",
+  "one": "W środku {n} Splugawiony, stwór Mgły.",
   "other": "W środku {n} Splugawionych, stworów Mgły."
  },
  "{n} Hollow": {
-  "one": "{n} Upadły",
   "few": "{n} Upadłych",
   "many": "{n} Upadłych",
+  "one": "{n} Upadły",
   "other": "{n} Upadłych"
  },
  "{n} Hollow ({elite} elite)": {
-  "one": "{n} Upadły (elitarni: {elite})",
   "few": "{n} Upadłych (elitarni: {elite})",
   "many": "{n} Upadłych (elitarni: {elite})",
+  "one": "{n} Upadły (elitarni: {elite})",
   "other": "{n} Upadłych (elitarni: {elite})"
  },
  "{n} batches": {
-  "one": "{n} partia",
   "few": "{n} partie",
   "many": "{n} partii",
+  "one": "{n} partia",
   "other": "{n} partii"
  },
  "{n} beasts": {
-  "one": "{n} bestia",
   "few": "{n} bestie",
   "many": "{n} bestii",
+  "one": "{n} bestia",
   "other": "{n} bestii"
  },
  "{n} bone piles": {
-  "one": "{n} stos kości",
   "few": "{n} stosy kości",
   "many": "{n} stosów kości",
+  "one": "{n} stos kości",
   "other": "{n} stosów kości"
  },
  "{n} d ago": "{n} d temu",
  "{n} feeders look empty": {
-  "one": "{n} karmnik wygląda na pusty",
   "few": "{n} karmniki wyglądają na puste",
   "many": "{n} karmników wygląda na puste",
+  "one": "{n} karmnik wygląda na pusty",
   "other": "{n} karmników wygląda na puste"
  },
  "{n} fire": "ogniowe: {n}",
  "{n} grapple points.": {
-  "one": "{n} punkt zaczepienia.",
   "few": "{n} punkty zaczepienia.",
   "many": "{n} punktów zaczepienia.",
+  "one": "{n} punkt zaczepienia.",
   "other": "{n} punktów zaczepienia."
  },
  "{n} h ago": "{n} godz. temu",
  "{n} items added to the plan, with where to get them": {
-  "one": "Dodano {n} przedmiot do planu, ze wskazaniem, skąd go wziąć",
   "few": "Dodano {n} przedmioty do planu, ze wskazaniem, skąd je wziąć",
   "many": "Dodano {n} przedmiotów do planu, ze wskazaniem, skąd je wziąć",
+  "one": "Dodano {n} przedmiot do planu, ze wskazaniem, skąd go wziąć",
   "other": "Dodano {n} przedmiotów do planu, ze wskazaniem, skąd je wziąć"
  },
  "{n} km": "{n} km",
@@ -809,120 +826,120 @@
  "{n} min": "{n} min",
  "{n} min ago": "{n} min temu",
  "{n} pages": {
-  "one": "{n} strona",
   "few": "{n} strony",
   "many": "{n} stron",
+  "one": "{n} strona",
   "other": "{n} stron"
  },
  "{n} pieces · altar {altar} · {zone} build zone · drag to turn, pinch to zoom": {
-  "one": "{n} element · ołtarz {altar} · strefa budowy {zone} · przeciągnij, by obrócić, uszczypnij, by przybliżyć",
   "few": "{n} elementy · ołtarz {altar} · strefa budowy {zone} · przeciągnij, by obrócić, uszczypnij, by przybliżyć",
   "many": "{n} elementów · ołtarz {altar} · strefa budowy {zone} · przeciągnij, by obrócić, uszczypnij, by przybliżyć",
+  "one": "{n} element · ołtarz {altar} · strefa budowy {zone} · przeciągnij, by obrócić, uszczypnij, by przybliżyć",
   "other": "{n} elementów · ołtarz {altar} · strefa budowy {zone} · przeciągnij, by obrócić, uszczypnij, by przybliżyć"
  },
  "{n} piles raise more Hollow until broken: break them first.": {
-  "one": "{n} stos przywołuje kolejnych Upadłych, dopóki go nie rozbijesz: rozbij go najpierw.",
   "few": "{n} stosy przywołują kolejnych Upadłych, dopóki ich nie rozbijesz: rozbij je najpierw.",
   "many": "{n} stosów przywołuje kolejnych Upadłych, dopóki ich nie rozbijesz: rozbij je najpierw.",
+  "one": "{n} stos przywołuje kolejnych Upadłych, dopóki go nie rozbijesz: rozbij go najpierw.",
   "other": "{n} stosów przywołuje kolejnych Upadłych, dopóki ich nie rozbijesz: rozbij je najpierw."
  },
  "{n} places": {
-  "one": "{n} miejsce",
   "few": "{n} miejsca",
   "many": "{n} miejsc",
+  "one": "{n} miejsce",
   "other": "{n} miejsc"
  },
  "{n} point": "{n} punkt",
  "{n} point per rank": "{n} punkt na stopień",
  "{n} points": {
-  "one": "{n} punkt",
   "few": "{n} punkty",
   "many": "{n} punktów",
+  "one": "{n} punkt",
   "other": "{n} punktów"
  },
  "{n} points per rank": {
-  "one": "{n} punkt na stopień",
   "few": "{n} punkty na stopień",
   "many": "{n} punktów na stopień",
+  "one": "{n} punkt na stopień",
   "other": "{n} punktów na stopień"
  },
  "{n} points to spend. Each path starts from your learned skills and follows the tree's links.": {
-  "one": "{n} punkt do wydania. Każda ścieżka zaczyna się od twoich wyuczonych umiejętności i biegnie połączeniami drzewka.",
   "few": "{n} punkty do wydania. Każda ścieżka zaczyna się od twoich wyuczonych umiejętności i biegnie połączeniami drzewka.",
   "many": "{n} punktów do wydania. Każda ścieżka zaczyna się od twoich wyuczonych umiejętności i biegnie połączeniami drzewka.",
+  "one": "{n} punkt do wydania. Każda ścieżka zaczyna się od twoich wyuczonych umiejętności i biegnie połączeniami drzewka.",
   "other": "{n} punktów do wydania. Każda ścieżka zaczyna się od twoich wyuczonych umiejętności i biegnie połączeniami drzewka."
  },
  "{n} pt": "{n} pkt",
  "{n} pts": "{n} pkt",
  "{n} random containers": "losowe pojemniki: {n}",
  "{n} rune barriers": {
-  "one": "{n} bariera runiczna",
   "few": "{n} bariery runiczne",
   "many": "{n} barier runicznych",
+  "one": "{n} bariera runiczna",
   "other": "{n} barier runicznych"
  },
  "{n} s": "{n} s",
  "{n} sets": {
-  "one": "{n} zestaw",
   "few": "{n} zestawy",
   "many": "{n} zestawów",
+  "one": "{n} zestaw",
   "other": "{n} zestawów"
  },
  "{n} shock": "elektryczne: {n}",
  "{n} spots": "miejsca: {n}",
  "{n} stacks": {
-  "one": "{n} stos",
   "few": "{n} stosy",
   "many": "{n} stosów",
+  "one": "{n} stos",
   "other": "{n} stosów"
  },
  "{n} stops, {distance} as the crow flies.": {
-  "one": "{n} przystanek, {distance} w linii prostej.",
   "few": "{n} przystanki, {distance} w linii prostej.",
   "many": "{n} przystanków, {distance} w linii prostej.",
+  "one": "{n} przystanek, {distance} w linii prostej.",
   "other": "{n} przystanków, {distance} w linii prostej."
  },
  "{n} tasks": {
-  "one": "{n} zadanie",
   "few": "{n} zadania",
   "many": "{n} zadań",
+  "one": "{n} zadanie",
   "other": "{n} zadań"
  },
  "{n} to find": "do znalezienia: {n}",
  "{n} traps": {
-  "one": "{n} pułapka",
   "few": "{n} pułapki",
   "many": "{n} pułapek",
+  "one": "{n} pułapka",
   "other": "{n} pułapek"
  },
  "{n} traps, {kinds}.": {
-  "one": "{n} pułapka, {kinds}.",
   "few": "{n} pułapki, {kinds}.",
   "many": "{n} pułapek, {kinds}.",
+  "one": "{n} pułapka, {kinds}.",
   "other": "{n} pułapek, {kinds}."
  },
  "{n} traps.": {
-  "one": "{n} pułapka.",
   "few": "{n} pułapki.",
   "many": "{n} pułapek.",
+  "one": "{n} pułapka.",
   "other": "{n} pułapek."
  },
  "{n} updrafts and glider barriers.": {
-  "one": "Prądy wstępujące i bariery dla lotni: {n}.",
   "few": "Prądy wstępujące i bariery dla lotni: {n}.",
   "many": "Prądy wstępujące i bariery dla lotni: {n}.",
+  "one": "Prądy wstępujące i bariery dla lotni: {n}.",
   "other": "Prądy wstępujące i bariery dla lotni: {n}."
  },
  "{n} upgrades left (L{level})": {
-  "one": "Zostało {n} ulepszenie (poz. {level})",
   "few": "Zostały {n} ulepszenia (poz. {level})",
   "many": "Zostało {n} ulepszeń (poz. {level})",
+  "one": "Zostało {n} ulepszenie (poz. {level})",
   "other": "Zostało {n} ulepszeń (poz. {level})"
  },
  "{n} upgrades to find": {
-  "one": "{n} ulepszenie do znalezienia",
   "few": "{n} ulepszenia do znalezienia",
   "many": "{n} ulepszeń do znalezienia",
+  "one": "{n} ulepszenie do znalezienia",
   "other": "{n} ulepszeń do znalezienia"
  },
  "{percent}% a wet boot": "{percent}% mokry but",
@@ -931,9 +948,9 @@
  "{region} Hollow Halls": "Głuche Grobowce: {region}",
  "{sets} sets in {groups} groups": "zestawy: {sets} w grupach: {groups}",
  "{set} · {n} items": {
-  "one": "{set} · {n} przedmiot",
   "few": "{set} · {n} przedmioty",
   "many": "{set} · {n} przedmiotów",
+  "one": "{set} · {n} przedmiot",
   "other": "{set} · {n} przedmiotów"
  },
  "{skill} · learned": "{skill} · wyuczone",

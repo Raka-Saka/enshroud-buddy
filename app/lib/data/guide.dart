@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -12,6 +11,7 @@ import '../l10n.dart';
 import 'game_db.dart';
 import 'live_state.dart';
 import 'where.dart' show compassOf, distanceText;
+import 'background.dart';
 
 /// Ground height from the game's own map (assets/height.png, written by tools/build_map.py): one value per
 /// map pixel (World.mPerPx metres), in steps of about 16 m, so a few metres off at best (fitted: median 5 m).
@@ -240,7 +240,8 @@ class GlideCheck {
       'stamina': (stamina / 5).round() * 5,
     });
     final est = measured ? '' : ' ${tr('(estimate until you glide a bit)')}';
-    if (reaches) return '${tr('Glide all the way: {cost}', {'cost': cost})}$est';
+    if (reaches)
+      return '${tr('Glide all the way: {cost}', {'cost': cost})}$est';
     if (carriesM < 30) {
       final drop =
           (climbFirst ?? 0) > 0
@@ -351,7 +352,7 @@ class LaunchPlan {
     NavTarget t,
     HeightMap hm,
     Glider g,
-  ) => Isolate.run(() => of(p, t, hm, g));
+  ) => background(() => of(p, t, hm, g));
 
   static double walkTime(double m, double up, double speed) =>
       (m + math.max(0, up) * climbCost) / speed;

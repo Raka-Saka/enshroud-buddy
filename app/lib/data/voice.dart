@@ -23,7 +23,7 @@ class Voice {
   /// What the player said, or null when they cancelled. Throws with a short reason.
   static Future<String?> listen() async {
     try {
-      return await _ch.invokeMethod<String>('listen');
+      return await _ch.invokeMethod<String>('listen', {'lang': L10n.lang.tag});
     } on PlatformException catch (e) {
       throw StateError(e.message ?? tr('No speech recognition'));
     } on MissingPluginException {
@@ -35,7 +35,10 @@ class Voice {
     _setup();
     speaking.value = text;
     try {
-      await _ch.invokeMethod('speak', {'text': forSpeech(text)});
+      await _ch.invokeMethod('speak', {
+        'text': forSpeech(text),
+        'lang': L10n.lang.tag,
+      });
     } catch (_) {
       speaking.value = null;
     }

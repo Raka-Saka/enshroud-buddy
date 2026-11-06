@@ -9,36 +9,38 @@
  "(estimate until you glide a bit)": "(примерно, пока вы немного не полетаете на планере)",
  "+5 min each, used on pickup.": "+5 мин каждая, тратится при подборе.",
  "+{n} Elixir Wells cleared": {
-  "one": "+{n} Колодец Эликсира очищен",
   "few": "+{n} Колодца Эликсира очищено",
   "many": "+{n} Колодцев Эликсира очищено",
+  "one": "+{n} Колодец Эликсира очищен",
   "other": "+{n} Колодца Эликсира очищено"
  },
  "+{n} Shroud Roots claimed": {
-  "one": "+{n} Корень Пелены захвачен",
   "few": "+{n} Корня Пелены захвачено",
   "many": "+{n} Корней Пелены захвачено",
+  "one": "+{n} Корень Пелены захвачен",
   "other": "+{n} Корня Пелены захвачено"
  },
  "+{n} discoveries": {
-  "one": "+{n} открытие",
   "few": "+{n} открытия",
   "many": "+{n} открытий",
+  "one": "+{n} открытие",
   "other": "+{n} открытия"
  },
  "+{n} levels": "+{n} ур.",
  "+{n} recipes": {
-  "one": "+{n} схема",
   "few": "+{n} схемы",
   "many": "+{n} схем",
+  "one": "+{n} схема",
   "other": "+{n} схемы"
  },
  "+{n} skill ranks": {
-  "one": "+{n} ранг навыка",
   "few": "+{n} ранга навыков",
   "many": "+{n} рангов навыков",
+  "one": "+{n} ранг навыка",
   "other": "+{n} ранга навыков"
  },
+ "A friend's world (I play as a guest)": "Мир друга (играю как гость)",
+ "A picture of your build and gear for Discord or a chat": "Картинка с вашей сборкой и снаряжением для Discord или чата",
  "A place, a piece of unique loot (\"{garb}\"), or a whole set (\"{set}\"): the map then shows only where it lies.": "Место, уникальная добыча («{garb}») или целый комплект («{set}»): карта покажет только, где это лежит.",
  "About": "О приложении",
  "Active skill": "Активный навык",
@@ -149,6 +151,7 @@
  "Could not load game data\n{error}": "Не удалось загрузить данные игры\n{error}",
  "Couldn't answer: {error}": "Не удалось ответить: {error}",
  "Couldn't scan: {error}. Type the details below.": "Не удалось отсканировать: {error}. Введите данные ниже.",
+ "Couldn't share the build": "Не удалось поделиться сборкой",
  "Couldn't switch: {error}": "Не удалось переключить: {error}",
  "Craft at {station}": "Создать на станке «{station}»",
  "Craft at {station} (locked)": "Создать на станке «{station}» (заперто)",
@@ -166,12 +169,14 @@
  "Details": "Подробности",
  "Done": "Готово",
  "Download it, then open it to install over this one: nothing is lost.": "Скачайте и откройте, чтобы установить поверх текущей версии: ничего не потеряется.",
+ "Download picture and copy text": "Скачать картинку и скопировать текст",
  "Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.": "Скачайте новый EnshroudBuddy.exe со страницы релиза и откройте его: он заменит старый.",
  "Durability {have}/{max}": "Прочность {have}/{max}",
  "Edit pin": "Изменить метку",
  "Eleven directions with the skills to take, scored on damage, area, survival, gathering, building and passives": "Одиннадцать направлений с навыками для изучения, с оценкой урона, площади, выживания, сбора, строительства и пассивок",
  "Empty": "Пусто",
  "End the route": "Завершить маршрут",
+ "Enshroud Buddy · unofficial fan app, not affiliated with Keen Games": "Enshroud Buddy · неофициальное фанатское приложение, не связано с Keen Games",
  "Equipped": "Выбрано",
  "Everything I own, per slot": "Всё, что у меня есть, по ячейкам",
  "Everything is in hand: craft away.": "Всё под рукой: создавайте.",
@@ -249,6 +254,7 @@
  "Hollow take more from {weak} and resist {strong}.": "Умертвия уязвимы к урону: {weak}; устойчивы к: {strong}.",
  "Hollow take more from {weak}.": "Умертвия уязвимы к урону: {weak}.",
  "Home": "Главная",
+ "Host's Flame strength: {n}": "Сила Пламени хозяина: {n}",
  "Hourglass capsules · {n} on the map": "Капсулы песочных часов · на карте: {n}",
  "How do I make {item}?": "Как создать {item}?",
  "How to get it": "Как получить",
@@ -285,10 +291,12 @@
  "Learned": "Изучено",
  "Learned: rank {rank} of {max}": "Изучено: ранг {rank} из {max}",
  "Legs": "Ноги",
+ "Less": "Меньше",
  "Level": "Уровень",
  "Level since {day}": "Уровень с {day}",
  "Level with you": "На одной высоте с вами",
  "Level {from}–{to}": "Уровень {from}–{to}",
+ "Level {level} · Flame strength {flame}": "Уровень {level} · Сила Пламени {flame}",
  "Level {level} · {spent} of {total} points spent · {free} free": "Уровень {level} · потрачено {spent} из {total} очков · свободно {free}",
  "Level {n}": "Уровень {n}",
  "Level {n} (+{up})": "Уровень {n} (+{up})",
@@ -322,6 +330,7 @@
  "Milestones": "Вехи",
  "Mine": "Добыть",
  "Missing gear": "Недостающее снаряжение",
+ "More": "Больше",
  "More of what your build already does": "Больше того, что уже делает ваша сборка",
  "My build": "Моя сборка",
  "My gear by slot": "Моё снаряжение по ячейкам",
@@ -367,6 +376,7 @@
  "Oct": "окт",
  "Offline · saved {ago}": "Не в сети · сохранено {ago}",
  "On foot": "Пешком",
+ "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone, and scan the browser code with this device's camera. Or type the pairing code:": "На PC: щёлкните правой кнопкой по значку Enshroud Buddy в трее, выберите «Связать телефон» и отсканируйте код для браузера камерой этого устройства. Или введите код связи:",
  "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:": "На PC: щёлкните правой кнопкой по значку Enshroud Buddy в трее и выберите «Связать телефон». Или введите данные:",
  "One fewer": "На один меньше",
  "One more": "На один больше",
@@ -391,6 +401,7 @@
  "Phone language": "Язык телефона",
  "Phone language ({lang})": "Язык телефона ({lang})",
  "Pick something to make or find; the plan works out unlocks, stations, gathering and crafting.": "Выберите, что создать или найти; план рассчитает разблокировки, станки, сбор и создание.",
+ "Picture downloaded, and the build is on the clipboard": "Картинка скачана, а сборка скопирована в буфер обмена",
  "Pin \"{title}\" deleted": "Метка «{title}» удалена",
  "Place": "Место",
  "Places": "Места",
@@ -402,7 +413,7 @@
  "Plan this skill": "Запланировать этот навык",
  "Plan {item}": "Запланировать: {item}",
  "Plan: {nodes} nodes, {points} points": "План: узлов {nodes}, очков {points}",
- "Playing in a friend's world? The world is saved on the host's PC, so only your character is on yours: pick a world you host to see bases and chests.": "Играете в мире друга? Мир хранится на PC хозяина, поэтому у вас есть только персонаж: выберите мир, где хозяин — вы, чтобы видеть базы и сундуки.",
+ "Playing in a friend's world? Pick \"A friend's world\" above: the world is saved on the host's PC, so the app reads your character and where you are.": "Играете в мире друга? Выберите выше «Мир друга»: мир хранится на PC хозяина, поэтому приложение читает вашего персонажа и где вы находитесь.",
  "Points per area": "Очки по областям",
  "Prepare": "Подготовка",
  "Produce to collect · {n}": "Урожай к сбору · {n}",
@@ -456,6 +467,9 @@
  "Sets · {n}": "Комплекты · {n}",
  "Setup": "Настройка",
  "Setup: PC agent and game save": "Настройка: агент на PC и сохранение",
+ "Share": "Поделиться",
+ "Share build": "Поделиться сборкой",
+ "Shared from Enshroud Buddy, an unofficial Enshrouded companion": "Отправлено из Enshroud Buddy, неофициального помощника для Enshrouded",
  "Shield": "Щит",
  "Shock": "Электричество",
  "Shopping": "Покупки",
@@ -542,9 +556,9 @@
  "Unique loot": "Уникальная добыча",
  "Unique loot only": "Только уникальная добыча",
  "Unique loot: {n} spots on the map": {
-  "one": "Уникальная добыча: {n} место на карте",
   "few": "Уникальная добыча: {n} места на карте",
   "many": "Уникальная добыча: {n} мест на карте",
+  "one": "Уникальная добыча: {n} место на карте",
   "other": "Уникальная добыча: {n} места на карте"
  },
  "Unknown station": "Неизвестный станок",
@@ -587,6 +601,7 @@
  "World setting ×{factor}": "Настройка мира ×{factor}",
  "Worn": "Надето",
  "Worn armour and weapons are level {lo} to {hi}, all at or above {level}.": "Надетые броня и оружие {lo}–{hi} уровня, всё не ниже {level}.",
+ "Worn: {items}": "Надето: {items}",
  "You are level {you}; its enemies are level {level}.": "Ваш уровень {you}; враги здесь {level}-го уровня.",
  "You can stay": "Можно оставаться",
  "You carry {items}.": "У вас с собой: {items}.",
@@ -602,10 +617,12 @@
  "Your bag and chests appear after the PC agent reads a save.": "Сумка и сундуки появятся после того, как агент на PC прочитает сохранение.",
  "Your build": "Ваша сборка",
  "Your build appears after the PC agent reads a save.": "Ваша сборка появится после того, как агент на PC прочитает сохранение.",
+ "Your character only: the world's chests and bases are on the host's PC": "Только ваш персонаж: сундуки и базы мира хранятся на PC хозяина",
  "Your journey starts here": "Ваш путь начинается здесь",
  "Your time in the Shroud: {time}.": "Ваше время в Пелене: {time}.",
  "Zone: {zone}": "Зона: {zone}",
  "Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).": "Зоны выше вашего уровня сопротивления Пелене отмечены на карте красным (слой «Пелена»).",
+ "a friend's world": "Мир друга",
  "agent not ready": "агент не готов",
  "all found": "всё найдено",
  "area level {level}": "уровень области {level}",
@@ -639,9 +656,9 @@
  "ice": "лёд",
  "in the Shroud": "в Пелене",
  "in {n} animals": {
-  "one": "у {n} животного",
   "few": "у {n} животных",
   "many": "у {n} животных",
+  "one": "у {n} животного",
   "other": "у {n} животного"
  },
  "in {n} chests": "в сундуках: {n}",
@@ -695,9 +712,9 @@
  "{base} · altar {level}": "{base} · алтарь {level}",
  "{base}: altar {n} ({zone} zone)": "{base}: алтарь {n} (зона {zone})",
  "{category} · {n} pieces on the map": {
-  "one": "{category} · {n} шт. на карте",
   "few": "{category} · {n} шт. на карте",
   "many": "{category} · {n} шт. на карте",
+  "one": "{category} · {n} шт. на карте",
   "other": "{category} · {n} шт. на карте"
  },
  "{container} #{n}": "{container} №{n}",
@@ -716,9 +733,9 @@
  "{hall}, level {level}. The game keeps every hall's inside in one far corner of the world; the map shows this one there with its chests, notes and save points. Inside, it follows you: your floor bright, the others faint.": "{hall}, уровень {level}. Игра хранит внутренности всех залов в одном дальнем углу мира; карта показывает этот зал там, с сундуками, заметками и точками сохранения. Внутри карта следует за вами: ваш этаж яркий, остальные блёклые.",
  "{items} +{n}": "{items} +{n}",
  "{items} deal {damage}, which they resist.": {
-  "one": "{items} наносит урон ({damage}), к которому они устойчивы.",
   "few": "{items} наносят урон ({damage}), к которому они устойчивы.",
   "many": "{items} наносят урон ({damage}), к которому они устойчивы.",
+  "one": "{items} наносит урон ({damage}), к которому они устойчивы.",
   "other": "{items} наносят урон ({damage}), к которому они устойчивы."
  },
  "{item} (worn)": "{item} (надето)",
@@ -733,66 +750,66 @@
  "{m} min": "{m} мин",
  "{m} min {s} s": "{m} мин {s} с",
  "{n} Fell": {
-  "one": "{n} павший",
   "few": "{n} павших",
   "many": "{n} павших",
+  "one": "{n} павший",
   "other": "{n} павшего"
  },
  "{n} Fell inside, the Shroud's creatures.": {
-  "one": "Внутри {n} павший, создание Пелены.",
   "few": "Внутри {n} павших, создания Пелены.",
   "many": "Внутри {n} павших, создания Пелены.",
+  "one": "Внутри {n} павший, создание Пелены.",
   "other": "Внутри {n} павшего, создания Пелены."
  },
  "{n} Hollow": {
-  "one": "{n} умертвие",
   "few": "{n} умертвия",
   "many": "{n} умертвий",
+  "one": "{n} умертвие",
   "other": "{n} умертвия"
  },
  "{n} Hollow ({elite} elite)": {
-  "one": "{n} умертвие (элитных: {elite})",
   "few": "{n} умертвия (элитных: {elite})",
   "many": "{n} умертвий (элитных: {elite})",
+  "one": "{n} умертвие (элитных: {elite})",
   "other": "{n} умертвия (элитных: {elite})"
  },
  "{n} batches": {
-  "one": "{n} партия",
   "few": "{n} партии",
   "many": "{n} партий",
+  "one": "{n} партия",
   "other": "{n} партии"
  },
  "{n} beasts": {
-  "one": "{n} зверь",
   "few": "{n} зверя",
   "many": "{n} зверей",
+  "one": "{n} зверь",
   "other": "{n} зверя"
  },
  "{n} bone piles": {
-  "one": "{n} груда костей",
   "few": "{n} груды костей",
   "many": "{n} груд костей",
+  "one": "{n} груда костей",
   "other": "{n} груды костей"
  },
  "{n} d ago": "{n} дн. назад",
  "{n} feeders look empty": {
-  "one": "{n} кормушка выглядит пустой",
   "few": "{n} кормушки выглядят пустыми",
   "many": "{n} кормушек выглядят пустыми",
+  "one": "{n} кормушка выглядит пустой",
   "other": "{n} кормушки выглядят пустыми"
  },
  "{n} fire": "{n} огненных",
  "{n} grapple points.": {
-  "one": "{n} точка для крюка.",
   "few": "{n} точки для крюка.",
   "many": "{n} точек для крюка.",
+  "one": "{n} точка для крюка.",
   "other": "{n} точки для крюка."
  },
  "{n} h ago": "{n} ч назад",
  "{n} items added to the plan, with where to get them": {
-  "one": "{n} предмет добавлен в план, с местами получения",
   "few": "{n} предмета добавлено в план, с местами получения",
   "many": "{n} предметов добавлено в план, с местами получения",
+  "one": "{n} предмет добавлен в план, с местами получения",
   "other": "{n} предмета добавлено в план, с местами получения"
  },
  "{n} km": "{n} км",
@@ -809,120 +826,120 @@
  "{n} min": "{n} мин",
  "{n} min ago": "{n} мин назад",
  "{n} pages": {
-  "one": "{n} страница",
   "few": "{n} страницы",
   "many": "{n} страниц",
+  "one": "{n} страница",
   "other": "{n} страницы"
  },
  "{n} pieces · altar {altar} · {zone} build zone · drag to turn, pinch to zoom": {
-  "one": "{n} деталь · алтарь {altar} · зона строительства {zone} · тяните, чтобы вращать, сводите пальцы для масштаба",
   "few": "{n} детали · алтарь {altar} · зона строительства {zone} · тяните, чтобы вращать, сводите пальцы для масштаба",
   "many": "{n} деталей · алтарь {altar} · зона строительства {zone} · тяните, чтобы вращать, сводите пальцы для масштаба",
+  "one": "{n} деталь · алтарь {altar} · зона строительства {zone} · тяните, чтобы вращать, сводите пальцы для масштаба",
   "other": "{n} детали · алтарь {altar} · зона строительства {zone} · тяните, чтобы вращать, сводите пальцы для масштаба"
  },
  "{n} piles raise more Hollow until broken: break them first.": {
-  "one": "{n} груда поднимает новых умертвий, пока её не разбить: разбейте её первой.",
   "few": "{n} груды поднимают новых умертвий, пока их не разбить: разбейте их первыми.",
   "many": "{n} груд поднимают новых умертвий, пока их не разбить: разбейте их первыми.",
+  "one": "{n} груда поднимает новых умертвий, пока её не разбить: разбейте её первой.",
   "other": "{n} груды поднимают новых умертвий, пока их не разбить: разбейте их первыми."
  },
  "{n} places": {
-  "one": "{n} место",
   "few": "{n} места",
   "many": "{n} мест",
+  "one": "{n} место",
   "other": "{n} места"
  },
  "{n} point": "{n} очко",
  "{n} point per rank": "{n} очко за ранг",
  "{n} points": {
-  "one": "{n} очко",
   "few": "{n} очка",
   "many": "{n} очков",
+  "one": "{n} очко",
   "other": "{n} очка"
  },
  "{n} points per rank": {
-  "one": "{n} очко за ранг",
   "few": "{n} очка за ранг",
   "many": "{n} очков за ранг",
+  "one": "{n} очко за ранг",
   "other": "{n} очка за ранг"
  },
  "{n} points to spend. Each path starts from your learned skills and follows the tree's links.": {
-  "one": "{n} очко можно потратить. Каждый путь начинается с изученных навыков и идёт по связям дерева.",
   "few": "{n} очка можно потратить. Каждый путь начинается с изученных навыков и идёт по связям дерева.",
   "many": "{n} очков можно потратить. Каждый путь начинается с изученных навыков и идёт по связям дерева.",
+  "one": "{n} очко можно потратить. Каждый путь начинается с изученных навыков и идёт по связям дерева.",
   "other": "{n} очка можно потратить. Каждый путь начинается с изученных навыков и идёт по связям дерева."
  },
  "{n} pt": "{n} оч.",
  "{n} pts": "{n} оч.",
  "{n} random containers": "случайных контейнеров: {n}",
  "{n} rune barriers": {
-  "one": "{n} руническая преграда",
   "few": "{n} рунические преграды",
   "many": "{n} рунических преград",
+  "one": "{n} руническая преграда",
   "other": "{n} рунической преграды"
  },
  "{n} s": "{n} с",
  "{n} sets": {
-  "one": "{n} комплект",
   "few": "{n} комплекта",
   "many": "{n} комплектов",
+  "one": "{n} комплект",
   "other": "{n} комплекта"
  },
  "{n} shock": "{n} электрических",
  "{n} spots": "мест: {n}",
  "{n} stacks": {
-  "one": "{n} стопка",
   "few": "{n} стопки",
   "many": "{n} стопок",
+  "one": "{n} стопка",
   "other": "{n} стопки"
  },
  "{n} stops, {distance} as the crow flies.": {
-  "one": "{n} точка, {distance} по прямой.",
   "few": "{n} точки, {distance} по прямой.",
   "many": "{n} точек, {distance} по прямой.",
+  "one": "{n} точка, {distance} по прямой.",
   "other": "{n} точки, {distance} по прямой."
  },
  "{n} tasks": {
-  "one": "{n} задача",
   "few": "{n} задачи",
   "many": "{n} задач",
+  "one": "{n} задача",
   "other": "{n} задачи"
  },
  "{n} to find": "найти: {n}",
  "{n} traps": {
-  "one": "{n} ловушка",
   "few": "{n} ловушки",
   "many": "{n} ловушек",
+  "one": "{n} ловушка",
   "other": "{n} ловушки"
  },
  "{n} traps, {kinds}.": {
-  "one": "{n} ловушка: {kinds}.",
   "few": "{n} ловушки: {kinds}.",
   "many": "{n} ловушек: {kinds}.",
+  "one": "{n} ловушка: {kinds}.",
   "other": "{n} ловушки: {kinds}."
  },
  "{n} traps.": {
-  "one": "{n} ловушка.",
   "few": "{n} ловушки.",
   "many": "{n} ловушек.",
+  "one": "{n} ловушка.",
   "other": "{n} ловушки."
  },
  "{n} updrafts and glider barriers.": {
-  "one": "{n} восходящий поток и преграды для планера.",
   "few": "{n} восходящих потока и преграды для планера.",
   "many": "{n} восходящих потоков и преграды для планера.",
+  "one": "{n} восходящий поток и преграды для планера.",
   "other": "{n} восходящего потока и преграды для планера."
  },
  "{n} upgrades left (L{level})": {
-  "one": "Осталось {n} улучшение (Ур.{level})",
   "few": "Осталось {n} улучшения (Ур.{level})",
   "many": "Осталось {n} улучшений (Ур.{level})",
+  "one": "Осталось {n} улучшение (Ур.{level})",
   "other": "Осталось {n} улучшения (Ур.{level})"
  },
  "{n} upgrades to find": {
-  "one": "Найти {n} улучшение",
   "few": "Найти {n} улучшения",
   "many": "Найти {n} улучшений",
+  "one": "Найти {n} улучшение",
   "other": "Найти {n} улучшения"
  },
  "{percent}% a wet boot": "{percent}% — мокрый сапог",
@@ -931,9 +948,9 @@
  "{region} Hollow Halls": "Залы умертвий: {region}",
  "{sets} sets in {groups} groups": "{sets} комплектов в {groups} группах",
  "{set} · {n} items": {
-  "one": "{set} · {n} предмет",
   "few": "{set} · {n} предмета",
   "many": "{set} · {n} предметов",
+  "one": "{set} · {n} предмет",
   "other": "{set} · {n} предмета"
  },
  "{skill} · learned": "{skill} · изучено",

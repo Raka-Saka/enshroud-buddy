@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'live_state.dart';
+import 'net.dart';
 
 /// A newer release on GitHub than the installed app.
 class Release {
@@ -38,7 +38,8 @@ class Updates {
 
   static Future<void> check() async {
     mine = await appVersion();
-    if (Live.defaultHost.isNotEmpty) return;
+    // the web app is updated with the PC program that serves it
+    if (Live.defaultHost.isNotEmpty || kIsWeb) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -81,36 +82,29 @@ class Updates {
   }
 
   static Future<Release?> _latest() async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 6);
-    try {
-      final req = await client.getUrl(
-        Uri.parse('https://api.github.com/repos/$repo/releases/latest'),
-      );
-      req.headers.set('Accept', 'application/vnd.github+json');
-      req.headers.set('User-Agent', 'EnshroudBuddy');
-      final res = await req.close().timeout(const Duration(seconds: 10));
-      final body = await res.transform(utf8.decoder).join();
-      if (res.statusCode != 200) return null;
-      final j = jsonDecode(body) as Map<String, dynamic>;
-      final apk = [
-        for (final a in (j['assets'] as List? ?? const []))
-          if ((a['name'] as String? ?? '').endsWith('.apk'))
-            a['browser_download_url'] as String,
-      ];
-      // only a download from GitHub itself is ever opened
-      apk.removeWhere((u) => !u.startsWith('https://github.com/'));
-      final page = j['html_url'] as String? ?? '';
-      if (!page.startsWith('https://github.com/')) return null;
-      final tag = (j['tag_name'] as String? ?? '').replaceFirst(
-        RegExp('^v'),
-        '',
-      );
-      return tag.isEmpty
-          ? null
-          : Release(tag, apk.isNotEmpty ? apk.first : page);
-    } finally {
-      client.close(force: true);
-    }
+    final res = await Net.send(
+      'GET',
+      Uri.parse('https://api.github.com/repos/$repo/releases/latest'),
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'EnshroudBuddy',
+      },
+      limit: 4 * 1024 * 1024,
+    );
+    if (res.status != 200) return null;
+    final body = res.text;
+    final j = jsonDecode(body) as Map<String, dynamic>;
+    final apk = [
+      for (final a in (j['assets'] as List? ?? const []))
+        if ((a['name'] as String? ?? '').endsWith('.apk'))
+          a['browser_download_url'] as String,
+    ];
+    // only a download from GitHub itself is ever opened
+    apk.removeWhere((u) => !u.startsWith('https://github.com/'));
+    final page = j['html_url'] as String? ?? '';
+    if (!page.startsWith('https://github.com/')) return null;
+    final tag = (j['tag_name'] as String? ?? '').replaceFirst(RegExp('^v'), '');
+    return tag.isEmpty ? null : Release(tag, apk.isNotEmpty ? apk.first : page);
   }
 
   /// Whether version a (like 0.35.0) is newer than b; anything after '+' or '-' is ignored.

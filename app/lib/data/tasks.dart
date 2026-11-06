@@ -132,7 +132,9 @@ class TaskPlan {
             TaskKind.station,
             ws.kind == 'prop'
                 ? w == null
-                    ? tr('Add {prop} to your station', {'prop': _a(gt(ws.name))})
+                    ? tr('Add {prop} to your station', {
+                      'prop': _a(gt(ws.name)),
+                    })
                     : tr('Add {prop} to your {station}', {
                       'prop': _a(gt(ws.name)),
                       'station': gt(w.name),
@@ -199,10 +201,7 @@ class TaskPlan {
       tasks.add(
         Task(
           TaskKind.fetch,
-          tr('Take {n} × {item}', {
-            'n': e.value,
-            'item': db.shownName(e.key),
-          }),
+          tr('Take {n} × {item}', {'n': e.value, 'item': db.shownName(e.key)}),
           itemId: e.key,
           count: e.value,
           detail: _byBase(places.where((p) => p.label != 'Equipped')),
@@ -313,9 +312,7 @@ class TaskPlan {
       if (shroud.isNotEmpty)
         Task(
           TaskKind.prepare,
-          tr('Shroud: about {time} per trip', {
-            'time': mins(sv.shroudSeconds),
-          }),
+          tr('Shroud: about {time} per trip', {'time': mins(sv.shroudSeconds)}),
           detail: tr(
             'For {items}. {food}. Shroud Roots and Return Beacons on the map; Flame strength {n} lets you in.',
             {

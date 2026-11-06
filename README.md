@@ -38,7 +38,8 @@ files and shows your game on the phone, while you play or away from the PC:
 ## What you need
 
 - A Windows PC with Enshrouded on Steam.
-- An Android phone on the same home network (Wi-Fi) as the PC.
+- An Android phone on the same home network (Wi-Fi) as the PC, or any other phone, tablet or browser there
+  (iPhone and iPad included): the PC program serves the app as a web page too.
 
 ## Install
 
@@ -67,6 +68,16 @@ PC**.
 4. In **Game save**, pick your world and character, then **Read this save**. The rest of the app fills in
    within seconds, and again after every game save (about every 30 s while you play).
 
+### On an iPhone, iPad or another browser
+
+1. On the PC, click the tray icon: the pairing window shows a second QR code, "iPhone, iPad or any browser".
+2. Scan it with the camera and open the link: the app opens in the browser, already paired. If nothing loads,
+   tap **Other address** under that code on the PC and scan again (a PC can have several network addresses).
+3. In Safari: Share → **Add to Home Screen**, to open it like an app.
+
+The web app has the same screens as the Android app, without voice and the code scanner. It needs the PC
+program running, as that is where it comes from.
+
 ### Updates
 
 The app tells you on Home when a new version is out: tap **Update** and install over the old one, nothing is
@@ -91,7 +102,8 @@ lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces 
   untick **Live position** in the tray menu; it stays off, also after updates. Everything else keeps working
   from your saves.
 - **Playing in a friend's world:** the world is saved on the host's PC, so your PC only has your character.
-  You'll see your gear and map, but not their bases and chests.
+  In Setup → Game save, pick **A friend's world** and set the host's Flame strength: you get your gear, bag,
+  skills, map and live position, but not their bases and chests.
 - **Ask** needs [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and signed in on the PC.
   It uses your Claude plan's usage (never an API key, even if one is set on the PC), and reads pages of the
   [Enshrouded wiki](https://enshrouded.wiki.gg) when a question needs them. Without Claude Code, Ask just says
@@ -104,6 +116,8 @@ lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces 
     metrics for it ([Google's privacy policy](https://policies.google.com/privacy)). Nothing about you or the
     code is sent.
   - **Updates:** once a day the app asks GitHub for the latest release, sending nothing about you.
+  - **Web app fonts:** in a browser, the page loads its fonts (Roboto, and Noto for Japanese, Chinese, Korean and
+    Thai) from Google Fonts (fonts.gstatic.com), as any web page using them does. The Android app doesn't.
   Nobody else, us included, gets anything: there are no accounts, ads or analytics.
 
 ## Troubleshooting

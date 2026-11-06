@@ -578,7 +578,9 @@ class Balancing {
   String zoneAt(int altar) =>
       zonePerAltar.isEmpty
           ? '?'
-          : tr('{n} m', {'n': zonePerAltar[altar.clamp(0, zonePerAltar.length - 1)]});
+          : tr('{n} m', {
+            'n': zonePerAltar[altar.clamp(0, zonePerAltar.length - 1)],
+          });
   final int skillPointsPerLevel;
 
   /// (knowledge id, points): skill points granted by discoveries.

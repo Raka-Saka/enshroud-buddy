@@ -69,8 +69,7 @@ class L10n {
         if (p.length == 1) return g;
         // Chinese: Traditional for Taiwan, Hong Kong, Macau or the Hant script, else Simplified
         if (p[0] == 'zh') {
-          final hant =
-              script == 'Hant' || {'TW', 'HK', 'MO'}.contains(region);
+          final hant = script == 'Hant' || {'TW', 'HK', 'MO'}.contains(region);
           return languages.firstWhere(
             (x) => x.code == (hant ? 'Zh_Tw' : 'Zh_Cn'),
           );

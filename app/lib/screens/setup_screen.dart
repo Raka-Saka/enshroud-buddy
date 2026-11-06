@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,6 +22,9 @@ class _SetupScreenState extends State<SetupScreen> {
   Future<SaveList>? saves;
   String? folder;
   int? world, character;
+
+  /// The host's Flame strength, for a guest in a friend's world (SaveList.guest).
+  int guestFlame = 1;
   bool busy = false;
 
   @override
@@ -35,6 +39,7 @@ class _SetupScreenState extends State<SetupScreen> {
       folder = list.current.folder;
       world = list.current.world;
       character = list.current.character;
+      guestFlame = list.current.guestFlame;
     });
     return list;
   }
@@ -105,8 +110,17 @@ class _SetupScreenState extends State<SetupScreen> {
     setState(() => busy = true);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await live.select(f.folder, world!, character!);
-      final w = f.worlds.firstWhere((e) => e.slot == world).name;
+      final guest = world == SaveList.guest;
+      await live.select(
+        f.folder,
+        world!,
+        character!,
+        flame: guest ? guestFlame : null,
+      );
+      final w =
+          guest
+              ? tr('a friend\'s world')
+              : f.worlds.firstWhere((e) => e.slot == world).name;
       final c = f.characters.firstWhere((e) => e.slot == character).name;
       messenger.showSnackBar(
         SnackBar(
@@ -139,47 +153,61 @@ class _SetupScreenState extends State<SetupScreen> {
         padding: const EdgeInsets.only(bottom: 32),
         children: [
           SectionTitle(tr('PC agent')),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: FilledButton.icon(
-              onPressed: busy ? null : () => _scan(live),
-              icon: const Icon(Icons.qr_code_scanner),
-              label: Text(tr('Scan the PC\'s code')),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-            child: Text(
-              tr(
-                'On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:',
+          // the web app is served by the agent: its address is the page's, and there is no scanner
+          if (kIsWeb)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(
+                tr(
+                  'On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone, and scan the browser code with this device\'s camera. Or type the pairing code:',
+                ),
+                style: const TextStyle(color: Palette.ash, fontSize: 12),
               ),
-              style: const TextStyle(color: Palette.ash, fontSize: 12),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: host,
-                    decoration: InputDecoration(
-                      hintText: '192.168.1.20:4750',
-                      helperText: tr(
-                        'Shown in the agent\'s tray menu on the PC: "Phone address"',
+          if (!kIsWeb)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: FilledButton.icon(
+                onPressed: busy ? null : () => _scan(live),
+                icon: const Icon(Icons.qr_code_scanner),
+                label: Text(tr('Scan the PC\'s code')),
+              ),
+            ),
+          if (!kIsWeb)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(
+                tr(
+                  'On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:',
+                ),
+                style: const TextStyle(color: Palette.ash, fontSize: 12),
+              ),
+            ),
+          if (!kIsWeb)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: host,
+                      decoration: InputDecoration(
+                        hintText: '192.168.1.20:4750',
+                        helperText: tr(
+                          'Shown in the agent\'s tray menu on the PC: "Phone address"',
+                        ),
                       ),
+                      onSubmitted: (_) => _saveHost(live),
                     ),
-                    onSubmitted: (_) => _saveHost(live),
                   ),
-                ),
-                const SizedBox(width: 8),
-                FilledButton.tonal(
-                  onPressed: () => _saveHost(live),
-                  child: Text(tr('Connect')),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  FilledButton.tonal(
+                    onPressed: () => _saveHost(live),
+                    child: Text(tr('Connect')),
+                  ),
+                ],
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: TextField(
@@ -236,7 +264,7 @@ class _SetupScreenState extends State<SetupScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: Text(
                       tr(
-                        'Playing in a friend\'s world? The world is saved on the host\'s PC, so only your character is on yours: pick a world you host to see bases and chests.',
+                        'Playing in a friend\'s world? Pick "A friend\'s world" above: the world is saved on the host\'s PC, so the app reads your character and where you are.',
                       ),
                       style: const TextStyle(
                         color: Palette.ash,
@@ -337,7 +365,8 @@ class _SetupScreenState extends State<SetupScreen> {
     final isCurrent =
         list.current.folder == f.folder &&
         list.current.world == world &&
-        list.current.character == character;
+        list.current.character == character &&
+        (world != SaveList.guest || list.current.guestFlame == guestFlame);
     Widget pick(String kind, SaveSlot e, bool selected, VoidCallback onTap) =>
         ListTile(
           dense: true,
@@ -391,6 +420,61 @@ class _SetupScreenState extends State<SetupScreen> {
                   world = e.slot;
                 }),
               ),
+            // a guest: the world's save is on the host's PC, so only the character is read
+            ListTile(
+              dense: true,
+              leading: Icon(
+                here && world == SaveList.guest
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
+                color:
+                    here && world == SaveList.guest
+                        ? Palette.flame
+                        : Palette.ash,
+              ),
+              title: Text(tr('A friend\'s world (I play as a guest)')),
+              subtitle: Text(
+                tr(
+                  'Your character only: the world\'s chests and bases are on the host\'s PC',
+                ),
+                style: const TextStyle(color: Palette.ash, fontSize: 12),
+              ),
+              onTap:
+                  () => setState(() {
+                    if (!here) character = f.characters.firstOrNull?.slot;
+                    folder = f.folder;
+                    world = SaveList.guest;
+                  }),
+            ),
+            if (here && world == SaveList.guest)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(56, 0, 16, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        tr('Host\'s Flame strength: {n}', {'n': guestFlame}),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: tr('Less'),
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed:
+                          guestFlame > 1
+                              ? () => setState(() => guestFlame--)
+                              : null,
+                    ),
+                    IconButton(
+                      tooltip: tr('More'),
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed:
+                          guestFlame < 20
+                              ? () => setState(() => guestFlame++)
+                              : null,
+                    ),
+                  ],
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text(
@@ -422,7 +506,8 @@ class _SetupScreenState extends State<SetupScreen> {
                               busy ||
                               world == null ||
                               character == null ||
-                              !f.worlds.any((e) => e.slot == world) ||
+                              (world != SaveList.guest &&
+                                  !f.worlds.any((e) => e.slot == world)) ||
                               !f.characters.any((e) => e.slot == character)
                           ? null
                           : () => _use(live, f),

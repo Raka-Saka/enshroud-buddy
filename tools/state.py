@@ -444,14 +444,24 @@ def world_state(save, gd):
     }
 
 
-def build(saves, world, character, export):
+GUEST = -1  # the world number for a guest in a friend's world
+
+
+def guest_world(flame):
+    """A guest in a friend's world: that world's save is on the host's PC, so no chests, bases or world
+    progress; the host's Flame strength, as the player gave it, for Shroud time and access."""
+    return {"name": "", "guest": True, "placed": {}, "settings": {}, "flame_level": int(flame), "knowledge": [],
+            "saved_at": None, "bases": [], "containers": []}
+
+
+def build(saves, world, character, export, guest_flame=1):
     gd = GameData(export)
     WARNINGS.clear()
     out = {
         "version": 1,
         "built_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "character": character_state(Save(saves / f"character{character}.ksd"), gd),
-        "world": world_state(Save(saves / f"world{world}.ksd"), gd),
+        "world": guest_world(guest_flame) if world == GUEST else world_state(Save(saves / f"world{world}.ksd"), gd),
     }
     out["warnings"] = sorted(WARNINGS)
     return out

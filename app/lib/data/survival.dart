@@ -51,14 +51,31 @@ class Survival {
             .fold(0, (b, v) => b + seconds(v.$2));
   });
 
-  /// Time in the Shroud: base plus the Flame level, times the world setting, plus worn gear.
+  /// Learned skills that add time in the Shroud for good, from their own text ("Time in the Shroud is
+  /// increased by 60/120/180 s"), at the rank learned. Skills that give time back during a fight (on a kill, a
+  /// hit) can't be counted ahead.
+  int get _skillShroudSeconds {
+    final re = RegExp(r'Time in the Shroud is increased by ([\d/]+) ?s\b');
+    var total = 0;
+    state.skills.forEach((id, rank) {
+      final m = re.firstMatch(db.skillById[id]?.description ?? '');
+      if (m == null) return;
+      final steps = m.group(1)!.split('/').map(int.parse).toList();
+      total += steps[(rank < 1 ? 1 : rank).clamp(1, steps.length) - 1];
+    });
+    return total;
+  }
+
+  /// Time in the Shroud: base plus the Flame level, times the world setting, plus worn gear and learned skills.
+  /// Food isn't in it: the save doesn't say what you've eaten.
   int get shroudSeconds {
     final b = db.balancing;
     if (b == null) return 0;
     return ((b.fogBase + b.fogPerFlame * state.flameLevel) *
                 _factor('shroud_time'))
             .round() +
-        _gearSeconds(shroudLabels);
+        _gearSeconds(shroudLabels) +
+        _skillShroudSeconds;
   }
 
   /// Breath underwater: base times the world setting, plus worn gear.

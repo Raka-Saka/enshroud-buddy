@@ -9,36 +9,38 @@
  "(estimate until you glide a bit)": "(приблизно, доки ви трохи не політаєте)",
  "+5 min each, used on pickup.": "+5 хв кожна, діє при підбиранні.",
  "+{n} Elixir Wells cleared": {
-  "one": "+{n} Колодязь Еліксиру очищено",
   "few": "+{n} Колодязі Еліксиру очищено",
   "many": "+{n} Колодязів Еліксиру очищено",
+  "one": "+{n} Колодязь Еліксиру очищено",
   "other": "+{n} Колодязя Еліксиру очищено"
  },
  "+{n} Shroud Roots claimed": {
-  "one": "+{n} Корінь Савана знищено",
   "few": "+{n} Корені Савана знищено",
   "many": "+{n} Коренів Савана знищено",
+  "one": "+{n} Корінь Савана знищено",
   "other": "+{n} Кореня Савана знищено"
  },
  "+{n} discoveries": {
-  "one": "+{n} відкриття",
   "few": "+{n} відкриття",
   "many": "+{n} відкриттів",
+  "one": "+{n} відкриття",
   "other": "+{n} відкриття"
  },
  "+{n} levels": "+{n} рівн.",
  "+{n} recipes": {
-  "one": "+{n} рецепт",
   "few": "+{n} рецепти",
   "many": "+{n} рецептів",
+  "one": "+{n} рецепт",
   "other": "+{n} рецепта"
  },
  "+{n} skill ranks": {
-  "one": "+{n} ранг навичок",
   "few": "+{n} ранги навичок",
   "many": "+{n} рангів навичок",
+  "one": "+{n} ранг навичок",
   "other": "+{n} рангу навичок"
  },
+ "A friend's world (I play as a guest)": "Світ друга (граю як гість)",
+ "A picture of your build and gear for Discord or a chat": "Зображення вашої збірки та спорядження для Discord або чату",
  "A place, a piece of unique loot (\"{garb}\"), or a whole set (\"{set}\"): the map then shows only where it lies.": "Місце, унікальна здобич («{garb}») або цілий набір («{set}»): мапа покаже лише те, де це лежить.",
  "About": "Про застосунок",
  "Active skill": "Активна навичка",
@@ -149,6 +151,7 @@
  "Could not load game data\n{error}": "Не вдалося завантажити дані гри\n{error}",
  "Couldn't answer: {error}": "Не вдалося відповісти: {error}",
  "Couldn't scan: {error}. Type the details below.": "Не вдалося сканувати: {error}. Введіть дані нижче.",
+ "Couldn't share the build": "Не вдалося поділитися збіркою",
  "Couldn't switch: {error}": "Не вдалося перемкнути: {error}",
  "Craft at {station}": "Майструвати: {station}",
  "Craft at {station} (locked)": "Майструвати: {station} (заблоковано)",
@@ -166,12 +169,14 @@
  "Details": "Подробиці",
  "Done": "Готово",
  "Download it, then open it to install over this one: nothing is lost.": "Завантажте й відкрийте файл, щоб установити поверх цієї версії: нічого не втратиться.",
+ "Download picture and copy text": "Завантажити зображення й скопіювати текст",
  "Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.": "Завантажте новий EnshroudBuddy.exe зі сторінки випуску й відкрийте його: він замінить старий.",
  "Durability {have}/{max}": "Міцність {have}/{max}",
  "Edit pin": "Редагувати мітку",
  "Eleven directions with the skills to take, scored on damage, area, survival, gathering, building and passives": "Одинадцять напрямів із навичками, які варто взяти, з оцінкою ушкоджень, площі, виживання, збирання, будівництва та пасивних бонусів",
  "Empty": "Порожньо",
  "End the route": "Завершити маршрут",
+ "Enshroud Buddy · unofficial fan app, not affiliated with Keen Games": "Enshroud Buddy · неофіційний фанатський застосунок, не пов'язаний із Keen Games",
  "Equipped": "Екіпіровано",
  "Everything I own, per slot": "Усе, що в мене є, за слотами",
  "Everything is in hand: craft away.": "Усе під рукою: майструйте.",
@@ -249,6 +254,7 @@
  "Hollow take more from {weak} and resist {strong}.": "Пустотілі вразливі до: {weak}; стійкі до: {strong}.",
  "Hollow take more from {weak}.": "Пустотілі вразливі до: {weak}.",
  "Home": "Головна",
+ "Host's Flame strength: {n}": "Сила Полум'я господаря: {n}",
  "Hourglass capsules · {n} on the map": "Капсули пісочного годинника · {n} на мапі",
  "How do I make {item}?": "Як виготовити «{item}»?",
  "How to get it": "Як отримати",
@@ -285,10 +291,12 @@
  "Learned": "Вивчено",
  "Learned: rank {rank} of {max}": "Вивчено: ранг {rank} з {max}",
  "Legs": "Ноги",
+ "Less": "Менше",
  "Level": "Рівень",
  "Level since {day}": "Рівень від {day}",
  "Level with you": "На вашому рівні",
  "Level {from}–{to}": "Рівень {from}–{to}",
+ "Level {level} · Flame strength {flame}": "Рівень {level} · Сила Полум'я {flame}",
  "Level {level} · {spent} of {total} points spent · {free} free": "Рівень {level} · витрачено {spent} з {total} оч. · вільно {free}",
  "Level {n}": "Рівень {n}",
  "Level {n} (+{up})": "Рівень {n} (+{up})",
@@ -322,6 +330,7 @@
  "Milestones": "Віхи",
  "Mine": "Моє",
  "Missing gear": "Відсутнє спорядження",
+ "More": "Більше",
  "More of what your build already does": "Більше того, що ваша збірка вже вміє",
  "My build": "Моя збірка",
  "My gear by slot": "Моє спорядження за слотами",
@@ -367,6 +376,7 @@
  "Oct": "жовт",
  "Offline · saved {ago}": "Не в мережі · збережено {ago}",
  "On foot": "Пішки",
+ "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone, and scan the browser code with this device's camera. Or type the pairing code:": "На PC: клацніть правою кнопкою значок Enshroud Buddy у треї, «Під'єднати телефон», і відскануйте код для браузера камерою цього пристрою. Або введіть код з'єднання:",
  "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:": "На PC: клацніть правою кнопкою значок Enshroud Buddy у треї, «Під'єднати телефон». Або введіть дані:",
  "One fewer": "На один менше",
  "One more": "Ще один",
@@ -391,6 +401,7 @@
  "Phone language": "Мова телефона",
  "Phone language ({lang})": "Мова телефона ({lang})",
  "Pick something to make or find; the plan works out unlocks, stations, gathering and crafting.": "Виберіть, що виготовити чи знайти; план розпише розблокування, станції, збирання й майстрування.",
+ "Picture downloaded, and the build is on the clipboard": "Зображення завантажено, а збірку скопійовано в буфер обміну",
  "Pin \"{title}\" deleted": "Мітку «{title}» видалено",
  "Place": "Місце",
  "Places": "Місця",
@@ -402,7 +413,7 @@
  "Plan this skill": "Запланувати навичку",
  "Plan {item}": "Запланувати: {item}",
  "Plan: {nodes} nodes, {points} points": "План: вузлів {nodes}, очок {points}",
- "Playing in a friend's world? The world is saved on the host's PC, so only your character is on yours: pick a world you host to see bases and chests.": "Граєте у світі друга? Світ зберігається на PC господаря, тож на вашому є лише ваш персонаж: виберіть світ, який розміщуєте ви, щоб бачити оплоти й скрині.",
+ "Playing in a friend's world? Pick \"A friend's world\" above: the world is saved on the host's PC, so the app reads your character and where you are.": "Граєте у світі друга? Виберіть вище «Світ друга»: світ зберігається на PC господаря, тож застосунок читає вашого персонажа і де ви перебуваєте.",
  "Points per area": "Очки за напрямами",
  "Prepare": "Підготуватися",
  "Produce to collect · {n}": "Продукти для збору · {n}",
@@ -456,6 +467,9 @@
  "Sets · {n}": "Набори · {n}",
  "Setup": "Налаштування",
  "Setup: PC agent and game save": "Налаштування: агент на PC і збереження гри",
+ "Share": "Поділитися",
+ "Share build": "Поділитися збіркою",
+ "Shared from Enshroud Buddy, an unofficial Enshrouded companion": "Надіслано з Enshroud Buddy, неофіційного помічника для Enshrouded",
  "Shield": "Щит",
  "Shock": "Електрошок",
  "Shopping": "Покупки",
@@ -542,9 +556,9 @@
  "Unique loot": "Унікальна здобич",
  "Unique loot only": "Лише унікальна здобич",
  "Unique loot: {n} spots on the map": {
-  "one": "Унікальна здобич: {n} місце на мапі",
   "few": "Унікальна здобич: {n} місця на мапі",
   "many": "Унікальна здобич: {n} місць на мапі",
+  "one": "Унікальна здобич: {n} місце на мапі",
   "other": "Унікальна здобич: {n} місця на мапі"
  },
  "Unknown station": "Невідома станція",
@@ -587,6 +601,7 @@
  "World setting ×{factor}": "Налаштування світу ×{factor}",
  "Worn": "Вдягнено",
  "Worn armour and weapons are level {lo} to {hi}, all at or above {level}.": "Вдягнені обладунки та зброя мають рівні від {lo} до {hi}, усі не нижче {level}.",
+ "Worn: {items}": "Вдягнено: {items}",
  "You are level {you}; its enemies are level {level}.": "Ваш рівень {you}; рівень ворогів тут {level}.",
  "You can stay": "Можна перебувати",
  "You carry {items}.": "У вас є: {items}.",
@@ -602,10 +617,12 @@
  "Your bag and chests appear after the PC agent reads a save.": "Ваша сумка й скрині з'являться, щойно агент на PC прочитає збереження.",
  "Your build": "Ваша збірка",
  "Your build appears after the PC agent reads a save.": "Ваша збірка з'явиться, щойно агент на PC прочитає збереження.",
+ "Your character only: the world's chests and bases are on the host's PC": "Лише ваш персонаж: скрині й оплоти світу зберігаються на PC господаря",
  "Your journey starts here": "Ваш шлях починається тут",
  "Your time in the Shroud: {time}.": "Ваш час у Савані: {time}.",
  "Zone: {zone}": "Зона: {zone}",
  "Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).": "Зони вище за ваш рівень стійкості до Савана позначено на мапі червоним (шар «Саван»).",
+ "a friend's world": "Світ друга",
  "agent not ready": "агент не готовий",
  "all found": "усе знайдено",
  "area level {level}": "рівень зони {level}",
@@ -639,9 +656,9 @@
  "ice": "крижане",
  "in the Shroud": "у Савані",
  "in {n} animals": {
-  "one": "у {n} тварини",
   "few": "у {n} тварин",
   "many": "у {n} тварин",
+  "one": "у {n} тварини",
   "other": "у {n} тварини"
  },
  "in {n} chests": "у скринях: {n}",
@@ -695,9 +712,9 @@
  "{base} · altar {level}": "{base} · вівтар {level}",
  "{base}: altar {n} ({zone} zone)": "{base}: вівтар {n} (зона {zone})",
  "{category} · {n} pieces on the map": {
-  "one": "{category} · {n} шт. на мапі",
   "few": "{category} · {n} шт. на мапі",
   "many": "{category} · {n} шт. на мапі",
+  "one": "{category} · {n} шт. на мапі",
   "other": "{category} · {n} шт. на мапі"
  },
  "{container} #{n}": "{container} №{n}",
@@ -716,9 +733,9 @@
  "{hall}, level {level}. The game keeps every hall's inside in one far corner of the world; the map shows this one there with its chests, notes and save points. Inside, it follows you: your floor bright, the others faint.": "{hall}, рівень {level}. Гра зберігає нутрощі всіх залів в одному далекому куті світу; мапа показує цей зал там, із його скринями, записами й точками збереження. Усередині вона стежить за вами: ваш поверх яскравий, інші бліді.",
  "{items} +{n}": "{items} +{n}",
  "{items} deal {damage}, which they resist.": {
-  "one": "{items}: ушкодження {damage}, до якого вони стійкі.",
   "few": "{items}: ушкодження {damage}, до якого вони стійкі.",
   "many": "{items}: ушкодження {damage}, до якого вони стійкі.",
+  "one": "{items}: ушкодження {damage}, до якого вони стійкі.",
   "other": "{items}: ушкодження {damage}, до якого вони стійкі."
  },
  "{item} (worn)": "{item} (вдягнено)",
@@ -733,66 +750,66 @@
  "{m} min": "{m} хв",
  "{m} min {s} s": "{m} хв {s} с",
  "{n} Fell": {
-  "one": "{n} занепалий",
   "few": "{n} занепалі",
   "many": "{n} занепалих",
+  "one": "{n} занепалий",
   "other": "{n} занепалого"
  },
  "{n} Fell inside, the Shroud's creatures.": {
-  "one": "Усередині {n} занепалий, створіння Савана.",
   "few": "Усередині {n} занепалі, створіння Савана.",
   "many": "Усередині {n} занепалих, створінь Савана.",
+  "one": "Усередині {n} занепалий, створіння Савана.",
   "other": "Усередині {n} занепалого, створіння Савана."
  },
  "{n} Hollow": {
-  "one": "{n} пустотілий",
   "few": "{n} пустотілі",
   "many": "{n} пустотілих",
+  "one": "{n} пустотілий",
   "other": "{n} пустотілого"
  },
  "{n} Hollow ({elite} elite)": {
-  "one": "{n} пустотілий (елітних: {elite})",
   "few": "{n} пустотілі (елітних: {elite})",
   "many": "{n} пустотілих (елітних: {elite})",
+  "one": "{n} пустотілий (елітних: {elite})",
   "other": "{n} пустотілого (елітних: {elite})"
  },
  "{n} batches": {
-  "one": "{n} партія",
   "few": "{n} партії",
   "many": "{n} партій",
+  "one": "{n} партія",
   "other": "{n} партії"
  },
  "{n} beasts": {
-  "one": "{n} звір",
   "few": "{n} звірі",
   "many": "{n} звірів",
+  "one": "{n} звір",
   "other": "{n} звіра"
  },
  "{n} bone piles": {
-  "one": "{n} купа кісток",
   "few": "{n} купи кісток",
   "many": "{n} куп кісток",
+  "one": "{n} купа кісток",
   "other": "{n} купи кісток"
  },
  "{n} d ago": "{n} д тому",
  "{n} feeders look empty": {
-  "one": "{n} годівниця, схоже, порожня",
   "few": "{n} годівниці, схоже, порожні",
   "many": "{n} годівниць, схоже, порожні",
+  "one": "{n} годівниця, схоже, порожня",
   "other": "{n} годівниці, схоже, порожні"
  },
  "{n} fire": "вогняні: {n}",
  "{n} grapple points.": {
-  "one": "{n} точка для гака.",
   "few": "{n} точки для гака.",
   "many": "{n} точок для гака.",
+  "one": "{n} точка для гака.",
   "other": "{n} точки для гака."
  },
  "{n} h ago": "{n} год тому",
  "{n} items added to the plan, with where to get them": {
-  "one": "{n} предмет додано до плану з місцями, де його взяти",
   "few": "{n} предмети додано до плану з місцями, де їх взяти",
   "many": "{n} предметів додано до плану з місцями, де їх взяти",
+  "one": "{n} предмет додано до плану з місцями, де його взяти",
   "other": "{n} предмета додано до плану з місцями, де їх взяти"
  },
  "{n} km": "{n} км",
@@ -809,120 +826,120 @@
  "{n} min": "{n} хв",
  "{n} min ago": "{n} хв тому",
  "{n} pages": {
-  "one": "{n} сторінка",
   "few": "{n} сторінки",
   "many": "{n} сторінок",
+  "one": "{n} сторінка",
   "other": "{n} сторінки"
  },
  "{n} pieces · altar {altar} · {zone} build zone · drag to turn, pinch to zoom": {
-  "one": "{n} елемент · вівтар {altar} · зона будівництва {zone} · тягніть, щоб повернути, зведіть пальці для масштабу",
   "few": "{n} елементи · вівтар {altar} · зона будівництва {zone} · тягніть, щоб повернути, зведіть пальці для масштабу",
   "many": "{n} елементів · вівтар {altar} · зона будівництва {zone} · тягніть, щоб повернути, зведіть пальці для масштабу",
+  "one": "{n} елемент · вівтар {altar} · зона будівництва {zone} · тягніть, щоб повернути, зведіть пальці для масштабу",
   "other": "{n} елемента · вівтар {altar} · зона будівництва {zone} · тягніть, щоб повернути, зведіть пальці для масштабу"
  },
  "{n} piles raise more Hollow until broken: break them first.": {
-  "one": "{n} купа піднімає нових пустотілих, доки її не зруйнувати: зруйнуйте її першою.",
   "few": "{n} купи піднімають нових пустотілих, доки їх не зруйнувати: зруйнуйте їх першими.",
   "many": "{n} куп піднімають нових пустотілих, доки їх не зруйнувати: зруйнуйте їх першими.",
+  "one": "{n} купа піднімає нових пустотілих, доки її не зруйнувати: зруйнуйте її першою.",
   "other": "{n} купи піднімають нових пустотілих, доки їх не зруйнувати: зруйнуйте їх першими."
  },
  "{n} places": {
-  "one": "{n} місце",
   "few": "{n} місця",
   "many": "{n} місць",
+  "one": "{n} місце",
   "other": "{n} місця"
  },
  "{n} point": "{n} очко",
  "{n} point per rank": "{n} очко за ранг",
  "{n} points": {
-  "one": "{n} очко",
   "few": "{n} очки",
   "many": "{n} очок",
+  "one": "{n} очко",
   "other": "{n} очка"
  },
  "{n} points per rank": {
-  "one": "{n} очко за ранг",
   "few": "{n} очки за ранг",
   "many": "{n} очок за ранг",
+  "one": "{n} очко за ранг",
   "other": "{n} очка за ранг"
  },
  "{n} points to spend. Each path starts from your learned skills and follows the tree's links.": {
-  "one": "{n} очко до витрати. Кожен шлях починається з ваших вивчених навичок і йде зв'язками дерева.",
   "few": "{n} очки до витрати. Кожен шлях починається з ваших вивчених навичок і йде зв'язками дерева.",
   "many": "{n} очок до витрати. Кожен шлях починається з ваших вивчених навичок і йде зв'язками дерева.",
+  "one": "{n} очко до витрати. Кожен шлях починається з ваших вивчених навичок і йде зв'язками дерева.",
   "other": "{n} очка до витрати. Кожен шлях починається з ваших вивчених навичок і йде зв'язками дерева."
  },
  "{n} pt": "{n} оч.",
  "{n} pts": "{n} оч.",
  "{n} random containers": "випадкових контейнерів: {n}",
  "{n} rune barriers": {
-  "one": "{n} рунний бар'єр",
   "few": "{n} рунні бар'єри",
   "many": "{n} рунних бар'єрів",
+  "one": "{n} рунний бар'єр",
   "other": "{n} рунного бар'єра"
  },
  "{n} s": "{n} с",
  "{n} sets": {
-  "one": "{n} набір",
   "few": "{n} набори",
   "many": "{n} наборів",
+  "one": "{n} набір",
   "other": "{n} набору"
  },
  "{n} shock": "електрошокові: {n}",
  "{n} spots": "місць: {n}",
  "{n} stacks": {
-  "one": "{n} стос",
   "few": "{n} стоси",
   "many": "{n} стосів",
+  "one": "{n} стос",
   "other": "{n} стосу"
  },
  "{n} stops, {distance} as the crow flies.": {
-  "one": "{n} зупинка, {distance} по прямій.",
   "few": "{n} зупинки, {distance} по прямій.",
   "many": "{n} зупинок, {distance} по прямій.",
+  "one": "{n} зупинка, {distance} по прямій.",
   "other": "{n} зупинки, {distance} по прямій."
  },
  "{n} tasks": {
-  "one": "{n} завдання",
   "few": "{n} завдання",
   "many": "{n} завдань",
+  "one": "{n} завдання",
   "other": "{n} завдання"
  },
  "{n} to find": "знайти: {n}",
  "{n} traps": {
-  "one": "{n} пастка",
   "few": "{n} пастки",
   "many": "{n} пасток",
+  "one": "{n} пастка",
   "other": "{n} пастки"
  },
  "{n} traps, {kinds}.": {
-  "one": "{n} пастка: {kinds}.",
   "few": "{n} пастки: {kinds}.",
   "many": "{n} пасток: {kinds}.",
+  "one": "{n} пастка: {kinds}.",
   "other": "{n} пастки: {kinds}."
  },
  "{n} traps.": {
-  "one": "{n} пастка.",
   "few": "{n} пастки.",
   "many": "{n} пасток.",
+  "one": "{n} пастка.",
   "other": "{n} пастки."
  },
  "{n} updrafts and glider barriers.": {
-  "one": "{n} висхідний потік і бар'єри для планера.",
   "few": "{n} висхідні потоки й бар'єри для планера.",
   "many": "{n} висхідних потоків і бар'єрів для планера.",
+  "one": "{n} висхідний потік і бар'єри для планера.",
   "other": "{n} висхідного потоку й бар'єрів для планера."
  },
  "{n} upgrades left (L{level})": {
-  "one": "Залишилось {n} покращення (Р{level})",
   "few": "Залишилось {n} покращення (Р{level})",
   "many": "Залишилось {n} покращень (Р{level})",
+  "one": "Залишилось {n} покращення (Р{level})",
   "other": "Залишилось {n} покращення (Р{level})"
  },
  "{n} upgrades to find": {
-  "one": "Знайти {n} покращення",
   "few": "Знайти {n} покращення",
   "many": "Знайти {n} покращень",
+  "one": "Знайти {n} покращення",
   "other": "Знайти {n} покращення"
  },
  "{percent}% a wet boot": "{percent}% — мокрий чобіт",
@@ -931,9 +948,9 @@
  "{region} Hollow Halls": "Зали пустотілих: {region}",
  "{sets} sets in {groups} groups": "наборів: {sets}, груп: {groups}",
  "{set} · {n} items": {
-  "one": "{set} · {n} предмет",
   "few": "{set} · {n} предмети",
   "many": "{set} · {n} предметів",
+  "one": "{set} · {n} предмет",
   "other": "{set} · {n} предмета"
  },
  "{skill} · learned": "{skill} · вивчено",

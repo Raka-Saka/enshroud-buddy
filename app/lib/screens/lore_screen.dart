@@ -136,7 +136,11 @@ class _DocsScreenState extends State<DocsScreen> {
                                   )
                                   : d.pages.length > 1
                                   ? Text(
-                                    trn(d.pages.length, '{n} page', '{n} pages'),
+                                    trn(
+                                      d.pages.length,
+                                      '{n} page',
+                                      '{n} pages',
+                                    ),
                                     style: const TextStyle(
                                       color: Palette.ash,
                                       fontSize: 12,
@@ -174,7 +178,8 @@ class DocScreen extends StatelessWidget {
     body: ListView(
       padding: const EdgeInsets.only(bottom: 24, top: 4),
       children: [
-        for (final p in doc.pages) Parchment(title: gtn(p.title), text: gt(p.text)),
+        for (final p in doc.pages)
+          Parchment(title: gtn(p.title), text: gt(p.text)),
         if (doc.rewards.isNotEmpty) ...[
           SectionTitle(tr('Rewards')),
           Padding(

@@ -75,9 +75,7 @@ class SetsScreen extends StatelessWidget {
     return embedded
         ? list
         : Scaffold(
-          appBar: AppBar(
-            title: Text(tr('Sets · {n}', {'n': db.sets.length})),
-          ),
+          appBar: AppBar(title: Text(tr('Sets · {n}', {'n': db.sets.length}))),
           body: list,
         );
   }

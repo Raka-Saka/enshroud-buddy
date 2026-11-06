@@ -9,7 +9,8 @@ versions, so whatever else this PC's Python has installed doesn't end up in the 
 
 Also writes dist/THIRD_PARTY_LICENSES.txt: the licence of everything the exe bundles (Python, Tcl/Tk and each
 package, with the source of the LGPL one), put in the exe too (tray menu "Licences") and next to it on the
-release. The game data goes in as it ships (tools/release.py public_export).
+release. The game data goes in as it ships (tools/release.py public_export). And the app as a web page
+(tools/build_web.py: build/web.zip, Flutter needed), which the agent serves at /app/.
 """
 import pathlib
 import subprocess
@@ -97,6 +98,8 @@ def main():
     for src, dest in public_data():
         args += ["--add-data", f"{src};{dest}"]
     args += ["--add-data", f"{licences(py)};."]
+    subprocess.run([sys.executable, str(ROOT / "tools" / "build_web.py")], check=True)
+    args += ["--add-data", f"{ROOT / 'build' / 'web.zip'};build"]
     subprocess.run(args + [str(ROOT / "agent" / "agent.py")], check=True)
     exe = DIST / "EnshroudBuddy.exe"
     print(f"{exe} ({exe.stat().st_size / 1e6:.0f} MB)")

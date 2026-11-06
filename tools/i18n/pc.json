@@ -1,4 +1,20 @@
 {
+ "a friend's world": {
+  "De_De": "Welt eines Freundes",
+  "Fr_Fr": "le monde d'un ami",
+  "Es_Es": "el mundo de un amigo",
+  "It_It": "il mondo di un amico",
+  "Pt_Br": "o mundo de um amigo",
+  "Pl_Pl": "świat znajomego",
+  "Tr_Tr": "bir arkadaşın dünyası",
+  "Ru_Ru": "мир друга",
+  "Uk_Ua": "світ друга",
+  "Ja_Jp": "フレンドのワールド",
+  "Ko_Kr": "친구의 세계",
+  "Zh_Cn": "朋友的世界",
+  "Zh_Tw": "朋友的世界",
+  "Th_Th": "โลกของเพื่อน"
+ },
  "Reading your question": {
   "De_De": "Lese deine Frage",
   "Es_Es": "Leyendo tu pregunta",
@@ -78,6 +94,38 @@
   "Uk_Ua": "У застосунку відкрийте «Налаштування» (значок шестірні на головній) і натисніть «Сканувати код із PC».",
   "Zh_Cn": "在应用中打开“设置”（首页上的齿轮图标），点击“扫描 PC 的二维码”。",
   "Zh_Tw": "在 App 中開啟「設定」（首頁的齒輪圖示），然後輕觸「掃描 PC 的條碼」。"
+ },
+ "iPhone, iPad or any browser: scan this with the camera to open the app there.": {
+  "De_De": "iPhone, iPad oder jeder Browser: Scanne das mit der Kamera, um die App dort zu öffnen.",
+  "Fr_Fr": "iPhone, iPad ou n'importe quel navigateur : scanne ceci avec l'appareil photo pour y ouvrir l'appli.",
+  "Es_Es": "iPhone, iPad o cualquier navegador: escanea esto con la cámara para abrir la app allí.",
+  "It_It": "iPhone, iPad o qualsiasi browser: scansiona questo con la fotocamera per aprire l'app lì.",
+  "Pt_Br": "iPhone, iPad ou qualquer navegador: escaneie isto com a câmera para abrir o app nele.",
+  "Pl_Pl": "iPhone, iPad lub dowolna przeglądarka: zeskanuj to aparatem, by otworzyć tam aplikację.",
+  "Tr_Tr": "iPhone, iPad veya herhangi bir tarayıcı: uygulamayı orada açmak için bunu kamerayla tara.",
+  "Ru_Ru": "iPhone, iPad или любой браузер: отсканируйте это камерой, чтобы открыть там приложение.",
+  "Uk_Ua": "iPhone, iPad або будь-який браузер: відскануйте це камерою, щоб відкрити там застосунок.",
+  "Ja_Jp": "iPhone、iPad、または任意のブラウザ：カメラでこれを読み取ると、そこでアプリが開きます。",
+  "Ko_Kr": "iPhone, iPad 또는 모든 브라우저: 카메라로 이것을 스캔하면 그곳에서 앱이 열립니다.",
+  "Zh_Cn": "iPhone、iPad 或任意浏览器：用相机扫描此码，即可在那里打开应用。",
+  "Zh_Tw": "iPhone、iPad 或任何瀏覽器：用相機掃描這個條碼，即可在那裡開啟 App。",
+  "Th_Th": "iPhone, iPad หรือเบราว์เซอร์ใดก็ได้: สแกนสิ่งนี้ด้วยกล้องเพื่อเปิดแอปที่นั่น"
+ },
+ "Other address": {
+  "De_De": "Andere Adresse",
+  "Fr_Fr": "Autre adresse",
+  "Es_Es": "Otra dirección",
+  "It_It": "Altro indirizzo",
+  "Pt_Br": "Outro endereço",
+  "Pl_Pl": "Inny adres",
+  "Tr_Tr": "Başka adres",
+  "Ru_Ru": "Другой адрес",
+  "Uk_Ua": "Інша адреса",
+  "Ja_Jp": "別のアドレス",
+  "Ko_Kr": "다른 주소",
+  "Zh_Cn": "其他地址",
+  "Zh_Tw": "其他位址",
+  "Th_Th": "ที่อยู่อื่น"
  },
  "Or type it in:": {
   "De_De": "Oder gib ihn ein:",
@@ -367,21 +415,21 @@
   "Zh_Cn": "许可",
   "Zh_Tw": "授權"
  },
- "Open state in browser": {
-  "De_De": "Status im Browser öffnen",
-  "Es_Es": "Abrir estado en el navegador",
-  "Fr_Fr": "Ouvrir l'état dans le navigateur",
-  "It_It": "Apri lo stato nel browser",
-  "Ja_Jp": "状態をブラウザで開く",
-  "Ko_Kr": "브라우저에서 상태 열기",
-  "Pl_Pl": "Otwórz stan w przeglądarce",
-  "Pt_Br": "Abrir estado no navegador",
-  "Ru_Ru": "Открыть состояние в браузере",
-  "Th_Th": "เปิดสถานะในเบราว์เซอร์",
-  "Tr_Tr": "Durumu tarayıcıda aç",
-  "Uk_Ua": "Відкрити стан у браузері",
-  "Zh_Cn": "在浏览器中打开状态",
-  "Zh_Tw": "在瀏覽器中開啟狀態"
+ "Open the app in the browser": {
+  "De_De": "App im Browser öffnen",
+  "Fr_Fr": "Ouvrir l'appli dans le navigateur",
+  "Es_Es": "Abrir la app en el navegador",
+  "It_It": "Apri l'app nel browser",
+  "Pt_Br": "Abrir o app no navegador",
+  "Pl_Pl": "Otwórz aplikację w przeglądarce",
+  "Tr_Tr": "Uygulamayı tarayıcıda aç",
+  "Ru_Ru": "Открыть приложение в браузере",
+  "Uk_Ua": "Відкрити застосунок у браузері",
+  "Ja_Jp": "ブラウザでアプリを開く",
+  "Ko_Kr": "브라우저에서 앱 열기",
+  "Zh_Cn": "在浏览器中打开应用",
+  "Zh_Tw": "在瀏覽器中開啟 App",
+  "Th_Th": "เปิดแอปในเบราว์เซอร์"
  },
  "Uninstall from this PC": {
   "De_De": "Von diesem PC deinstallieren",

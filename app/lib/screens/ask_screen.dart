@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -495,7 +496,8 @@ class _AskScreenState extends State<AskScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (_empty)
+                  // the web app has no speech (it lives in the Android app's MainActivity)
+                  if (_empty && !kIsWeb)
                     IconButton.filled(
                       tooltip: tr('Ask out loud'),
                       onPressed: busy ? null : _listen,
@@ -785,26 +787,29 @@ class _AnswerState extends State<_Answer> {
                       ),
                     ] else
                       const Spacer(),
-                    ValueListenableBuilder<String?>(
-                      valueListenable: Voice.speaking,
-                      builder: (context, now, _) {
-                        final on = now == widget.text;
-                        return IconButton(
-                          visualDensity: VisualDensity.compact,
-                          tooltip: on ? tr('Stop reading') : tr('Read aloud'),
-                          icon: Icon(
-                            on
-                                ? Icons.stop_circle_outlined
-                                : Icons.volume_up_outlined,
-                            size: 20,
-                            color: on ? Palette.flame : Palette.ash,
-                          ),
-                          onPressed:
-                              () =>
-                                  on ? Voice.stop() : Voice.speak(widget.text),
-                        );
-                      },
-                    ),
+                    if (!kIsWeb)
+                      ValueListenableBuilder<String?>(
+                        valueListenable: Voice.speaking,
+                        builder: (context, now, _) {
+                          final on = now == widget.text;
+                          return IconButton(
+                            visualDensity: VisualDensity.compact,
+                            tooltip: on ? tr('Stop reading') : tr('Read aloud'),
+                            icon: Icon(
+                              on
+                                  ? Icons.stop_circle_outlined
+                                  : Icons.volume_up_outlined,
+                              size: 20,
+                              color: on ? Palette.flame : Palette.ash,
+                            ),
+                            onPressed:
+                                () =>
+                                    on
+                                        ? Voice.stop()
+                                        : Voice.speak(widget.text),
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

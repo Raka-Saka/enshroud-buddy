@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'buddy_auth.dart';
 import 'game_db.dart';
+import 'net.dart';
 
 /// Game data that can be newer than the app: the PC agent serves the latest build (GET /db, from
 /// tools/build_db.py) and the phone keeps a copy, so data fixes arrive without reinstalling. New screens
@@ -54,25 +54,29 @@ class DbStore {
   /// When the PC agent has newer data than [current]: download it, check that it loads, keep it, and
   /// return it. Null when there's nothing newer or the agent can't be reached.
   static Future<GameDb?> update(String host, String key, GameDb current) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    // the web app comes from the agent itself, with its data: nothing newer to fetch, nowhere to keep it
+    if (kIsWeb) return null;
     Future<String> get(String path) async {
-      final req = await client.getUrl(Uri.parse('http://$host$path'));
-      final nonce = BuddyAuth.apply(req, key);
-      final res = await req.close().timeout(const Duration(seconds: 90));
-      if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
+      final a = BuddyAuth.headers(key, 'GET', path);
       // never more than [maxBytes]: something posing as the agent can't fill the phone's memory
-      final b = BytesBuilder(copy: false);
-      await for (final chunk in res) {
-        b.add(chunk);
-        if (b.length > maxBytes)
-          throw const HttpException('game data too large');
-      }
-      final body = b.takeBytes();
+      final res = await Net.send(
+        'GET',
+        Uri.parse('http://$host$path'),
+        headers: a.headers,
+        timeout: const Duration(seconds: 90),
+        limit: maxBytes,
+      );
+      if (res.status != 200) throw StateError('HTTP ${res.status}');
       // only the agent can sign it: data from anything else on the network is never kept
-      if (!BuddyAuth.replyOk(key, nonce, res, body)) {
-        throw const HttpException('not signed by the agent');
+      if (!BuddyAuth.replyOk(
+        key,
+        a.nonce,
+        res.header('X-Buddy-Reply'),
+        res.body,
+      )) {
+        throw StateError('not signed by the agent');
       }
-      return utf8.decode(body);
+      return res.text;
     }
 
     try {
@@ -92,8 +96,6 @@ class DbStore {
       return db;
     } catch (_) {
       return null;
-    } finally {
-      client.close(force: true);
     }
   }
 }

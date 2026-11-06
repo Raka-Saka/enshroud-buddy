@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Estimated Shroud level per fog-map pixel (assets/shroud_levels.png, built by tools/build_map.py):
@@ -72,8 +73,32 @@ Uint8List encodePng(Uint8List rgba, int w, int h) {
   }
 
   chunk('IHDR', [..._u32(w), ..._u32(h), 8, 6, 0, 0, 0]);
-  chunk('IDAT', ZLibEncoder(level: 6).convert(raw.takeBytes()));
+  final pixels = raw.takeBytes();
+  chunk(
+    'IDAT',
+    kIsWeb ? _stored(pixels) : ZLibEncoder(level: 6).convert(pixels),
+  );
   chunk('IEND', const []);
+  return out.takeBytes();
+}
+
+/// zlib data in stored (uncompressed) blocks: a browser has no ZLibEncoder, and these images only live in
+/// memory.
+Uint8List _stored(Uint8List data) {
+  final out = BytesBuilder()..add(const [0x78, 0x01]);
+  var a = 1, b = 0;
+  for (final v in data) {
+    a = (a + v) % 65521;
+    b = (b + a) % 65521;
+  }
+  for (var i = 0; i == 0 || i < data.length; i += 65535) {
+    final n = (data.length - i).clamp(0, 65535);
+    out
+      ..addByte(i + n >= data.length ? 1 : 0)
+      ..add([n & 0xFF, n >> 8, ~n & 0xFF, (~n >> 8) & 0xFF])
+      ..add(Uint8List.sublistView(data, i, i + n));
+  }
+  out.add(_u32((b << 16) | a));
   return out.takeBytes();
 }
 

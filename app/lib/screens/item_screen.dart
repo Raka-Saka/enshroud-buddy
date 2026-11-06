@@ -87,7 +87,8 @@ class ItemScreen extends StatelessWidget {
                     children: [
                       Pill(gt(item.rarity), color: Palette.rarity(item.rarity)),
                       Pill(categoryLabel(item.category)),
-                      if (item.maxStack > 1) Pill(tr('Stacks to {n}', {'n': item.maxStack})),
+                      if (item.maxStack > 1)
+                        Pill(tr('Stacks to {n}', {'n': item.maxStack})),
                     ],
                   ),
                 ),
@@ -164,7 +165,10 @@ class ItemScreen extends StatelessWidget {
                                 }),
                           ),
                         if (st.comfort > 0)
-                          Pill(tr('Comfort +{n}', {'n': st.comfort}), color: Palette.spring),
+                          Pill(
+                            tr('Comfort +{n}', {'n': st.comfort}),
+                            color: Palette.spring,
+                          ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -439,7 +443,10 @@ class RecipeCard extends StatelessWidget {
                   children: [
                     Text(
                       tr('Needs'),
-                      style: const TextStyle(color: Palette.veilText, fontSize: 13),
+                      style: const TextStyle(
+                        color: Palette.veilText,
+                        fontSize: 13,
+                      ),
                     ),
                     for (final p in recipe.props)
                       Text(
@@ -493,11 +500,18 @@ class RecipeCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.lock_open, size: 16, color: Palette.spring),
+                    const Icon(
+                      Icons.lock_open,
+                      size: 16,
+                      color: Palette.spring,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       tr('Unlocked'),
-                      style: const TextStyle(color: Palette.spring, fontSize: 13),
+                      style: const TextStyle(
+                        color: Palette.spring,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -579,7 +593,10 @@ class UnlockView extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(gtn(u.text) ?? '', style: const TextStyle(fontSize: 13)),
+              child: Text(
+                gtn(u.text) ?? '',
+                style: const TextStyle(fontSize: 13),
+              ),
             ),
           ],
         ),
@@ -625,5 +642,4 @@ String formatSeconds(double s) =>
         : tr('{n} s', {'n': s.toStringAsFixed(0)});
 
 /// Lowercase in English ("Always in a gold chest"); other languages keep their own casing.
-String _lowerEn(String s) =>
-    L10n.lang.code == 'En_Us' ? s.toLowerCase() : s;
+String _lowerEn(String s) => L10n.lang.code == 'En_Us' ? s.toLowerCase() : s;

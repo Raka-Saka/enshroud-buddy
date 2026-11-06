@@ -3,6 +3,19 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.39.0 (2026-11-06)
+
+- **iPhone, iPad and any browser:** the PC program now serves the app as a web page. Click the tray icon (Pair a
+  phone) and scan the second QR code with the camera: the app opens in the browser, already paired. Add it to
+  the home screen to use it like an app. Same screens as on Android, minus voice and the code scanner. On the PC
+  itself: tray menu → Open the app in the browser (handy on a second monitor).
+- **Playing as a guest:** Setup → Game save → "A friend's world" reads just your character (gear, bag, skills,
+  Shroud time from the host's Flame strength you set) and your live position, instead of one of your own worlds.
+- **Share build:** Character → Build → Share build makes a picture of your build and gear for Discord or a chat,
+  with the same in words.
+- Time in the Shroud now counts the Inner Fires skill.
+- Read aloud and voice questions now use the app's language instead of always English.
+
 ## 0.38.0 (2026-11-06)
 
 - **15 languages:** English, Deutsch, Français, Español, Italiano, Português (Brasil), Polski, Русский,

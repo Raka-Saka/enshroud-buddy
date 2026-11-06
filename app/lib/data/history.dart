@@ -39,10 +39,7 @@ List<String> changes(
     if (b.level > a.level)
       tr('Level {n} (+{up})', {'n': b.level, 'up': b.level - a.level}),
     if (b.flame > a.flame)
-      tr('Flame strength {n} (+{up})', {
-        'n': b.flame,
-        'up': b.flame - a.flame,
-      }),
+      tr('Flame strength {n} (+{up})', {'n': b.flame, 'up': b.flame - a.flame}),
     if (b.roots > a.roots)
       trn(
         b.roots - a.roots,

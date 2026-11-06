@@ -173,7 +173,10 @@ class SurvivalScreen extends StatelessWidget {
                         ),
                         Text(
                           tr('Read from your save; check it matches the game.'),
-                          style: const TextStyle(color: Palette.ash, fontSize: 11),
+                          style: const TextStyle(
+                            color: Palette.ash,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),

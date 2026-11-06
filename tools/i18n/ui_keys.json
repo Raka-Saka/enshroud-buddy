@@ -79,6 +79,16 @@
   ],
   "plural": true
  },
+ "A friend's world (I play as a guest)": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "A picture of your build and gear for Discord or a chat": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
  "A place, a piece of unique loot (\"{garb}\"), or a whole set (\"{set}\"): the map then shows only where it lies.": {
   "files": [
    "screens/map_screen.dart"
@@ -647,6 +657,11 @@
    "screens/setup_screen.dart"
   ]
  },
+ "Couldn't share the build": {
+  "files": [
+   "screens/share_screen.dart"
+  ]
+ },
  "Couldn't switch: {error}": {
   "files": [
    "screens/setup_screen.dart"
@@ -733,6 +748,11 @@
    "screens/home_screen.dart"
   ]
  },
+ "Download picture and copy text": {
+  "files": [
+   "screens/share_screen.dart"
+  ]
+ },
  "Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.": {
   "files": [
    "screens/home_screen.dart"
@@ -761,6 +781,11 @@
  "End the route": {
   "files": [
    "screens/map_screen.dart"
+  ]
+ },
+ "Enshroud Buddy · unofficial fan app, not affiliated with Keen Games": {
+  "files": [
+   "screens/share_screen.dart"
   ]
  },
  "Equipped": {
@@ -1156,6 +1181,11 @@
    "main.dart"
   ]
  },
+ "Host's Flame strength: {n}": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
  "Hourglass capsules · {n} on the map": {
   "files": [
    "screens/survival_screen.dart"
@@ -1340,6 +1370,11 @@
    "labels.dart"
   ]
  },
+ "Less": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
  "Level": {
   "files": [
    "data/hall_check.dart",
@@ -1359,6 +1394,11 @@
  "Level {from}–{to}": {
   "files": [
    "screens/item_screen.dart"
+  ]
+ },
+ "Level {level} · Flame strength {flame}": {
+  "files": [
+   "screens/share_screen.dart"
   ]
  },
  "Level {level} · {spent} of {total} points spent · {free} free": {
@@ -1536,6 +1576,11 @@
    "screens/plans_screen.dart"
   ]
  },
+ "More": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
  "More of what your build already does": {
   "files": [
    "data/projection.dart"
@@ -1653,7 +1698,8 @@
  "No live data yet": {
   "files": [
    "screens/build_screen.dart",
-   "screens/character_screen.dart"
+   "screens/character_screen.dart",
+   "screens/share_screen.dart"
   ]
  },
  "No mapped spot: mined from terrain, or from vendors or quests": {
@@ -1764,6 +1810,11 @@
  "On foot": {
   "files": [
    "data/guide.dart"
+  ]
+ },
+ "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone, and scan the browser code with this device's camera. Or type the pairing code:": {
+  "files": [
+   "screens/setup_screen.dart"
   ]
  },
  "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:": {
@@ -1886,6 +1937,11 @@
    "screens/home_screen.dart"
   ]
  },
+ "Picture downloaded, and the build is on the clipboard": {
+  "files": [
+   "screens/share_screen.dart"
+  ]
+ },
  "Pin \"{title}\" deleted": {
   "files": [
    "screens/map_screen.dart"
@@ -1943,7 +1999,7 @@
    "screens/skill_tree_screen.dart"
   ]
  },
- "Playing in a friend's world? The world is saved on the host's PC, so only your character is on yours: pick a world you host to see bases and chests.": {
+ "Playing in a friend's world? Pick \"A friend's world\" above: the world is saved on the host's PC, so the app reads your character and where you are.": {
   "files": [
    "screens/setup_screen.dart"
   ]
@@ -2215,6 +2271,22 @@
  "Setup: PC agent and game save": {
   "files": [
    "screens/home_screen.dart"
+  ]
+ },
+ "Share": {
+  "files": [
+   "screens/share_screen.dart"
+  ]
+ },
+ "Share build": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/share_screen.dart"
+  ]
+ },
+ "Shared from Enshroud Buddy, an unofficial Enshrouded companion": {
+  "files": [
+   "screens/share_screen.dart"
   ]
  },
  "Shield": {
@@ -2859,6 +2931,11 @@
    "data/hall_check.dart"
   ]
  },
+ "Worn: {items}": {
+  "files": [
+   "screens/share_screen.dart"
+  ]
+ },
  "You are level {you}; its enemies are level {level}.": {
   "files": [
    "data/hall_check.dart"
@@ -2931,7 +3008,13 @@
  },
  "Your build appears after the PC agent reads a save.": {
   "files": [
-   "screens/build_screen.dart"
+   "screens/build_screen.dart",
+   "screens/share_screen.dart"
+  ]
+ },
+ "Your character only: the world's chests and bases are on the host's PC": {
+  "files": [
+   "screens/setup_screen.dart"
   ]
  },
  "Your journey starts here": {
@@ -2953,6 +3036,12 @@
  "Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).": {
   "files": [
    "screens/survival_screen.dart"
+  ]
+ },
+ "a friend's world": {
+  "files": [
+   "data/live_state.dart",
+   "screens/setup_screen.dart"
   ]
  },
  "agent not ready": {

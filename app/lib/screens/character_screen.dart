@@ -196,7 +196,8 @@ List<(String, List<Storage>)> _byBase(LiveState s, List<Storage> chests) {
       for (final c in chests)
         if (c.baseId == b.id) c,
     ];
-    if (list.isNotEmpty) out.add((tr('Chests · {base}', {'base': b.label}), list));
+    if (list.isNotEmpty)
+      out.add((tr('Chests · {base}', {'base': b.label}), list));
   }
   final rest = [
     for (final c in chests)
@@ -427,9 +428,7 @@ class _ContainerTile extends StatelessWidget {
         initiallyExpanded: open,
         leading: const Icon(Icons.inventory_2_outlined, color: Palette.flame),
         title: Text(label),
-        subtitle: Text(
-          trn(c.items.length, '{n} stack', '{n} stacks'),
-        ),
+        subtitle: Text(trn(c.items.length, '{n} stack', '{n} stacks')),
         children: [for (final o in shown) _OwnedTile(db: db, o: o)],
       ),
     );

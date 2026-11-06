@@ -113,8 +113,8 @@ class Mentions {
         _index[k] = t;
         _anyCase.add(k);
       }
-      _plainNames = _plain.keys.toList()
-        ..sort((a, b) => b.length.compareTo(a.length));
+      _plainNames =
+          _plain.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
     }
     for (final k in _index.keys) {
       final n = ' '.allMatches(k).length + 1;
@@ -140,7 +140,8 @@ class Mentions {
   final _anyCase = <String>{};
 
   /// Scripts without spaces between words: translated names found as they are written.
-  bool get _spaceless => {'ja', 'zh', 'th'}.contains(L10n.lang.tag.split('-')[0]);
+  bool get _spaceless =>
+      {'ja', 'zh', 'th'}.contains(L10n.lang.tag.split('-')[0]);
   final _plain = <String, _Target>{};
   var _plainNames = const <String>[];
 
@@ -252,7 +253,11 @@ class Mentions {
   void _findPlain(String text, List<Mention> out) {
     bool free(int a, int b) => out.every((m) => b <= m.start || a >= m.end);
     for (final name in _plainNames) {
-      for (var at = text.indexOf(name); at >= 0; at = text.indexOf(name, at + 1)) {
+      for (
+        var at = text.indexOf(name);
+        at >= 0;
+        at = text.indexOf(name, at + 1)
+      ) {
         final end = at + name.length;
         if (!free(at, end)) continue;
         final t = _plain[name]!;

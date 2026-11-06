@@ -225,7 +225,8 @@ def write_me(state):
     name = lambda i: items.get(i, {}).get("n", i)
     c, w = state["character"], state["world"]
     lines = [
-        f"# {c.get('name')} in {w.get('name')} (saved {c.get('saved_at')})",
+        f"# {c.get('name')} in " + ("a friend's world, as a guest (its chests and bases are on the host's PC)"
+                                    if w.get("guest") else str(w.get("name"))) + f" (saved {c.get('saved_at')})",
         f"Level {c.get('level')}, Flame strength {w.get('flame_level')}, {len(c.get('recipes_unlocked') or [])} recipes unlocked.",
         "", "## Skills learned (rank)",
         ", ".join(f"{skills.get(s['node'], {}).get('n', s['node'])} {s['level']}" for s in c.get("skills") or []),
