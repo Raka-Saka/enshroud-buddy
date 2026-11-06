@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n.dart';
+import '../labels.dart';
 import 'game_db.dart';
 import 'live_state.dart';
 
@@ -229,7 +231,7 @@ class BuildTarget {
     for (final e in (traits.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value)))
         .take(6))
-      traitNames[e.key] ?? e.key,
+      traitName(e.key),
   ];
 
   final _weights = <String, double>{};
@@ -261,29 +263,31 @@ class BuildTarget {
     return out.join(' ');
   }
 
-  static const traitNames = {
-    'bow': 'Bows',
-    'dagger': 'Daggers',
-    'wand': 'Wands',
-    'staff': 'Staves',
-    'one-handed': 'One-handed',
-    'two-handed': 'Two-handed',
-    'melee': 'Melee',
-    'ranged': 'Ranged',
-    'magic': 'Magic',
-    'critical': 'Critical strikes',
-    'backstab': 'Backstab',
-    'sneak': 'Sneak attacks',
-    'merciless': 'Merciless attacks',
-    'skillshot': 'Skillshots',
-    'parry': 'Parry',
-    'mana': 'Mana',
-    'stamina': 'Stamina',
-    'health': 'Health',
-    'fire': 'Fire',
-    'ice': 'Ice',
-    'shock': 'Shock',
-    'shroud': 'Shroud time',
+  /// A trait's name, for display.
+  static String traitName(String key) => switch (key) {
+    'bow' => tr('Bows'),
+    'dagger' => tr('Daggers'),
+    'wand' => tr('Wands'),
+    'staff' => tr('Staves'),
+    'one-handed' => tr('One-handed'),
+    'two-handed' => tr('Two-handed'),
+    'melee' => tr('Melee'),
+    'ranged' => tr('Ranged'),
+    'magic' => tr('Magic'),
+    'critical' => tr('Critical strikes'),
+    'backstab' => tr('Backstab'),
+    'sneak' => tr('Sneak attacks'),
+    'merciless' => tr('Merciless attacks'),
+    'skillshot' => tr('Skillshots'),
+    'parry' => tr('Parry'),
+    'mana' => tr('Mana'),
+    'stamina' => tr('Stamina'),
+    'health' => tr('Health'),
+    'fire' => tr('Fire'),
+    'ice' => tr('Ice'),
+    'shock' => tr('Shock'),
+    'shroud' => tr('Shroud time'),
+    _ => key,
   };
 
   /// Words in a skill's effect that mark a trait.
@@ -383,7 +387,16 @@ class GearOption {
   /// What makes it fit: weapon type, class, best stat, perks named after the build's skills.
   final List<String> why;
   final Owned? owned;
+
+  /// Where it is: 'Worn', 'Bag' or a chest's label (English: compared); [place] is the text to show.
   final String? where;
+
+  String? get place => switch (where) {
+    'Worn' => tr('Worn'),
+    'Bag' => tr('Bag'),
+    final w? => shownLabel(w),
+    null => null,
+  };
 
   /// The level it's rated at: an owned item's own level, or the level one to find comes at.
   final int? level;
@@ -490,18 +503,18 @@ class GearAdvisor {
     if (wt != null) {
       final wf = target.weaponFit(wt);
       s += wf * 35 + cf * 10;
-      if (wf >= 0.6) why.add(wt);
+      if (wf >= 0.6) why.add(weaponLabel(wt));
     } else {
       s += cf * 30;
-      if (st.suits != null && cf >= 0.6) why.add(st.suits!);
+      if (st.suits != null && cf >= 0.6) why.add(classLabel(st.suits!));
     }
     s += 15 * _gain(st).clamp(0.0, 2.0);
-    if (_bestStat(st) case final l?) why.add(l);
+    if (_bestStat(st) case final l?) why.add(gt(l));
     for (final p in st.perks) {
       final name = p.replaceAll(RegExp(r' ×\d+$'), '');
       if (target.skills.contains(name)) {
         s += 5;
-        if (!why.contains(name)) why.add(name);
+        if (!why.contains(gt(name))) why.add(gt(name));
       } else {
         s += 3 * target.weight(name) / target.maxWeight;
       }
@@ -728,7 +741,8 @@ class GearAdvisor {
       if (g <= 0) continue;
       final why = [
         for (final (label, v) in st.values)
-          if (target.weight(label) > 0) '${label.trim()} +$v',
+          if (target.weight(label) > 0)
+            tr('{stat} +{value}', {'stat': gt(label.trim()), 'value': v}),
       ];
       out.add(FoodOption(it, g, why, state.owned(it.id), canMake(it)));
     }
@@ -758,10 +772,22 @@ class GearAdvisor {
   /// How to get an item: craft (unlocked?), a fixed spot, or chest kinds.
   List<String> howToGet(Item it) => [
     for (final r in db.madeBy[it.id] ?? const <Recipe>[])
-      'Craft at ${db.workshops[r.workshopId]?.name ?? '?'}${state.recipesUnlocked.contains(r.id) ? '' : ' (locked)'}',
+      state.recipesUnlocked.contains(r.id)
+          ? tr('Craft at {station}', {
+            'station': gtn(db.workshops[r.workshopId]?.name) ?? '?',
+          })
+          : tr('Craft at {station} (locked)', {
+            'station': gtn(db.workshops[r.workshopId]?.name) ?? '?',
+          }),
     if (it.fixedPlacements > 0)
-      'Unique loot: ${it.fixedPlacements} spot${it.fixedPlacements > 1 ? 's' : ''} on the map',
+      trn(
+        it.fixedPlacements,
+        'Unique loot: {n} spot on the map',
+        'Unique loot: {n} spots on the map',
+      ),
     if (it.chestKinds.isNotEmpty)
-      'Random loot: ${it.chestKinds.take(3).join(', ')}',
+      tr('Random loot: {kinds}', {
+        'kinds': it.chestKinds.take(3).map(gt).join(', '),
+      }),
   ];
 }

@@ -4,6 +4,7 @@ import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/survival.dart';
 import '../data/item_icons.dart';
+import '../l10n.dart';
 import '../nav.dart';
 import '../theme.dart';
 import 'base_view_screen.dart';
@@ -55,7 +56,7 @@ class _CharacterScreenState extends State<CharacterScreen>
     final s = live.state;
     return Scaffold(
       appBar: AppBar(
-        title: Text(s?.character ?? 'Character'),
+        title: Text(s?.character ?? tr('Character')),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -65,11 +66,11 @@ class _CharacterScreenState extends State<CharacterScreen>
         bottom: TabBar(
           controller: tabs,
           isScrollable: true,
-          tabs: const [
-            Tab(text: 'Build'),
-            Tab(text: 'Gear'),
-            Tab(text: 'Inventory'),
-            Tab(text: 'Bases'),
+          tabs: [
+            Tab(text: tr('Build')),
+            Tab(text: tr('Gear')),
+            Tab(text: tr('Inventory')),
+            Tab(text: tr('Bases')),
           ],
         ),
       ),
@@ -104,18 +105,21 @@ class _InventoryState extends State<_Inventory> {
   Widget build(BuildContext context) {
     final s = LiveScope.of(context).state;
     if (s == null) {
-      return const Center(
+      return Center(
         child: EmptyState(
           icon: Icons.inventory_2_outlined,
-          title: 'No live data yet',
-          message:
-              'Your bag and chests appear after the PC agent reads a save.',
+          title: tr('No live data yet'),
+          message: tr(
+            'Your bag and chests appear after the PC agent reads a save.',
+          ),
         ),
       );
     }
     final needle = q.trim().toLowerCase();
     bool match(Owned o) =>
-        needle.isEmpty || name(o.itemId).toLowerCase().contains(needle);
+        needle.isEmpty ||
+        name(o.itemId).toLowerCase().contains(needle) ||
+        gt(name(o.itemId)).toLowerCase().contains(needle);
     final labels = s.labels(name);
     final chests = [
       for (final c in s.containers)
@@ -136,23 +140,23 @@ class _InventoryState extends State<_Inventory> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: TextField(
               onChanged: (v) => setState(() => q = v),
-              decoration: const InputDecoration(
-                hintText: 'Find in my gear, bag and chests',
-                prefixIcon: Icon(Icons.search, color: Palette.flame),
+              decoration: InputDecoration(
+                hintText: tr('Find in my gear, bag and chests'),
+                prefixIcon: const Icon(Icons.search, color: Palette.flame),
               ),
             ),
           ),
           if (s.equipment.any(match)) ...[
-            const SectionTitle('Equipped'),
+            SectionTitle(tr('Equipped')),
             for (final o in s.equipment.where(match))
               _OwnedTile(db: widget.db, o: o),
           ],
           if (s.cosmetics.any(match)) ...[
-            const SectionTitle('Cosmetic (look only)'),
+            SectionTitle(tr('Cosmetic (look only)')),
             for (final o in s.cosmetics.where(match))
               _OwnedTile(db: widget.db, o: o),
           ],
-          SectionTitle('Bag · ${bag.length}'),
+          SectionTitle(tr('Bag · {n}', {'n': bag.length})),
           for (final o in bag) _OwnedTile(db: widget.db, o: o),
           for (final (base, list) in _byBase(s, chests)) ...[
             SectionTitle('$base · ${list.length}'),
@@ -160,18 +164,20 @@ class _InventoryState extends State<_Inventory> {
               _ContainerTile(
                 db: widget.db,
                 c: c,
-                label: labels[c.index],
+                label: shownLabel(labels[c.index]),
                 match: match,
                 open: needle.isNotEmpty,
               ),
           ],
           if (others.isNotEmpty) ...[
-            SectionTitle('Animals & other storage · ${others.length}'),
+            SectionTitle(
+              tr('Animals & other storage · {n}', {'n': others.length}),
+            ),
             for (final c in others)
               _ContainerTile(
                 db: widget.db,
                 c: c,
-                label: labels[c.index],
+                label: shownLabel(labels[c.index]),
                 match: match,
                 open: needle.isNotEmpty,
               ),
@@ -190,13 +196,13 @@ List<(String, List<Storage>)> _byBase(LiveState s, List<Storage> chests) {
       for (final c in chests)
         if (c.baseId == b.id) c,
     ];
-    if (list.isNotEmpty) out.add(('Chests · ${b.label}', list));
+    if (list.isNotEmpty) out.add((tr('Chests · {base}', {'base': b.label}), list));
   }
   final rest = [
     for (final c in chests)
       if (s.baseName(c.baseId) == null) c,
   ];
-  if (rest.isNotEmpty) out.add(('Chests · base not known', rest));
+  if (rest.isNotEmpty) out.add((tr('Chests · base not known'), rest));
   return out;
 }
 
@@ -209,14 +215,14 @@ class _Bases extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = LiveScope.of(context).state;
     if (s == null) {
-      return const Center(
+      return Center(
         child: EmptyState(
           icon: Icons.cottage_outlined,
-          title: 'No live data yet',
+          title: tr('No live data yet'),
         ),
       );
     }
-    String name(String id) => db.items[id]?.name ?? id;
+    String name(String id) => gt(db.items[id]?.name ?? id);
     final stations =
         s.placed.entries
             .where((e) => db.workshops.values.any((w) => w.itemId == e.key))
@@ -230,7 +236,10 @@ class _Bases extends StatelessWidget {
       for (final z in b?.zonePerAltar ?? const <int>[])
         if (z > 0) z,
     ];
-    final zones = sizes.isEmpty ? null : '${sizes.first} to ${sizes.last} m';
+    final zones =
+        sizes.isEmpty
+            ? null
+            : tr('{from} to {to} m', {'from': sizes.first, 'to': sizes.last});
     final sv = Survival(db, s);
     return ListView(
       padding: const EdgeInsets.only(top: 8, bottom: 32),
@@ -238,14 +247,24 @@ class _Bases extends StatelessWidget {
         DashCard(
           title:
               b == null
-                  ? 'Flame Altars'
-                  : 'Flame Altars · ${s.bases.length} of ${b.altarsAt(s.flameLevel)}',
+                  ? tr('Flame Altars')
+                  : tr('Flame Altars · {n} of {max}', {
+                    'n': s.bases.length,
+                    'max': b.altarsAt(s.flameLevel),
+                  }),
           icon: Icons.local_fire_department,
           child: Column(
             children: [
               Text(
-                'Flame strength ${s.flameLevel} sets how many; an altar\'s own level sets its build zone'
-                '${zones == null ? '' : ' ($zones a side)'}.',
+                zones == null
+                    ? tr(
+                      'Flame strength {flame} sets how many; an altar\'s own level sets its build zone.',
+                      {'flame': s.flameLevel},
+                    )
+                    : tr(
+                      'Flame strength {flame} sets how many; an altar\'s own level sets its build zone ({zones} a side).',
+                      {'flame': s.flameLevel, 'zones': zones},
+                    ),
                 style: const TextStyle(color: Palette.ash, fontSize: 12.5),
               ),
               for (final base in s.bases)
@@ -255,7 +274,10 @@ class _Bases extends StatelessWidget {
                   title: Text(base.label),
                   // altar level under the name, so a long name keeps its room next to the buttons
                   subtitle: Text(
-                    'Altar ${base.altarLevel} · ${base.zone} build zone',
+                    tr('Altar {level} · {zone} build zone', {
+                      'level': base.altarLevel,
+                      'zone': base.zone,
+                    }),
                     style: const TextStyle(color: Palette.flame, fontSize: 12),
                   ),
                   trailing: Row(
@@ -263,7 +285,7 @@ class _Bases extends StatelessWidget {
                     children: [
                       if (base.pieces.isNotEmpty)
                         IconButton(
-                          tooltip: 'See it in 3D',
+                          tooltip: tr('See it in 3D'),
                           icon: const Icon(Icons.view_in_ar, size: 20),
                           onPressed:
                               () => Navigator.push(
@@ -275,14 +297,16 @@ class _Bases extends StatelessWidget {
                               ),
                         ),
                       IconButton(
-                        tooltip: 'Show on the map',
+                        tooltip: tr('Show on the map'),
                         icon: const Icon(Icons.map_outlined, size: 20),
                         onPressed:
                             () =>
                                 mapFocus.value = Poi({
                                   'c': 'spot',
-                                  'k':
-                                      'Altar ${base.altarLevel} · build zone ${base.zone}',
+                                  'k': tr('Altar {level} · build zone {zone}', {
+                                    'level': base.altarLevel,
+                                    'zone': base.zone,
+                                  }),
                                   't': base.label,
                                   'x': base.mapX,
                                   'y': base.mapY,
@@ -297,8 +321,8 @@ class _Bases extends StatelessWidget {
         Card(
           child: ListTile(
             leading: const Icon(Icons.grass, color: Palette.spring),
-            title: const Text('Farm'),
-            subtitle: const Text('Feeders, produce to collect, seeds'),
+            title: Text(tr('Farm')),
+            subtitle: Text(tr('Feeders, produce to collect, seeds')),
             trailing: const Icon(Icons.chevron_right),
             onTap:
                 () => Navigator.push(
@@ -310,9 +334,12 @@ class _Bases extends StatelessWidget {
         Card(
           child: ListTile(
             leading: const Icon(Icons.cloud_outlined, color: Palette.veil),
-            title: const Text('Survival: Shroud, cold, water'),
+            title: Text(tr('Survival: Shroud, cold, water')),
             subtitle: Text(
-              'Shroud ${Survival.format(sv.shroudSeconds)} · breath ${Survival.format(sv.oxygenSeconds)}',
+              tr('Shroud {shroud} · breath {breath}', {
+                'shroud': Survival.format(sv.shroudSeconds),
+                'breath': Survival.format(sv.oxygenSeconds),
+              }),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap:
@@ -322,7 +349,7 @@ class _Bases extends StatelessWidget {
                 ),
           ),
         ),
-        SectionTitle('Stations built · ${stations.length}'),
+        SectionTitle(tr('Stations built · {n}', {'n': stations.length})),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Wrap(
@@ -345,14 +372,17 @@ class _OwnedTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final item = db.items[o.itemId];
     final extra = [
-      if (o.level != null) 'Level ${o.level}',
+      if (o.level != null) tr('Level {n}', {'n': o.level}),
       if (o.durability != null)
-        'Durability ${o.durability![0]}/${o.durability![1]}',
+        tr('Durability {have}/{max}', {
+          'have': o.durability![0],
+          'max': o.durability![1],
+        }),
     ].join(' · ');
     return ListTile(
       dense: true,
       leading: ItemIcon(item, size: 34),
-      title: Text(item?.name ?? o.itemId),
+      title: Text(gt(item?.name ?? o.itemId)),
       subtitle: extra.isEmpty ? null : Text(extra),
       trailing:
           o.count > 1
@@ -397,7 +427,9 @@ class _ContainerTile extends StatelessWidget {
         initiallyExpanded: open,
         leading: const Icon(Icons.inventory_2_outlined, color: Palette.flame),
         title: Text(label),
-        subtitle: Text('${c.items.length} stacks'),
+        subtitle: Text(
+          trn(c.items.length, '{n} stack', '{n} stacks'),
+        ),
         children: [for (final o in shown) _OwnedTile(db: db, o: o)],
       ),
     );

@@ -4,6 +4,8 @@ import '../data/build.dart';
 import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/projection.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../theme.dart';
 import 'skill_tree_screen.dart';
 import 'widgets.dart';
@@ -26,8 +28,8 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
     final s = LiveScope.of(context).state;
     if (s == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Suggested builds')),
-        body: const Center(child: Text('No live data from the PC agent yet.')),
+        appBar: AppBar(title: Text(tr('Suggested builds'))),
+        body: Center(child: Text(tr('No live data from the PC agent yet.'))),
       );
     }
     final points = SkillPoints(db, s);
@@ -46,7 +48,7 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Suggested builds')),
+      appBar: AppBar(title: Text(tr('Suggested builds'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
@@ -57,10 +59,10 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
               runSpacing: 6,
               children: [
                 for (final (label, n) in [
-                  ('Free now (${points.free})', 0),
-                  ('+10 levels', 10),
-                  ('+20 levels', 20),
-                  if (toCap > 0) ('Level $cap', toCap),
+                  (tr('Free now ({n})', {'n': points.free}), 0),
+                  (tr('+{n} levels', {'n': 10}), 10),
+                  (tr('+{n} levels', {'n': 20}), 20),
+                  if (toCap > 0) (tr('Level {n}', {'n': cap}), toCap),
                 ])
                   ChoiceChip(
                     label: Text(label),
@@ -73,7 +75,11 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Text(
-              '$budget points to spend. Each path starts from your learned skills and follows the tree\'s links.',
+              trn(
+                budget,
+                '{n} points to spend. Each path starts from your learned skills and follows the tree\'s links.',
+                '{n} points to spend. Each path starts from your learned skills and follows the tree\'s links.',
+              ),
               style: const TextStyle(color: Palette.ash, fontSize: 12),
             ),
           ),
@@ -104,7 +110,10 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
                               ),
                             ),
                           ),
-                          Pill('${p.spent} pts', color: Palette.flame),
+                          Pill(
+                            tr('{n} pts', {'n': p.spent}),
+                            color: Palette.flame,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 2),
@@ -120,7 +129,7 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
                         Wrap(
                           spacing: 6,
                           runSpacing: 6,
-                          children: [for (final w in p.goal.weapons) Pill(w)],
+                          children: [for (final w in p.goal.weapons) Pill(weaponLabel(w))],
                         ),
                       ],
                       const SizedBox(height: 10),
@@ -143,10 +152,10 @@ class _ProjectionsScreenState extends State<ProjectionsScreen> {
           (a, p.share(a) - p.share(a, projected: false)),
     ]..sort((x, y) => y.$2.compareTo(x.$2));
     if (grown.isEmpty) {
-      return const [
+      return [
         Text(
-          'Nothing left to gain for this direction.',
-          style: TextStyle(color: Palette.ash, fontSize: 12),
+          tr('Nothing left to gain for this direction.'),
+          style: const TextStyle(color: Palette.ash, fontSize: 12),
         ),
       ];
     }
@@ -230,7 +239,10 @@ class ProjectionScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Text(
-              'Bars: share of what the tree offers this build, now (dark) and after ${p.spent} points (bright).',
+              tr(
+                'Bars: share of what the tree offers this build, now (dark) and after {n} points (bright).',
+                {'n': p.spent},
+              ),
               style: const TextStyle(color: Palette.ash, fontSize: 12),
             ),
           ),
@@ -249,7 +261,7 @@ class ProjectionScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: FilledButton.icon(
               icon: const Icon(Icons.flag),
-              label: const Text('Use as my skill plan'),
+              label: Text(tr('Use as my skill plan')),
               onPressed:
                   p.steps.isEmpty
                       ? null
@@ -258,16 +270,18 @@ class ProjectionScreen extends StatelessWidget {
                           p.steps.map((s) => s.skill.id).toSet(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text(
-                              'Plan set. The skill tree and Build screen now follow it.',
+                              tr(
+                                'Plan set. The skill tree and Build screen now follow it.',
+                              ),
                             ),
                           ),
                         );
                       },
             ),
           ),
-          SectionTitle('Steps · ${p.steps.length}'),
+          SectionTitle(tr('Steps · {n}', {'n': p.steps.length})),
           for (final (i, st) in p.steps.indexed)
             ListTile(
               dense: true,
@@ -276,12 +290,12 @@ class ProjectionScreen extends StatelessWidget {
                 style: const TextStyle(color: Palette.ash),
               ),
               title: Text(
-                '${st.skill.name}${st.skill.maxLevel > 1 ? ' · rank ${st.rank}' : ''}',
+                '${gt(st.skill.name)}${st.skill.maxLevel > 1 ? tr(' · rank {n}', {'n': st.rank}) : ''}',
               ),
               subtitle: Text(
                 [
-                  '${st.skill.archetype} · ${st.skill.cost} pt',
-                  (st.skill.description ?? '').split('\n').first,
+                  '${gt(st.skill.archetype)} · ${tr('{n} pt', {'n': st.skill.cost})}',
+                  gt(st.skill.description ?? '').split('\n').first,
                 ].join('\n'),
                 style: const TextStyle(color: Palette.ash, fontSize: 12),
               ),

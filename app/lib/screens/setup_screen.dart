@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/live_state.dart';
+import '../l10n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
@@ -55,7 +56,9 @@ class _SetupScreenState extends State<SetupScreen> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            'Couldn\'t scan: ${e.message}. Type the details below.',
+            tr('Couldn\'t scan: {error}. Type the details below.', {
+              'error': e.message,
+            }),
           ),
         ),
       );
@@ -64,9 +67,11 @@ class _SetupScreenState extends State<SetupScreen> {
     if (code == null) return; // cancelled
     if (Live.parsePairing(code) == null) {
       messenger.showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'That isn\'t the agent\'s code: on the PC, right-click the tray icon, Pair a phone.',
+            tr(
+              'That isn\'t the agent\'s code: on the PC, right-click the tray icon, Pair a phone.',
+            ),
           ),
         ),
       );
@@ -87,9 +92,10 @@ class _SetupScreenState extends State<SetupScreen> {
       SnackBar(
         content: Text(
           h != null
-              ? 'Paired with your PC'
-              : 'The PC didn\'t answer. Is the phone on the same Wi-Fi as the PC? On the PC, allow '
-                  'Enshroud Buddy on private networks if Windows asked.',
+              ? tr('Paired with your PC')
+              : tr(
+                'The PC didn\'t answer. Is the phone on the same Wi-Fi as the PC? On the PC, allow Enshroud Buddy on private networks if Windows asked.',
+              ),
         ),
       ),
     );
@@ -103,11 +109,20 @@ class _SetupScreenState extends State<SetupScreen> {
       final w = f.worlds.firstWhere((e) => e.slot == world).name;
       final c = f.characters.firstWhere((e) => e.slot == character).name;
       messenger.showSnackBar(
-        SnackBar(content: Text('Reading $c in $w; it shows in a few seconds')),
+        SnackBar(
+          content: Text(
+            tr('Reading {character} in {world}; it shows in a few seconds', {
+              'character': c,
+              'world': w,
+            }),
+          ),
+        ),
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Couldn\'t switch: $e')));
+      messenger.showSnackBar(
+        SnackBar(content: Text(tr('Couldn\'t switch: {error}', {'error': e}))),
+      );
     } finally {
       if (mounted) setState(() => busy = false);
     }
@@ -116,25 +131,29 @@ class _SetupScreenState extends State<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     final live = LiveScope.of(context);
+    // rebuilt when another language is picked (the app's locale changes once its texts are loaded)
+    Localizations.localeOf(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup')),
+      appBar: AppBar(title: Text(tr('Setup'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
-          const SectionTitle('PC agent'),
+          SectionTitle(tr('PC agent')),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: FilledButton.icon(
               onPressed: busy ? null : () => _scan(live),
               icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Scan the PC\'s code'),
+              label: Text(tr('Scan the PC\'s code')),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Text(
-              'On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:',
-              style: TextStyle(color: Palette.ash, fontSize: 12),
+              tr(
+                'On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:',
+              ),
+              style: const TextStyle(color: Palette.ash, fontSize: 12),
             ),
           ),
           Padding(
@@ -144,10 +163,11 @@ class _SetupScreenState extends State<SetupScreen> {
                 Expanded(
                   child: TextField(
                     controller: host,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: '192.168.1.20:4750',
-                      helperText:
-                          'Shown in the agent\'s tray menu on the PC: "Phone address"',
+                      helperText: tr(
+                        'Shown in the agent\'s tray menu on the PC: "Phone address"',
+                      ),
                     ),
                     onSubmitted: (_) => _saveHost(live),
                   ),
@@ -155,7 +175,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 const SizedBox(width: 8),
                 FilledButton.tonal(
                   onPressed: () => _saveHost(live),
-                  child: const Text('Connect'),
+                  child: Text(tr('Connect')),
                 ),
               ],
             ),
@@ -165,24 +185,28 @@ class _SetupScreenState extends State<SetupScreen> {
             child: TextField(
               controller: pairing,
               textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'ABCD-EFGH',
-                helperText:
-                    'Pairing code, also in the tray menu: keeps other devices out',
+                helperText: tr(
+                  'Pairing code, also in the tray menu: keeps other devices out',
+                ),
               ),
               onSubmitted: (_) => _saveHost(live),
             ),
           ),
-          const SectionTitle('Game save'),
+          _language(),
+          SectionTitle(tr('Game save')),
           FutureBuilder<SaveList>(
             future: saves,
             builder: (context, snap) {
               if (snap.hasError) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
+                return Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Text(
-                    'The agent didn\'t answer, or it is older than this app. Check the address above.',
-                    style: TextStyle(color: Palette.ash),
+                    tr(
+                      'The agent didn\'t answer, or it is older than this app. Check the address above.',
+                    ),
+                    style: const TextStyle(color: Palette.ash),
                   ),
                 );
               }
@@ -194,11 +218,13 @@ class _SetupScreenState extends State<SetupScreen> {
                 );
               }
               if (list.folders.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
+                return Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Text(
-                    'No Enshrouded saves on that PC yet: play once, then come back.',
-                    style: TextStyle(color: Palette.ash),
+                    tr(
+                      'No Enshrouded saves on that PC yet: play once, then come back.',
+                    ),
+                    style: const TextStyle(color: Palette.ash),
                   ),
                 );
               }
@@ -206,38 +232,104 @@ class _SetupScreenState extends State<SetupScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (final f in list.folders) _folder(live, list, f),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: Text(
-                      'Playing in a friend\'s world? The world is saved on the host\'s PC, so only your '
-                      'character is on yours: pick a world you host to see bases and chests.',
-                      style: TextStyle(color: Palette.ash, fontSize: 12.5),
+                      tr(
+                        'Playing in a friend\'s world? The world is saved on the host\'s PC, so only your character is on yours: pick a world you host to see bases and chests.',
+                      ),
+                      style: const TextStyle(
+                        color: Palette.ash,
+                        fontSize: 12.5,
+                      ),
                     ),
                   ),
                 ],
               );
             },
           ),
-          const SectionTitle('About'),
+          SectionTitle(tr('About')),
           ListTile(
             leading: const Icon(Icons.gavel_outlined),
-            title: const Text('Licenses and credits'),
-            subtitle: const Text(
-              'Unofficial fan project. Not affiliated with or endorsed by Keen Games.',
-              style: TextStyle(color: Palette.ash, fontSize: 12),
+            title: Text(tr('Licenses and credits')),
+            subtitle: Text(
+              tr(
+                'Unofficial fan project. Not affiliated with or endorsed by Keen Games.',
+              ),
+              style: const TextStyle(color: Palette.ash, fontSize: 12),
             ),
             onTap:
                 () => showLicensePage(
                   context: context,
                   applicationName: 'Enshroud Buddy',
-                  applicationLegalese:
-                      'Unofficial fan project. Not affiliated with or endorsed by Keen Games. '
-                      'Enshrouded and its content are the property of Keen Games GmbH. App code: MIT license.',
+                  applicationLegalese: tr(
+                    'Unofficial fan project. Not affiliated with or endorsed by Keen Games. Enshrouded and its content are the property of Keen Games GmbH. App code: MIT license.',
+                  ),
                 ),
           ),
         ],
       ),
     );
+  }
+
+  /// The language picked here (null: the phone's), shown on the Language tile.
+  late Future<String?> _chosen = L10n.chosen();
+
+  Widget _language() => FutureBuilder<String?>(
+    future: _chosen,
+    builder: (context, snap) {
+      final pick = languages.where((l) => l.code == snap.data).firstOrNull;
+      return ListTile(
+        leading: const Icon(Icons.translate),
+        title: Text(tr('Language')),
+        subtitle: Text(
+          pick?.name ??
+              tr('Phone language ({lang})', {'lang': L10n.ofDevice().name}),
+          style: const TextStyle(color: Palette.ash, fontSize: 12),
+        ),
+        onTap:
+            snap.connectionState == ConnectionState.done
+                ? () => _pickLanguage(pick?.code)
+                : null,
+      );
+    },
+  );
+
+  Future<void> _pickLanguage(String? current) async {
+    // '' stands for the phone's language; null is a dismissed dialog
+    final now = current ?? '';
+    final code = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => SimpleDialog(
+            title: Text(tr('Language')),
+            children: [
+              for (final (c, name) in [
+                ('', tr('Phone language')),
+                for (final l in languages) (l.code, l.name),
+              ])
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, c),
+                  child: Row(
+                    children: [
+                      Icon(
+                        c == now
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        size: 20,
+                        color: c == now ? Palette.flame : Palette.ash,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(name)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+    );
+    if (code == null || code == now) return;
+    await L10n.choose(code.isEmpty ? null : code);
+    if (mounted) setState(() => _chosen = L10n.chosen());
   }
 
   Widget _folder(Live live, SaveList list, SaveFolder f) {
@@ -253,9 +345,16 @@ class _SetupScreenState extends State<SetupScreen> {
             selected ? Icons.radio_button_checked : Icons.radio_button_off,
             color: selected ? Palette.flame : Palette.ash,
           ),
-          title: Text(e.name.isEmpty ? '$kind ${e.slot}' : e.name),
+          title: Text(
+            e.name.isEmpty
+                ? tr('{kind} {slot}', {'kind': kind, 'slot': e.slot})
+                : e.name,
+          ),
           subtitle: Text(
-            'Slot ${e.slot} · saved ${e.savedAt.replaceFirst('T', ' ')}',
+            tr('Slot {slot} · saved {time}', {
+              'slot': e.slot,
+              'time': e.savedAt.replaceFirst('T', ' '),
+            }),
             style: const TextStyle(color: Palette.ash, fontSize: 12),
           ),
           onTap: onTap,
@@ -273,13 +372,16 @@ class _SetupScreenState extends State<SetupScreen> {
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: Text('World', style: TextStyle(color: Palette.ash)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                tr('World'),
+                style: const TextStyle(color: Palette.ash),
+              ),
             ),
             for (final e in f.worlds)
               pick(
-                'World',
+                tr('World'),
                 e,
                 here && world == e.slot,
                 () => setState(() {
@@ -289,13 +391,16 @@ class _SetupScreenState extends State<SetupScreen> {
                   world = e.slot;
                 }),
               ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: Text('Character', style: TextStyle(color: Palette.ash)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                tr('Character'),
+                style: const TextStyle(color: Palette.ash),
+              ),
             ),
             for (final e in f.characters)
               pick(
-                'Character',
+                tr('Character'),
                 e,
                 here && character == e.slot,
                 () => setState(() {
@@ -310,7 +415,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 child: FilledButton.icon(
                   icon: Icon(isCurrent ? Icons.check : Icons.swap_horiz),
                   label: Text(
-                    isCurrent ? 'Reading this save' : 'Read this save',
+                    isCurrent ? tr('Reading this save') : tr('Read this save'),
                   ),
                   onPressed:
                       isCurrent ||

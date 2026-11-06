@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/game_db.dart';
+import '../l10n.dart';
 import '../nav.dart';
 import 'items_screen.dart';
 import 'lore_screen.dart';
@@ -45,16 +46,16 @@ class _CodexScreenState extends State<CodexScreen>
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Codex'),
+      title: Text(tr('Codex')),
       bottom: TabBar(
         controller: tabs,
         isScrollable: true,
         tabs: [
           // plain labels fit a phone's width; each tab shows its own count
-          const Tab(text: 'Items'),
-          const Tab(text: 'Sets'),
-          const Tab(text: 'Lore'),
-          const Tab(text: 'Quests'),
+          Tab(text: tr('Items')),
+          Tab(text: tr('Sets')),
+          Tab(text: tr('Lore')),
+          Tab(text: tr('Quests')),
         ],
       ),
     ),

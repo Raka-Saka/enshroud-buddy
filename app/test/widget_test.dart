@@ -21,6 +21,7 @@ import 'package:ensh_companion/data/route.dart';
 import 'package:ensh_companion/data/shroud.dart';
 import 'package:ensh_companion/data/tasks.dart';
 import 'package:ensh_companion/data/where.dart';
+import 'package:ensh_companion/l10n.dart';
 import 'package:ensh_companion/screens/items_screen.dart';
 import 'package:ensh_companion/screens/survival_screen.dart';
 import 'package:flutter/material.dart';
@@ -882,7 +883,7 @@ void main() {
       },
       'world': {'name': 'Test', 'bases': [], 'containers': []},
     });
-    final lines = {for (final l in HallCheck(db, top, s).lines()) l.title: l};
+    final lines = {for (final l in HallCheck(db, top, s).lines()) l.id: l};
     expect(lines['Level']!.mark, CheckMark.warn);
     expect(lines['Gear']!.mark, CheckMark.warn);
     expect(lines['Gear']!.detail, contains(helmet.name));
@@ -897,7 +898,7 @@ void main() {
     expect(dmg.weak, isNot(contains('physicalCut')));
     expect(lines['Damage']!.mark, CheckMark.warn);
     // without a save: the level and what's inside, nothing about gear
-    final bare = HallCheck(db, top, null).lines().map((l) => l.title);
+    final bare = HallCheck(db, top, null).lines().map((l) => l.id);
     expect(bare, contains('Level'));
     expect(bare, isNot(contains('Gear')));
   });
@@ -1200,5 +1201,51 @@ void main() {
     expect((plan['lines'] as List).length, inInclusiveRange(1, 5));
     expect(plan['open'], greaterThanOrEqualTo((plan['lines'] as List).length));
     expect(plan['target'], isNotNull);
+  });
+
+  test('languages: every file has every text, placeholders and plural forms', () {
+    final keys =
+        jsonDecode(File('../tools/i18n/ui_keys.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final slots = RegExp(r'\{(\w+)\}');
+    Set<String> of(String s) => {for (final m in slots.allMatches(s)) m[1]!};
+    for (final l in languages.skip(1)) {
+      final ui =
+          jsonDecode(
+                File('assets/i18n/ui/${l.code}.json').readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      for (final k in keys.keys) {
+        final v = ui[k];
+        expect(v, isNotNull, reason: '${l.code}: $k');
+        for (final form in v is Map ? v.values : [v]) {
+          expect(of(form as String), of(k), reason: '${l.code}: $k');
+        }
+      }
+      final game = File('assets/i18n/game/${l.code}.json');
+      expect(game.existsSync(), isTrue, reason: l.code);
+    }
+    L10n.use(
+      languages.firstWhere((l) => l.code == 'Ru_Ru'),
+      ui: {
+        '{n} items': {
+          'one': '{n} предмет',
+          'few': '{n} предмета',
+          'many': '{n} предметов',
+        },
+        'Hello {name}': 'Привет, {name}',
+      },
+      game: {'Iron Bar': 'Железный слиток'},
+    );
+    expect(trn(1, '{n} item', '{n} items'), '1 предмет');
+    expect(trn(3, '{n} item', '{n} items'), '3 предмета');
+    expect(trn(11, '{n} item', '{n} items'), '11 предметов');
+    expect(trn(22, '{n} item', '{n} items'), '22 предмета');
+    expect(tr('Hello {name}', {'name': 'Ann'}), 'Привет, Ann');
+    expect(tr('Untranslated'), 'Untranslated');
+    expect(gt('Iron Bar'), 'Железный слиток');
+    L10n.use(languages.first);
+    expect(trn(1, '{n} item', '{n} items'), '1 item');
+    expect(gt('Iron Bar'), 'Iron Bar');
   });
 }

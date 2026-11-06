@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import '../l10n.dart';
 import 'build.dart';
 import 'game_db.dart';
 
@@ -73,23 +74,25 @@ class Projection {
     'exploration',
     'passives',
   ];
-  static const axisNames = {
-    'damage': 'Damage',
-    'area': 'Area damage',
-    'survival': 'Survivability',
-    'sustain': 'Mana & stamina',
-    'gathering': 'Gathering',
-    'building': 'Building',
-    'exploration': 'Exploration',
-    'passives': 'Passive buffs',
+  /// Axis names, for display.
+  static Map<String, String> get axisNames => {
+    'damage': tr('Damage'),
+    'area': tr('Area damage'),
+    'survival': tr('Survivability'),
+    'sustain': tr('Mana & stamina'),
+    'gathering': tr('Gathering'),
+    'building': tr('Building'),
+    'exploration': tr('Exploration'),
+    'passives': tr('Passive buffs'),
   };
 
   static const _melee1h = ['Sword', 'Axe', 'Mace'];
   static const _melee2h = ['Greatsword', 'Hammer', 'Two-handed axe'];
-  static const goals = [
+  /// The build directions to project, with display names (they are only shown).
+  static List<BuildGoal> get goals => [
     BuildGoal(
-      'Archer',
-      'Bow damage, crits and arrows',
+      tr('Archer'),
+      tr('Bow damage, crits and arrows'),
       ['Bow'],
       {
         'damage': 3,
@@ -101,8 +104,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Assassin',
-      'Daggers, backstabs and sneak attacks',
+      tr('Assassin'),
+      tr('Daggers, backstabs and sneak attacks'),
       ['Dagger'],
       {
         'damage': 3,
@@ -114,8 +117,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Ranger',
-      'Bow at range, daggers up close',
+      tr('Ranger'),
+      tr('Bow at range, daggers up close'),
       ['Bow', 'Dagger'],
       {
         'damage': 3,
@@ -127,8 +130,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Wand mage',
-      'Fast wand casting and mana',
+      tr('Wand mage'),
+      tr('Fast wand casting and mana'),
       ['Wand'],
       {
         'damage': 3,
@@ -140,8 +143,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Staff caster and healer',
-      'Staff blasts, auras and heals',
+      tr('Staff caster and healer'),
+      tr('Staff blasts, auras and heals'),
       ['Staff'],
       {
         'damage': 2,
@@ -153,8 +156,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Knight',
-      'One-handed weapon and shield, hard to kill',
+      tr('Knight'),
+      tr('One-handed weapon and shield, hard to kill'),
       [..._melee1h, 'Shield'],
       {
         'damage': 2,
@@ -166,8 +169,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Barbarian',
-      'Two-handed weapons, big hits and sweeps',
+      tr('Barbarian'),
+      tr('Two-handed weapons, big hits and sweeps'),
       _melee2h,
       {
         'damage': 3,
@@ -179,8 +182,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Battlemage',
-      'Melee and wand together',
+      tr('Battlemage'),
+      tr('Melee and wand together'),
       [..._melee1h, 'Wand'],
       {
         'damage': 2.5,
@@ -192,8 +195,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Spellbow',
-      'Bow damage with staff and wand magic',
+      tr('Spellbow'),
+      tr('Bow damage with staff and wand magic'),
       ['Bow', 'Wand', 'Staff'],
       {
         'damage': 3,
@@ -205,8 +208,8 @@ class Projection {
       },
     ),
     BuildGoal(
-      'Explorer and builder',
-      'Gathering, building, travel and passive buffs',
+      tr('Explorer and builder'),
+      tr('Gathering, building, travel and passive buffs'),
       [],
       {
         'gathering': 3,
@@ -236,8 +239,8 @@ class Projection {
       }
     });
     return BuildGoal(
-      'Keep my direction',
-      'More of what your build already does',
+      tr('Keep my direction'),
+      tr('More of what your build already does'),
       target.topWeapons,
       {
         for (final a in axes)

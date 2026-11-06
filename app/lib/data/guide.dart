@@ -7,6 +7,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n.dart';
+
 import 'game_db.dart';
 import 'live_state.dart';
 import 'where.dart' show compassOf, distanceText;
@@ -233,32 +235,51 @@ class GlideCheck {
 
   /// "Glide all the way: 34 s, about 140 stamina" / "Glide 620 m, then walk 280 m · 40 m higher would do it".
   String describe() {
-    final cost =
-        '${seconds.round()} s, about ${(stamina / 5).round() * 5} stamina';
-    final est = measured ? '' : ' (estimate until you glide a bit)';
-    if (reaches) return 'Glide all the way: $cost$est';
+    final cost = tr('{s} s, about {stamina} stamina', {
+      's': seconds.round(),
+      'stamina': (stamina / 5).round() * 5,
+    });
+    final est = measured ? '' : ' ${tr('(estimate until you glide a bit)')}';
+    if (reaches) return '${tr('Glide all the way: {cost}', {'cost': cost})}$est';
     if (carriesM < 30) {
-      return 'No drop to glide from here${(climbFirst ?? 0) > 0 ? ': ${climbFirst!.round()} m higher would do it' : ''}$est';
+      final drop =
+          (climbFirst ?? 0) > 0
+              ? tr('No drop to glide from here: {n} m higher would do it', {
+                'n': climbFirst!.round(),
+              })
+              : tr('No drop to glide from here');
+      return '$drop$est';
     }
     final more =
         (climbFirst ?? 0) > 0
-            ? ' · ${climbFirst!.round()} m higher would do it'
+            ? ' · ${tr('{n} m higher would do it', {'n': climbFirst!.round()})}'
             : '';
-    return 'Glide ${distanceText(carriesM)} ($cost), then walk ${distanceText(walkM)}$more$est';
+    final go = tr('Glide {glide} ({cost}), then walk {walk}', {
+      'glide': distanceText(carriesM),
+      'cost': cost,
+      'walk': distanceText(walkM),
+    });
+    return '$go$more$est';
   }
 
   /// In the air: what the glide does if you head straight for the target now.
   String describeAloft() {
     if (reaches) {
       return spareM >= 30
-          ? 'Head straight there: you make it with ${(spareM / 5).round() * 5} m to spare'
-          : 'Head straight there: you just make it';
+          ? tr('Head straight there: you make it with {n} m to spare', {
+            'n': (spareM / 5).round() * 5,
+          })
+          : tr('Head straight there: you just make it');
     }
     final more =
         (climbFirst ?? 0) > 0
-            ? ' · ${climbFirst!.round()} m more height (an updraft) would do it'
+            ? ' · ${tr('{n} m more height (an updraft) would do it', {'n': climbFirst!.round()})}'
             : '';
-    return 'Head straight there: you come down ${distanceText(walkM)} short, then walk$more';
+    final short = tr(
+      'Head straight there: you come down {distance} short, then walk',
+      {'distance': distanceText(walkM)},
+    );
+    return '$short$more';
   }
 }
 
@@ -403,13 +424,24 @@ class LaunchPlan {
     final dir = compassOf(x - p.x, y - p.y);
     final go =
         climbM >= 10
-            ? 'Climb ${(climbM / 5).round() * 5} m to high ground ${distanceText(walkM)} $dir'
-            : 'Walk ${distanceText(walkM)} $dir to the drop';
+            ? tr('Climb {n} m to high ground {distance} {direction}', {
+              'n': (climbM / 5).round() * 5,
+              'distance': distanceText(walkM),
+              'direction': dir,
+            })
+            : tr('Walk {distance} {direction} to the drop', {
+              'distance': distanceText(walkM),
+              'direction': dir,
+            });
     final saved =
         savedS >= 90
-            ? '${(savedS / 60).round()} min'
-            : '${(savedS / 10).round() * 10} s';
-    return '$go, then glide ${distanceText(glide.carriesM)} · about $saved quicker';
+            ? tr('{n} min', {'n': (savedS / 60).round()})
+            : tr('{n} s', {'n': (savedS / 10).round() * 10});
+    return tr('{go}, then glide {glide} · about {saved} quicker', {
+      'go': go,
+      'glide': distanceText(glide.carriesM),
+      'saved': saved,
+    });
   }
 }
 
@@ -417,21 +449,25 @@ class LaunchPlan {
 /// (a cave, a cellar, the sea floor or a floating island). [ground] from the [HeightMap], the top surface
 /// with islands, so a few metres off and more on cliffs; [me] the live position, when there is one.
 String heightNote(double h, double? ground, PlayerPos? me) {
-  final parts = ['${h.round()} m up'];
+  final parts = [
+    tr('{n} m up', {'n': h.round()}),
+  ];
   if (ground != null) {
     final d = (h - ground).round();
     if (d < -15) {
-      parts.add('${-d} m under the surface');
+      parts.add(tr('{n} m under the surface', {'n': -d}));
     } else if (d > 15) {
-      parts.add('$d m above the ground');
+      parts.add(tr('{n} m above the ground', {'n': d}));
     }
   }
   if (me != null) {
     final c = (h - (me.height - GlideCheck.cameraHeight)).round();
     parts.add(
       c.abs() < 4
-          ? 'level with you'
-          : '${c.abs()} m ${c > 0 ? 'above' : 'below'} you',
+          ? tr('level with you')
+          : c > 0
+          ? tr('{n} m above you', {'n': c.abs()})
+          : tr('{n} m below you', {'n': c.abs()}),
     );
   }
   return parts.join(' · ');
@@ -484,37 +520,39 @@ class Guide {
 
   /// "340 m · bear left" ...
   String get headline {
-    if (arrived) return "You're there";
+    if (arrived) return tr("You're there");
     return '${distanceText(distanceM)} · $turnText';
   }
 
   String get turnText {
     final a = turn.abs();
-    final side = turn < 0 ? 'left' : 'right';
-    if (a < 15) return 'straight ahead';
-    if (a < 60) return 'bear $side';
-    if (a < 135) return 'turn $side';
-    return 'behind you';
+    final left = turn < 0;
+    if (a < 15) return tr('straight ahead');
+    if (a < 60) return left ? tr('bear left') : tr('bear right');
+    if (a < 135) return left ? tr('turn left') : tr('turn right');
+    return tr('behind you');
   }
 
   /// "60 m above you" / "level with you".
   String get heightText {
     final c = climb.round();
-    if (c.abs() < 4) return 'Level with you';
-    return '${c.abs()} m ${c > 0 ? 'above' : 'below'} you';
+    if (c.abs() < 4) return tr('Level with you');
+    return c > 0
+        ? tr('{n} m above you', {'n': c.abs()})
+        : tr('{n} m below you', {'n': c.abs()});
   }
 
   /// "On foot", "Gliding", "Falling"; null from an older agent.
   String? get modeText => switch (mode) {
-    Motion.foot => 'On foot',
-    Motion.air => 'Gliding',
-    Motion.fall => 'Falling',
+    Motion.foot => tr('On foot'),
+    Motion.air => tr('Gliding'),
+    Motion.fall => tr('Falling'),
     null => null,
   };
 
   /// The glide line for the card: from here on foot, straight on in the air, a warning when falling.
   String? get glideText {
-    if (mode == Motion.fall) return 'Falling: open the glider';
+    if (mode == Motion.fall) return tr('Falling: open the glider');
     final g = glide;
     if (g == null) return null;
     return mode == Motion.air ? g.describeAloft() : g.describe();

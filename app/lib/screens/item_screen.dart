@@ -4,6 +4,8 @@ import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/where.dart';
 import '../data/item_icons.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../theme.dart';
 import 'ask_screen.dart';
 import 'items_screen.dart';
@@ -49,16 +51,16 @@ class ItemScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.name, overflow: TextOverflow.ellipsis),
+        title: Text(gt(item.name), overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
-            tooltip: 'Ask about this',
+            tooltip: tr('Ask about this'),
             icon: const Icon(Icons.auto_awesome),
             onPressed:
                 () => askAbout(context, db, item.name, itemPrompts(db, item)),
           ),
           IconButton(
-            tooltip: 'Add to shopping list',
+            tooltip: tr('Add to shopping list'),
             icon: const Icon(Icons.add_task),
             onPressed:
                 () => addGoal(
@@ -83,9 +85,9 @@ class ItemScreen extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 6,
                     children: [
-                      Pill(item.rarity, color: Palette.rarity(item.rarity)),
-                      Pill(categoryLabels[item.category] ?? item.category),
-                      if (item.maxStack > 1) Pill('Stacks to ${item.maxStack}'),
+                      Pill(gt(item.rarity), color: Palette.rarity(item.rarity)),
+                      Pill(categoryLabel(item.category)),
+                      if (item.maxStack > 1) Pill(tr('Stacks to {n}', {'n': item.maxStack})),
                     ],
                   ),
                 ),
@@ -101,8 +103,8 @@ class ItemScreen extends StatelessWidget {
                   children: [
                     Text(
                       where.isEmpty
-                          ? 'You have none'
-                          : 'You have ${live.owned(item.id)}',
+                          ? tr('You have none')
+                          : tr('You have {n}', {'n': live.owned(item.id)}),
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: where.isEmpty ? Palette.ash : Palette.spring,
@@ -131,7 +133,7 @@ class ItemScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
               child: Text(
-                item.description!,
+                gt(item.description!),
                 style: const TextStyle(height: 1.4),
               ),
             ),
@@ -139,7 +141,7 @@ class ItemScreen extends StatelessWidget {
               when st.values.isNotEmpty ||
                   st.perks.isNotEmpty ||
                   st.levels != null) ...[
-            const SectionTitle('Stats'),
+            SectionTitle(tr('Stats')),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -151,15 +153,18 @@ class ItemScreen extends StatelessWidget {
                       runSpacing: 6,
                       children: [
                         if (st.slotLabel.isNotEmpty)
-                          Pill(st.slotLabel, color: Palette.flame),
+                          Pill(slotName(st.slotLabel), color: Palette.flame),
                         if (st.levels != null && st.levels![1] > 0)
                           Pill(
                             st.levels![0] == st.levels![1]
-                                ? 'Level ${st.levels![0]}'
-                                : 'Level ${st.levels![0]}–${st.levels![1]}',
+                                ? tr('Level {n}', {'n': st.levels![0]})
+                                : tr('Level {from}–{to}', {
+                                  'from': st.levels![0],
+                                  'to': st.levels![1],
+                                }),
                           ),
                         if (st.comfort > 0)
-                          Pill('Comfort +${st.comfort}', color: Palette.spring),
+                          Pill(tr('Comfort +{n}', {'n': st.comfort}), color: Palette.spring),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -170,12 +175,12 @@ class ItemScreen extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                label,
+                                gt(label),
                                 style: const TextStyle(color: Palette.ash),
                               ),
                             ),
                             Text(
-                              value,
+                              gt(value),
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -185,9 +190,9 @@ class ItemScreen extends StatelessWidget {
                       ),
                     if (st.perks.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      const Text(
-                        'Perks',
-                        style: TextStyle(
+                      Text(
+                        tr('Perks'),
+                        style: const TextStyle(
                           color: Palette.veilText,
                           fontWeight: FontWeight.w600,
                         ),
@@ -197,7 +202,7 @@ class ItemScreen extends StatelessWidget {
                         spacing: 6,
                         runSpacing: 4,
                         children: [
-                          for (final p in st.perks) Chip(label: Text(p)),
+                          for (final p in st.perks) Chip(label: Text(gt(p))),
                         ],
                       ),
                     ],
@@ -206,14 +211,14 @@ class ItemScreen extends StatelessWidget {
               ),
             ),
           ],
-          if (item.lore != null) Parchment(text: item.lore!),
+          if (item.lore != null) Parchment(text: gt(item.lore!)),
           if (item.hint != null || setHints.isNotEmpty) ...[
-            const SectionTitle('How to get it'),
+            SectionTitle(tr('How to get it')),
             for (final h in {if (item.hint != null) item.hint!, ...setHints})
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Text(h, style: const TextStyle(height: 1.4)),
+                  child: Text(gt(h), style: const TextStyle(height: 1.4)),
                 ),
               ),
           ],
@@ -240,7 +245,7 @@ class ItemScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (best.isNotEmpty)
-                      const SectionTitle('Best places for you'),
+                      SectionTitle(tr('Best places for you')),
                     for (final r in best)
                       ListTile(
                         dense: true,
@@ -251,9 +256,11 @@ class ItemScreen extends StatelessWidget {
                           color: Palette.risk(r.risk),
                         ),
                         title: Text(switch (r.spot.kind) {
-                          'gather' => 'Gather',
-                          'unique' => 'Unique loot',
-                          _ => r.spot.poi?.title.split(' · ').first ?? 'Chest',
+                          'gather' => tr('Gather'),
+                          'unique' => tr('Unique loot'),
+                          _ =>
+                            gtn(r.spot.poi?.title)?.split(' · ').first ??
+                                tr('Chest'),
                         }),
                         subtitle: Text(
                           r.describe(),
@@ -263,7 +270,7 @@ class ItemScreen extends StatelessWidget {
                           ),
                         ),
                         trailing: TextButton(
-                          child: const Text('Map'),
+                          child: Text(tr('Map')),
                           onPressed: () {
                             Navigator.of(context).popUntil((r) => r.isFirst);
                             mapFocus.value = where.asPoi(item.id, r);
@@ -271,18 +278,24 @@ class ItemScreen extends StatelessWidget {
                         ),
                       ),
                     if (uniques.isNotEmpty || item.chestKinds.isNotEmpty)
-                      const SectionTitle('Where to find it'),
+                      SectionTitle(tr('Where to find it')),
                     for (final spot in uniques)
                       ListTile(
                         dense: true,
                         leading: const Icon(Icons.star, color: Palette.gold),
                         title: Text(
                           spot.cat == 'special'
-                              ? 'In one of ${spot.candidates} chests in an area'
-                              : 'Always in a ${spot.title.split(' · ').first.toLowerCase()}',
+                              ? tr('In one of {n} chests in an area', {
+                                'n': spot.candidates,
+                              })
+                              : tr('Always in a {chest}', {
+                                'chest': _lowerEn(
+                                  gt(spot.title).split(' · ').first,
+                                ),
+                              }),
                         ),
                         trailing: TextButton(
-                          child: const Text('Map'),
+                          child: Text(tr('Map')),
                           onPressed: () {
                             Navigator.of(context).popUntil((r) => r.isFirst);
                             mapFocus.value = spot;
@@ -297,7 +310,9 @@ class ItemScreen extends StatelessWidget {
                           color: Palette.flame,
                         ),
                         title: Text(
-                          'Random loot in: ${item.chestKinds.join(', ')}',
+                          tr('Random loot in: {chests}', {
+                            'chests': item.chestKinds.map(gt).join(', '),
+                          }),
                         ),
                       ),
                   ],
@@ -306,34 +321,36 @@ class ItemScreen extends StatelessWidget {
             ),
           if (made.isNotEmpty) ...[
             SectionTitle(
-              made.length == 1 ? 'Recipe' : 'Recipes (${made.length})',
+              made.length == 1
+                  ? tr('Recipe')
+                  : tr('Recipes ({n})', {'n': made.length}),
             ),
             for (final r in made)
               RecipeCard(db: db, recipe: r, onItem: (id) => open(context, id)),
           ],
           if (usedIn.isNotEmpty) ...[
-            SectionTitle('Used to make (${usedIn.length})'),
+            SectionTitle(tr('Used to make ({n})', {'n': usedIn.length})),
             for (final e in usedIn.entries)
               ItemTile(
                 db: db,
                 item: db.items[e.key]!,
                 trailing: Text(
-                  db.workshops[e.value.workshopId]?.name ?? '',
+                  gtn(db.workshops[e.value.workshopId]?.name) ?? '',
                   style: const TextStyle(color: Palette.ash, fontSize: 12),
                 ),
               ),
           ],
           if (sets.isNotEmpty) ...[
-            const SectionTitle('Part of a set'),
+            SectionTitle(tr('Part of a set')),
             for (final s in sets)
               ListTile(
                 leading: const Icon(
                   Icons.collections_bookmark_outlined,
                   color: Palette.veil,
                 ),
-                title: Text(s.name),
+                title: Text(gt(s.name)),
                 subtitle: Text(
-                  s.category,
+                  gt(s.category),
                   style: const TextStyle(color: Palette.ash),
                 ),
                 onTap:
@@ -390,13 +407,13 @@ class RecipeCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    w?.name ?? 'Unknown station',
+                    gtn(w?.name) ?? tr('Unknown station'),
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
                 if (out.count > 1)
                   Text(
-                    'makes ${out.count}',
+                    tr('makes {n}', {'n': out.count}),
                     style: const TextStyle(color: Palette.ash),
                   ),
                 if (recipe.seconds > 0)
@@ -407,11 +424,11 @@ class RecipeCard extends StatelessWidget {
               ],
             ),
             if (built(w?.itemId) == false)
-              const Padding(
-                padding: EdgeInsets.only(top: 4, left: 26),
+              Padding(
+                padding: const EdgeInsets.only(top: 4, left: 26),
                 child: Text(
-                  'Station not built yet',
-                  style: TextStyle(color: Palette.ember, fontSize: 13),
+                  tr('Station not built yet'),
+                  style: const TextStyle(color: Palette.ember, fontSize: 13),
                 ),
               ),
             if (recipe.props.isNotEmpty)
@@ -420,13 +437,13 @@ class RecipeCard extends StatelessWidget {
                 child: Wrap(
                   spacing: 4,
                   children: [
-                    const Text(
-                      'Needs',
-                      style: TextStyle(color: Palette.veilText, fontSize: 13),
+                    Text(
+                      tr('Needs'),
+                      style: const TextStyle(color: Palette.veilText, fontSize: 13),
                     ),
                     for (final p in recipe.props)
                       Text(
-                        '${db.workshops[p]?.name ?? p}${switch (built(db.workshops[p]?.itemId)) {
+                        '${gt(db.workshops[p]?.name ?? p)}${switch (built(db.workshops[p]?.itemId)) {
                           true => ' ✓',
                           false => ' ✗',
                           null => '',
@@ -464,23 +481,23 @@ class RecipeCard extends StatelessWidget {
                             ),
                     label: Text(
                       live == null
-                          ? '${i.count} × ${db.nameOf(i.ref)}'
-                          : '${have(i)}/${i.count} ${db.nameOf(i.ref)}',
+                          ? '${i.count} × ${db.shownName(i.ref)}'
+                          : '${have(i)}/${i.count} ${db.shownName(i.ref)}',
                     ),
                     onPressed: i.isCategory ? null : () => onItem(i.ref),
                   ),
               ],
             ),
             if (unlocked == true)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.lock_open, size: 16, color: Palette.spring),
-                    SizedBox(width: 6),
+                    const Icon(Icons.lock_open, size: 16, color: Palette.spring),
+                    const SizedBox(width: 6),
                     Text(
-                      'Unlocked',
-                      style: TextStyle(color: Palette.spring, fontSize: 13),
+                      tr('Unlocked'),
+                      style: const TextStyle(color: Palette.spring, fontSize: 13),
                     ),
                   ],
                 ),
@@ -493,11 +510,11 @@ class RecipeCard extends StatelessWidget {
                 onItem: onItem,
               ),
             if (unlocked == false && recipe.unlock == null)
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Locked. Its unlock condition is not in the game data.',
-                  style: TextStyle(color: Palette.ash, fontSize: 13),
+                  tr('Locked. Its unlock condition is not in the game data.'),
+                  style: const TextStyle(color: Palette.ash, fontSize: 13),
                 ),
               ),
           ],
@@ -532,7 +549,7 @@ class UnlockView extends StatelessWidget {
           children: [
             if (depth > 0 || u.op == 'OR')
               Text(
-                u.op == 'OR' ? 'Any of:' : 'All of:',
+                u.op == 'OR' ? tr('Any of:') : tr('All of:'),
                 style: const TextStyle(color: Palette.ash, fontSize: 12),
               ),
             for (final c in u.children) _node(c, depth + 1),
@@ -562,7 +579,7 @@ class UnlockView extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(u.text ?? '', style: const TextStyle(fontSize: 13)),
+              child: Text(gtn(u.text) ?? '', style: const TextStyle(fontSize: 13)),
             ),
           ],
         ),
@@ -581,13 +598,13 @@ class UnlockView extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(Icons.lock_outline, size: 16, color: Palette.flame),
-            SizedBox(width: 6),
+            const Icon(Icons.lock_outline, size: 16, color: Palette.flame),
+            const SizedBox(width: 6),
             Text(
-              'To unlock',
-              style: TextStyle(
+              tr('To unlock'),
+              style: const TextStyle(
                 color: Palette.flame,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
@@ -604,5 +621,9 @@ class UnlockView extends StatelessWidget {
 
 String formatSeconds(double s) =>
     s >= 60
-        ? '${(s / 60).toStringAsFixed(s % 60 == 0 ? 0 : 1)} min'
-        : '${s.toStringAsFixed(0)} s';
+        ? tr('{n} min', {'n': (s / 60).toStringAsFixed(s % 60 == 0 ? 0 : 1)})
+        : tr('{n} s', {'n': s.toStringAsFixed(0)});
+
+/// Lowercase in English ("Always in a gold chest"); other languages keep their own casing.
+String _lowerEn(String s) =>
+    L10n.lang.code == 'En_Us' ? s.toLowerCase() : s;

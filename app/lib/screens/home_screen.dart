@@ -7,6 +7,8 @@ import '../data/survival.dart';
 import '../data/tasks.dart';
 import '../data/updates.dart';
 import '../data/where.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../nav.dart';
 import '../theme.dart';
 import 'ask_screen.dart';
@@ -42,12 +44,12 @@ class HomeScreen extends StatelessWidget {
               title: Text(s?.character ?? 'Enshrouded'),
               actions: [
                 IconButton(
-                  tooltip: 'Refresh',
+                  tooltip: tr('Refresh'),
                   icon: const Icon(Icons.refresh),
                   onPressed: live.loading ? null : live.refresh,
                 ),
                 IconButton(
-                  tooltip: 'Setup: PC agent and game save',
+                  tooltip: tr('Setup: PC agent and game save'),
                   icon: const Icon(Icons.settings_outlined),
                   onPressed: () => _push(context, const SetupScreen()),
                 ),
@@ -84,23 +86,23 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           const Icon(Icons.auto_awesome, color: Palette.flame),
                           const SizedBox(width: 12),
-                          const Expanded(
+                          Expanded(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               child: Text(
-                                'Ask anything about your game',
-                                style: TextStyle(color: Palette.ash),
+                                tr('Ask anything about your game'),
+                                style: const TextStyle(color: Palette.ash),
                               ),
                             ),
                           ),
                           IconButton(
-                            tooltip: 'Search items',
+                            tooltip: tr('Search items'),
                             icon: const Icon(Icons.search, color: Palette.ash),
                             onPressed:
                                 () => _push(
                                   context,
                                   Scaffold(
-                                    appBar: AppBar(title: const Text('Items')),
+                                    appBar: AppBar(title: Text(tr('Items'))),
                                     body: ItemsScreen(
                                       db: db,
                                       embedded: true,
@@ -133,14 +135,20 @@ class HomeScreen extends StatelessWidget {
                                     Icons.system_update,
                                     color: Palette.ember,
                                   ),
-                                  title: Text('Version ${r.version} is out'),
-                                  subtitle: const Text(
-                                    'Download it, then open it to install over this one: nothing is lost.',
-                                    style: TextStyle(fontSize: 12),
+                                  title: Text(
+                                    tr('Version {version} is out', {
+                                      'version': r.version,
+                                    }),
+                                  ),
+                                  subtitle: Text(
+                                    tr(
+                                      'Download it, then open it to install over this one: nothing is lost.',
+                                    ),
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                   trailing: FilledButton.tonal(
                                     onPressed: () => Updates.open(r),
-                                    child: const Text('Update'),
+                                    child: Text(tr('Update')),
                                   ),
                                 ),
                               ),
@@ -154,12 +162,14 @@ class HomeScreen extends StatelessWidget {
                   child: Material(
                     color: Palette.ember.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(Radii.tile),
-                    child: const ListTile(
-                      leading: Icon(Icons.computer, color: Palette.ember),
-                      title: Text('Update the PC program too'),
+                    child: ListTile(
+                      leading: const Icon(Icons.computer, color: Palette.ember),
+                      title: Text(tr('Update the PC program too')),
                       subtitle: Text(
-                        'Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.',
-                        style: TextStyle(fontSize: 12),
+                        tr(
+                          'Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.',
+                        ),
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
                   ),
@@ -185,8 +195,10 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'The save has something the reader doesn\'t know yet, so some of it may be '
-                              'missing:\n${s.warnings.join('\n')}',
+                              tr(
+                                'The save has something the reader doesn\'t know yet, so some of it may be missing:\n{warnings}',
+                                {'warnings': s.warnings.join('\n')},
+                              ),
                               style: const TextStyle(
                                 fontSize: 13,
                                 height: 1.35,
@@ -204,13 +216,14 @@ class HomeScreen extends StatelessWidget {
                 hasScrollBody: false,
                 child: EmptyState(
                   icon: Icons.wifi_tethering_off,
-                  title: 'Waiting for the PC agent',
-                  message:
-                      'Install Enshroud Buddy on your PC and start it, then open Setup and scan the code it shows. Your character appears within seconds.',
+                  title: tr('Waiting for the PC agent'),
+                  message: tr(
+                    'Install Enshroud Buddy on your PC and start it, then open Setup and scan the code it shows. Your character appears within seconds.',
+                  ),
                   actions: [
                     FilledButton.tonal(
                       onPressed: () => _push(context, const SetupScreen()),
-                      child: const Text('Setup'),
+                      child: Text(tr('Setup')),
                     ),
                   ],
                 ),
@@ -231,41 +244,42 @@ class HomeScreen extends StatelessWidget {
     final stats = [
       StatTile(
         value: '${s.level}',
-        label: 'Level',
+        label: tr('Level'),
         icon: Icons.person_outline,
         onTap: () => _push(context, JourneyScreen(db: db)),
       ),
       StatTile(
         value: '${s.flameLevel}',
-        label: 'Flame strength',
+        label: tr('Flame strength'),
         icon: Icons.local_fire_department,
         color: Palette.ember,
         onTap: () => _push(context, SurvivalScreen(db: db)),
       ),
       StatTile(
         value: '${points.free}',
-        label: 'Skill points',
+        label: tr('Skill points'),
         icon: Icons.auto_awesome,
         color: points.free > 0 ? Palette.flame : Palette.ash,
         onTap: () => _push(context, SkillTreeScreen(db: db)),
       ),
       StatTile(
         value: mins(sv.shroudSeconds),
-        label: 'In the Shroud',
+        label: tr('In the Shroud'),
         icon: Icons.hourglass_bottom,
         color: Palette.veil,
         onTap: () => _push(context, SurvivalScreen(db: db)),
       ),
       StatTile(
         value: '${sv.frostResistance}',
-        label: sv.coldProtected ? 'Frost (no freezing)' : 'Frost resist',
+        label:
+            sv.coldProtected ? tr('Frost (no freezing)') : tr('Frost resist'),
         icon: Icons.ac_unit,
         color: const Color(0xFF8CC8FF),
         onTap: () => _push(context, SurvivalScreen(db: db)),
       ),
       StatTile(
         value: mins(sv.oxygenSeconds),
-        label: 'Breath',
+        label: tr('Breath'),
         icon: Icons.bubble_chart_outlined,
         color: Palette.spring,
         onTap: () => _push(context, SurvivalScreen(db: db)),
@@ -292,9 +306,9 @@ class HomeScreen extends StatelessWidget {
       _ProgressCard(db: db, state: s),
       if (s.bases.isNotEmpty)
         DashCard(
-          title: 'Bases',
+          title: tr('Bases'),
           icon: Icons.cottage_outlined,
-          action: 'All',
+          action: tr('All'),
           onAction: () => goTo(Tabs.character, character: CharacterTabs.bases),
           child: Wrap(
             spacing: 8,
@@ -307,12 +321,20 @@ class HomeScreen extends StatelessWidget {
                     size: 16,
                     color: Palette.flame,
                   ),
-                  label: Text('${b.label} · altar ${b.altarLevel}'),
+                  label: Text(
+                    tr('{base} · altar {level}', {
+                      'base': b.label,
+                      'level': b.altarLevel,
+                    }),
+                  ),
                   onPressed:
                       () =>
                           mapFocus.value = Poi({
                             'c': 'spot',
-                            'k': 'Altar ${b.altarLevel} · build zone ${b.zone}',
+                            'k': tr('Altar {level} · build zone {zone}', {
+                              'level': b.altarLevel,
+                              'zone': b.zone,
+                            }),
                             't': b.label,
                             'x': b.mapX,
                             'y': b.mapY,
@@ -345,22 +367,23 @@ class _NextUp extends StatelessWidget {
     final goals = GoalsScope.of(context).all;
     if (goals.isEmpty) {
       return DashCard(
-        title: 'Next up',
+        title: tr('Next up'),
         icon: Icons.flag_outlined,
         child: EmptyState(
           icon: Icons.checklist,
-          title: 'Nothing planned',
-          message:
-              'Pick something to make or find; the plan works out unlocks, stations, gathering and crafting.',
+          title: tr('Nothing planned'),
+          message: tr(
+            'Pick something to make or find; the plan works out unlocks, stations, gathering and crafting.',
+          ),
           actions: [
             FilledButton.tonal(
               onPressed:
                   () => goTo(Tabs.character, character: CharacterTabs.gear),
-              child: const Text('Missing gear'),
+              child: Text(tr('Missing gear')),
             ),
             OutlinedButton(
               onPressed: () => goTo(Tabs.codex),
-              child: const Text('Browse items'),
+              child: Text(tr('Browse items')),
             ),
           ],
         ),
@@ -379,15 +402,15 @@ class _NextUp extends StatelessWidget {
         // what you can do where you stand comes first (live position from the game)
         final open = nextUp(plan, here);
         return DashCard(
-          title: 'Next up',
+          title: tr('Next up'),
           icon: Icons.flag_outlined,
-          action: '${open.length} tasks',
+          action: trn(open.length, '{n} task', '{n} tasks'),
           onAction: () => goTo(Tabs.plan),
           child:
               open.isEmpty
-                  ? const Text(
-                    'Everything is in hand: craft away.',
-                    style: TextStyle(color: Palette.spring),
+                  ? Text(
+                    tr('Everything is in hand: craft away.'),
+                    style: const TextStyle(color: Palette.spring),
                   )
                   : Column(
                     children: [
@@ -447,9 +470,9 @@ class _BuildCard extends StatelessWidget {
     final classes =
         t.classes.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     return DashCard(
-      title: 'Your build',
+      title: tr('Your build'),
       icon: Icons.account_tree_outlined,
-      action: 'Details',
+      action: tr('Details'),
       onAction: () => goTo(Tabs.character, character: CharacterTabs.build),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,7 +496,7 @@ class _BuildCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             classes
-                .map((e) => '${e.key} ${(e.value * 100).round()}%')
+                .map((e) => '${classLabel(e.key)} ${(e.value * 100).round()}%')
                 .join(' · '),
             style: const TextStyle(color: Palette.ash, fontSize: 12.5),
           ),
@@ -482,7 +505,7 @@ class _BuildCard extends StatelessWidget {
             spacing: 6,
             runSpacing: 6,
             children: [
-              for (final w in t.topWeapons) Pill(w, color: Palette.flame),
+              for (final w in t.topWeapons) Pill(weaponLabel(w), color: Palette.flame),
               for (final v in t.topTraits.take(4)) Pill(v),
             ],
           ),
@@ -492,7 +515,7 @@ class _BuildCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.hub_outlined, size: 18),
-                  label: const Text('Skill tree'),
+                  label: Text(tr('Skill tree')),
                   onPressed:
                       () => Navigator.push(
                         context,
@@ -506,7 +529,7 @@ class _BuildCard extends StatelessWidget {
               Expanded(
                 child: FilledButton.tonalIcon(
                   icon: const Icon(Icons.auto_graph, size: 18),
-                  label: const Text('Suggestions'),
+                  label: Text(tr('Suggestions')),
                   onPressed:
                       () => Navigator.push(
                         context,
@@ -541,10 +564,10 @@ class _ProgressCard extends StatelessWidget {
             .toList();
     final h = LiveScope.of(context).history;
     return DashCard(
-      title: 'Progress',
+      title: tr('Progress'),
       icon: Icons.insights,
       color: Palette.veil,
-      action: 'Journey',
+      action: tr('Journey'),
       onAction:
           () => Navigator.push(
             context,
@@ -556,19 +579,27 @@ class _ProgressCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Text(
-                'Since ${JourneyScreen.day(h.first.t)}: +${h.last.level - h.first.level} levels, +${h.last.recipes - h.first.recipes} recipes, +${h.last.roots - h.first.roots} Shroud Roots',
+                tr(
+                  'Since {day}: +{levels} levels, +{recipes} recipes, +{roots} Shroud Roots',
+                  {
+                    'day': JourneyScreen.day(h.first.t),
+                    'levels': h.last.level - h.first.level,
+                    'recipes': h.last.recipes - h.first.recipes,
+                    'roots': h.last.roots - h.first.roots,
+                  },
+                ),
                 style: const TextStyle(color: Palette.spring, fontSize: 12.5),
               ),
             ),
           ProgressLine(
-            label: 'Recipes unlocked',
+            label: tr('Recipes unlocked'),
             icon: Icons.menu_book_outlined,
             done: state.recipesUnlocked.length,
             total: db.recipes.length,
             onTap: () => goTo(Tabs.codex, codex: CodexTabs.items),
           ),
           ProgressLine(
-            label: 'Skills learned',
+            label: tr('Skills learned'),
             icon: Icons.hub_outlined,
             done: state.skills.length,
             total: db.skills.where((s) => s.type != 'Root').length,
@@ -579,21 +610,21 @@ class _ProgressCard extends StatelessWidget {
                 ),
           ),
           ProgressLine(
-            label: 'Set pieces collected',
+            label: tr('Set pieces collected'),
             icon: Icons.collections_bookmark_outlined,
             done: setEntries.where((e) => e.done?.likely(k) ?? false).length,
             total: setEntries.length,
             onTap: () => goTo(Tabs.codex, codex: CodexTabs.sets),
           ),
           ProgressLine(
-            label: 'Lore pages found',
+            label: tr('Lore pages found'),
             icon: Icons.auto_stories_outlined,
             done: lorePages.where((p) => p.done?.likely(k) ?? false).length,
             total: lorePages.length,
             onTap: () => goTo(Tabs.codex, codex: CodexTabs.lore),
           ),
           ProgressLine(
-            label: 'Quests completed',
+            label: tr('Quests completed'),
             icon: Icons.flag_outlined,
             done:
                 quests

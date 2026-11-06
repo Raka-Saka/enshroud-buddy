@@ -12,9 +12,11 @@ import '../data/live_state.dart';
 import '../data/mentions.dart';
 import '../data/voice.dart';
 import '../data/where.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../theme.dart';
 import 'item_screen.dart';
-import 'items_screen.dart' show categoryLabels;
+import 'items_screen.dart' show categoryLabel;
 import 'map_screen.dart';
 import 'plans_screen.dart';
 import 'skill_tree_screen.dart';
@@ -143,28 +145,80 @@ void askAbout(
   ),
 );
 
-List<String> itemPrompts(GameDb db, Item it) => [
-  if (db.madeBy[it.id]?.isNotEmpty ?? false)
-    'How do I make ${it.name}?'
-  else
-    'Where do I find ${it.name}?',
-  if (it.stats?.slot != null) 'Is ${it.name} good for my build?',
-  'What is ${it.name} good for?',
-  if (db.madeBy[it.id]?.isNotEmpty ?? false) 'Where do I find ${it.name}?',
-];
+/// The questions offered in the chosen language, by the English question that is sent (Claude gets the
+/// English one; it answers in the chosen language).
+final _shownQuestions = <String, String>{};
 
-List<String> skillPrompts(Skill k) => [
-  'Is ${k.name} worth it for my build?',
-  'What does ${k.name} do at each rank?',
-  'Which skills go well with ${k.name}?',
-];
+/// A question to offer: [en] is sent, [shown] is what the chip and the bubble say.
+String _question(String en, String shown) {
+  _shownQuestions[en] = shown;
+  return en;
+}
+
+/// An offered question as the player sees it.
+String shownQuestion(String en) => _shownQuestions[en] ?? en;
+
+List<String> itemPrompts(GameDb db, Item it) {
+  final item = {'item': gt(it.name)};
+  return [
+    if (db.madeBy[it.id]?.isNotEmpty ?? false)
+      _question('How do I make ${it.name}?', tr('How do I make {item}?', item))
+    else
+      _question(
+        'Where do I find ${it.name}?',
+        tr('Where do I find {item}?', item),
+      ),
+    if (it.stats?.slot != null)
+      _question(
+        'Is ${it.name} good for my build?',
+        tr('Is {item} good for my build?', item),
+      ),
+    _question(
+      'What is ${it.name} good for?',
+      tr('What is {item} good for?', item),
+    ),
+    if (db.madeBy[it.id]?.isNotEmpty ?? false)
+      _question(
+        'Where do I find ${it.name}?',
+        tr('Where do I find {item}?', item),
+      ),
+  ];
+}
+
+List<String> skillPrompts(Skill k) {
+  final skill = {'skill': gt(k.name)};
+  return [
+    _question(
+      'Is ${k.name} worth it for my build?',
+      tr('Is {skill} worth it for my build?', skill),
+    ),
+    _question(
+      'What does ${k.name} do at each rank?',
+      tr('What does {skill} do at each rank?', skill),
+    ),
+    _question(
+      'Which skills go well with ${k.name}?',
+      tr('Which skills go well with {skill}?', skill),
+    ),
+  ];
+}
 
 List<String> placePrompts(Poi p) {
   final at = '${p.title} at x ${p.x.round()}, y ${p.y.round()}';
+  final place = {'place': gt(p.title), 'x': p.x.round(), 'y': p.y.round()};
   return [
-    'What is at the $at?',
-    'Am I ready for the $at?',
-    'What should I bring to the $at?',
+    _question(
+      'What is at the $at?',
+      tr('What is at the {place} at x {x}, y {y}?', place),
+    ),
+    _question(
+      'Am I ready for the $at?',
+      tr('Am I ready for the {place} at x {x}, y {y}?', place),
+    ),
+    _question(
+      'What should I bring to the $at?',
+      tr('What should I bring to the {place} at x {x}, y {y}?', place),
+    ),
   ];
 }
 
@@ -187,13 +241,30 @@ class _AskScreenState extends State<AskScreen> {
   final scroll = ScrollController();
   var _shown = '';
 
-  static const suggestions = [
-    'What should I do next?',
-    'Where do I find Copper Ore?',
-    'What is the best food for my build?',
-    'What can I craft with what I have?',
-    'Am I ready for the Shroud in Kindlewastes?',
-    'Which skills should I take next?',
+  static List<String> get suggestions => [
+    _question('What should I do next?', tr('What should I do next?')),
+    _question(
+      'Where do I find Copper Ore?',
+      tr('Where do I find {item}?', {'item': gt('Copper Ore')}),
+    ),
+    _question(
+      'What is the best food for my build?',
+      tr('What is the best food for my build?'),
+    ),
+    _question(
+      'What can I craft with what I have?',
+      tr('What can I craft with what I have?'),
+    ),
+    _question(
+      'Am I ready for the Shroud in Kindlewastes?',
+      tr('Am I ready for the Shroud in {region}?', {
+        'region': gt('Kindlewastes'),
+      }),
+    ),
+    _question(
+      'Which skills should I take next?',
+      tr('Which skills should I take next?'),
+    ),
   ];
 
   /// The page's questions stay offered until one is asked.
@@ -288,11 +359,11 @@ class _AskScreenState extends State<AskScreen> {
     final turns = askChat.turns, busy = askChat.busy;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ask'),
+        title: Text(tr('Ask')),
         actions: [
           if (turns.isNotEmpty)
             IconButton(
-              tooltip: 'New conversation',
+              tooltip: tr('New conversation'),
               icon: const Icon(Icons.add_comment_outlined),
               onPressed: busy ? null : askChat.clear,
             ),
@@ -310,10 +381,13 @@ class _AskScreenState extends State<AskScreen> {
                           icon: Icons.auto_awesome,
                           title:
                               widget.topic == null
-                                  ? 'Ask about your game'
-                                  : 'Ask about ${widget.topic}',
-                          message:
-                              'Claude Code on your PC answers from your latest save, the game data and the wiki. It uses your Claude plan, and your question with what it needs from your save goes to Anthropic. Tap a name in an answer to open it, plan it or find it on the map. Or tap the mic and ask out loud: the answer is read back.',
+                                  ? tr('Ask about your game')
+                                  : tr('Ask about {topic}', {
+                                    'topic': gt(widget.topic!),
+                                  }),
+                          message: tr(
+                            'Claude Code on your PC answers from your latest save, the game data and the wiki. It uses your Claude plan, and your question with what it needs from your save goes to Anthropic. Tap a name in an answer to open it, plan it or find it on the map. Or tap the mic and ask out loud: the answer is read back.',
+                          ),
                         ),
                         Wrap(
                           spacing: 8,
@@ -322,7 +396,7 @@ class _AskScreenState extends State<AskScreen> {
                           children: [
                             for (final s in widget.prompts ?? suggestions)
                               ActionChip(
-                                label: Text(s),
+                                label: Text(shownQuestion(s)),
                                 onPressed: () => send(s),
                               ),
                           ],
@@ -334,12 +408,18 @@ class _AskScreenState extends State<AskScreen> {
                       padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
                       children: [
                         for (final t in turns) ...[
-                          _Bubble(text: t.question, mine: true),
+                          _Bubble(text: shownQuestion(t.question), mine: true),
                           if (t.answer != null)
                             _Answer(db: widget.db, text: t.answer!)
                           else if (t.error != null)
                             _Bubble(
-                              text: 'Couldn\'t answer: ${t.error}',
+                              text: tr('Couldn\'t answer: {error}', {
+                                'error': switch (t.error) {
+                                  'interrupted' => tr('interrupted'),
+                                  'no answer' => tr('no answer'),
+                                  final e => e,
+                                },
+                              }),
                               mine: false,
                               color: const Color(0xFF3A1E16),
                               action: TextButton(
@@ -351,7 +431,7 @@ class _AskScreenState extends State<AskScreen> {
                                           t,
                                           context: _context(),
                                         ),
-                                child: const Text('Retry'),
+                                child: Text(tr('Retry')),
                               ),
                             )
                           else if (t.partial.isNotEmpty)
@@ -377,7 +457,7 @@ class _AskScreenState extends State<AskScreen> {
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: ActionChip(
-                        label: Text(s),
+                        label: Text(shownQuestion(s)),
                         onPressed: busy ? null : () => send(s),
                       ),
                     ),
@@ -401,10 +481,12 @@ class _AskScreenState extends State<AskScreen> {
                       decoration: InputDecoration(
                         hintText:
                             widget.topic != null && _offer
-                                ? 'Ask about ${widget.topic}'
+                                ? tr('Ask about {topic}', {
+                                  'topic': gt(widget.topic!),
+                                })
                                 : turns.isEmpty
-                                ? 'Ask anything'
-                                : 'Ask a follow-up',
+                                ? tr('Ask anything')
+                                : tr('Ask a follow-up'),
                         prefixIcon: const Icon(
                           Icons.auto_awesome,
                           color: Palette.flame,
@@ -415,13 +497,13 @@ class _AskScreenState extends State<AskScreen> {
                   const SizedBox(width: 8),
                   if (_empty)
                     IconButton.filled(
-                      tooltip: 'Ask out loud',
+                      tooltip: tr('Ask out loud'),
                       onPressed: busy ? null : _listen,
                       icon: const Icon(Icons.mic),
                     )
                   else
                     IconButton.filled(
-                      tooltip: 'Send',
+                      tooltip: tr('Send'),
                       onPressed: busy ? null : () => send(input.text),
                       icon: const Icon(Icons.arrow_upward),
                     ),
@@ -527,7 +609,7 @@ class _AnswerState extends State<_Answer> {
               .replaceAll(RegExp(r'^[-•\s]+'), '');
           final label = line.split(RegExp(r'[(:,]')).first.trim();
           return _Spot(
-            label.isEmpty ? 'Place' : label,
+            label.isEmpty ? tr('Place') : label,
             double.parse(m.group(1)!),
             double.parse(m.group(2)!),
           );
@@ -662,7 +744,7 @@ class _AnswerState extends State<_Answer> {
                           () =>
                               mapFocus.value = Poi({
                                 'c': 'spot',
-                                'k': 'From the companion',
+                                'k': tr('From the companion'),
                                 't': s.label,
                                 'x': s.x,
                                 'y': s.y,
@@ -677,7 +759,7 @@ class _AnswerState extends State<_Answer> {
                         size: 16,
                         color: _tint(m.kind),
                       ),
-                      label: Text(_short(m.name)),
+                      label: Text(_short(gt(m.name))),
                       onPressed: () => _open(m),
                     ),
                 ],
@@ -709,7 +791,7 @@ class _AnswerState extends State<_Answer> {
                         final on = now == widget.text;
                         return IconButton(
                           visualDensity: VisualDensity.compact,
-                          tooltip: on ? 'Stop reading' : 'Read aloud',
+                          tooltip: on ? tr('Stop reading') : tr('Read aloud'),
                           icon: Icon(
                             on
                                 ? Icons.stop_circle_outlined
@@ -784,7 +866,7 @@ class _MentionSheet extends StatelessWidget {
                 else
                   Icon(_icon(m.kind), color: _tint(m.kind)),
                 const SizedBox(width: 10),
-                Expanded(child: Text(m.name, style: text.titleLarge)),
+                Expanded(child: Text(gt(m.name), style: text.titleLarge)),
               ],
             ),
             if (subtitle.isNotEmpty)
@@ -816,22 +898,31 @@ class _MentionSheet extends StatelessWidget {
         s == null
             ? null
             : have == 0
-            ? 'You have none.'
-            : 'You have $have: ${where.take(3).map((w) => '${w.base != null ? '${w.base}, ' : ''}${w.label} ${w.count}').join(' · ')}';
+            ? tr('You have none.')
+            : tr('You have {n}: {where}', {
+              'n': have,
+              'where': where
+                  .take(3)
+                  .map(
+                    (w) =>
+                        '${w.base != null ? '${w.base}, ' : ''}${shownLabel(w.label)} ${w.count}',
+                  )
+                  .join(' · '),
+            });
     final findable =
         db.gather.containsKey(it.id) ||
         it.fixedPlacements > 0 ||
         it.chestKinds.isNotEmpty;
     return (
       [
-        categoryLabels[it.category] ?? it.category,
-        if (it.rarity.isNotEmpty) it.rarity,
+        categoryLabel(it.category),
+        if (it.rarity.isNotEmpty) gt(it.rarity),
       ].join(' · '),
       detail,
       [
         FilledButton.tonalIcon(
           icon: const Icon(Icons.menu_book_outlined),
-          label: const Text('Open'),
+          label: Text(tr('Open')),
           onPressed:
               () => _then(
                 context,
@@ -845,13 +936,13 @@ class _MentionSheet extends StatelessWidget {
         ),
         FilledButton.tonalIcon(
           icon: const Icon(Icons.playlist_add),
-          label: const Text('Add to plan'),
+          label: Text(tr('Add to plan')),
           onPressed: () => _then(context, () => addGoal(outer, it, 1)),
         ),
         if (findable)
           FilledButton.tonalIcon(
             icon: const Icon(Icons.map_outlined),
-            label: const Text('Show on map'),
+            label: Text(tr('Show on map')),
             onPressed:
                 () => _then(context, () async {
                   final here = LiveScope.of(context).pos.value;
@@ -872,17 +963,19 @@ class _MentionSheet extends StatelessWidget {
     final rank = s?.skills[k.id];
     return (
       [
-        k.archetype,
-        if (k.cls != 'Neutral') k.cls,
-        '${k.cost} point${k.cost == 1 ? '' : 's'} per rank',
+        gt(k.archetype),
+        if (k.cls != 'Neutral') classLabel(k.cls),
+        trn(k.cost, '{n} point per rank', '{n} points per rank'),
         if (s != null)
-          rank == null ? 'not learned' : 'rank $rank of ${k.maxLevel}',
+          rank == null
+              ? tr('not learned')
+              : tr('rank {rank} of {max}', {'rank': rank, 'max': k.maxLevel}),
       ].join(' · '),
-      k.description,
+      gtn(k.description),
       [
         FilledButton.tonalIcon(
           icon: const Icon(Icons.account_tree_outlined),
-          label: const Text('Open in skill tree'),
+          label: Text(tr('Open in skill tree')),
           onPressed:
               () => _then(
                 context,
@@ -904,20 +997,20 @@ class _MentionSheet extends StatelessWidget {
     final done = s == null ? null : db.poiDone(p, s.knowledge);
     return (
       [
-        if (p.kind != null) p.kind!,
-        if (region != null) region,
-        if (done == true) 'done',
+        if (p.kind != null) gt(p.kind!),
+        if (region != null) gt(region),
+        if (done == true) tr('done'),
       ].join(' · '),
       null,
       [
         FilledButton.tonalIcon(
           icon: const Icon(Icons.map_outlined),
-          label: const Text('Show on map'),
+          label: Text(tr('Show on map')),
           onPressed: () => _then(context, () => mapFocus.value = p),
         ),
         OutlinedButton.icon(
           icon: const Icon(Icons.near_me),
-          label: const Text('Navigate'),
+          label: Text(tr('Navigate')),
           onPressed:
               () => _then(context, () {
                 navTarget.value = NavTarget.poi(p);
@@ -955,7 +1048,11 @@ class _Thinking extends StatelessWidget {
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: Text(
-              '${status ?? 'Thinking'}…',
+              switch (status) {
+                null => tr('Thinking…'),
+                'Sending' => tr('Sending…'),
+                final s => '$s…',
+              },
               key: ValueKey(status),
               style: const TextStyle(color: Palette.ash),
             ),

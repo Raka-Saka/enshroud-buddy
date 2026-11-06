@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../data/game_db.dart';
 import '../data/live_state.dart';
+import '../l10n.dart';
 import '../theme.dart';
 import 'item_screen.dart';
 import 'widgets.dart';
+
+/// [DocsScreen.title] (English, from the caller) for display.
+String _titleText(String title) => switch (title) {
+  'Lore' => tr('Lore'),
+  'Quests' => tr('Quests'),
+  _ => title,
+};
 
 /// Lore documents or quests, grouped by category, with search.
 class DocsScreen extends StatefulWidget {
@@ -42,18 +50,25 @@ class _DocsScreenState extends State<DocsScreen> {
       (d) =>
           needle.isEmpty ||
           d.name.toLowerCase().contains(needle) ||
-          d.pages.any((p) => p.text.toLowerCase().contains(needle)),
+          gt(d.name).toLowerCase().contains(needle) ||
+          d.pages.any(
+            (p) =>
+                p.text.toLowerCase().contains(needle) ||
+                gt(p.text).toLowerCase().contains(needle),
+          ),
     );
     final byCategory = <String, List<Doc>>{};
     for (final d in shown) {
       (byCategory[d.category] ??= []).add(d);
     }
-    final cats = byCategory.keys.toList()..sort();
+    final cats =
+        byCategory.keys.toList()..sort((a, b) => gt(a).compareTo(gt(b)));
+    final n = widget.docs.length;
     return Scaffold(
       appBar:
           widget.embedded
               ? null
-              : AppBar(title: Text('${widget.title} · ${widget.docs.length}')),
+              : AppBar(title: Text('${_titleText(widget.title)} · $n')),
       body: Column(
         children: [
           Padding(
@@ -61,8 +76,14 @@ class _DocsScreenState extends State<DocsScreen> {
             child: TextField(
               onChanged: (v) => setState(() => q = v),
               decoration: InputDecoration(
-                hintText:
-                    'Search ${widget.docs.length} ${widget.title.toLowerCase()} texts',
+                hintText: switch (widget.title) {
+                  'Lore' => tr('Search {n} lore texts', {'n': n}),
+                  'Quests' => tr('Search {n} quests texts', {'n': n}),
+                  _ => tr('Search {n} {what} texts', {
+                    'n': n,
+                    'what': widget.title.toLowerCase(),
+                  }),
+                },
                 prefixIcon: const Icon(Icons.search, color: Palette.flame),
               ),
             ),
@@ -77,7 +98,7 @@ class _DocsScreenState extends State<DocsScreen> {
                       Icons.auto_stories_outlined,
                       color: Palette.veil,
                     ),
-                    title: Text(c),
+                    title: Text(gt(c)),
                     subtitle: Text(
                       '${byCategory[c]!.length}',
                       style: const TextStyle(color: Palette.ash),
@@ -98,7 +119,7 @@ class _DocsScreenState extends State<DocsScreen> {
                                   )
                                   : null,
                           title: Text(
-                            d.name,
+                            gt(d.name),
                             style: TextStyle(
                               color:
                                   k == null || done(d)
@@ -115,7 +136,7 @@ class _DocsScreenState extends State<DocsScreen> {
                                   )
                                   : d.pages.length > 1
                                   ? Text(
-                                    '${d.pages.length} pages',
+                                    trn(d.pages.length, '{n} page', '{n} pages'),
                                     style: const TextStyle(
                                       color: Palette.ash,
                                       fontSize: 12,
@@ -149,13 +170,13 @@ class DocScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(doc.name, overflow: TextOverflow.ellipsis)),
+    appBar: AppBar(title: Text(gt(doc.name), overflow: TextOverflow.ellipsis)),
     body: ListView(
       padding: const EdgeInsets.only(bottom: 24, top: 4),
       children: [
-        for (final p in doc.pages) Parchment(title: p.title, text: p.text),
+        for (final p in doc.pages) Parchment(title: gtn(p.title), text: gt(p.text)),
         if (doc.rewards.isNotEmpty) ...[
-          const SectionTitle('Rewards'),
+          SectionTitle(tr('Rewards')),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Wrap(
@@ -164,7 +185,7 @@ class DocScreen extends StatelessWidget {
               children: [
                 for (final id in doc.rewards)
                   ActionChip(
-                    label: Text(db.nameOf(id)),
+                    label: Text(db.shownName(id)),
                     onPressed:
                         () => Navigator.push(
                           context,

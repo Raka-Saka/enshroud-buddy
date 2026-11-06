@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../l10n.dart';
+
 import 'game_db.dart';
 import 'live_state.dart';
 import 'planner.dart';
@@ -89,13 +91,17 @@ class TaskPlan {
       tasks.add(
         Task(
           TaskKind.unlock,
-          'Unlock ${db.nameOf(out)}',
+          tr('Unlock {item}', {'item': db.shownName(out)}),
           itemId: out,
           detail:
               missing == null
-                  ? 'The game data has no unlock condition for this recipe: usually an artisan or a quest.'
+                  ? tr(
+                    'The game data has no unlock condition for this recipe: usually an artisan or a quest.',
+                  )
                   : missing.isEmpty
-                  ? 'Everything the save can check is done; the rest is runtime state.'
+                  ? tr(
+                    'Everything the save can check is done; the rest is runtime state.',
+                  )
                   : null,
           steps: missing ?? const [],
         ),
@@ -119,16 +125,23 @@ class TaskPlan {
         final users = [
           for (final (r2, _) in crafts.values)
             if (r2.workshopId == ws.id || r2.props.contains(ws.id))
-              db.nameOf(r2.outputs.first.ref),
+              db.shownName(r2.outputs.first.ref),
         ];
         tasks.add(
           Task(
             TaskKind.station,
             ws.kind == 'prop'
-                ? 'Add ${_a(ws.name)} to your ${w?.name ?? 'station'}'
-                : 'Build ${_a(ws.name)}',
+                ? w == null
+                    ? tr('Add {prop} to your station', {'prop': _a(gt(ws.name))})
+                    : tr('Add {prop} to your {station}', {
+                      'prop': _a(gt(ws.name)),
+                      'station': gt(w.name),
+                    })
+                : tr('Build {station}', {'station': _a(gt(ws.name))}),
             itemId: item,
-            detail: 'Needed for ${users.take(4).join(', ')}',
+            detail: tr('Needed for {items}', {
+              'items': users.take(4).join(', '),
+            }),
           ),
         );
       }
@@ -149,15 +162,23 @@ class TaskPlan {
       tasks.add(
         Task(
           TaskKind.gather,
-          '${gear ? 'Find' : 'Gather'} ${g.value} × ${db.nameOf(g.key)}',
+          gear
+              ? tr('Find {n} × {item}', {
+                'n': g.value,
+                'item': db.shownName(g.key),
+              })
+              : tr('Gather {n} × {item}', {
+                'n': g.value,
+                'item': db.shownName(g.key),
+              }),
           itemId: g.key.startsWith('cat:') ? null : g.key,
           count: g.value,
           detail:
               it == null
-                  ? 'Any item of this kind'
-                  : it.everywhere ??
-                      (it.isCommon ? 'Found almost everywhere' : null) ??
-                      it.hint,
+                  ? tr('Any item of this kind')
+                  : gtn(it.everywhere) ??
+                      (it.isCommon ? tr('Found almost everywhere') : null) ??
+                      gtn(it.hint),
           spots:
               g.key.startsWith('cat:') || it?.everywhere != null
                   ? const []
@@ -178,7 +199,10 @@ class TaskPlan {
       tasks.add(
         Task(
           TaskKind.fetch,
-          'Take ${e.value} × ${db.nameOf(e.key)}',
+          tr('Take {n} × {item}', {
+            'n': e.value,
+            'item': db.shownName(e.key),
+          }),
           itemId: e.key,
           count: e.value,
           detail: _byBase(places.where((p) => p.label != 'Equipped')),
@@ -194,17 +218,20 @@ class TaskPlan {
       tasks.add(
         Task(
           TaskKind.craft,
-          'Craft ${out.count * batches} × ${db.nameOf(out.ref)}',
+          tr('Craft {n} × {item}', {
+            'n': out.count * batches,
+            'item': db.shownName(out.ref),
+          }),
           itemId: out.ref,
           count: out.count * batches,
           station: w?.kind == 'npc' ? null : w?.itemId,
           detail: [
             if (w != null)
               w.kind == 'npc'
-                  ? 'at the ${w.name} (artisan)'
-                  : 'at ${_a(w.name)}${_stationBases(w.itemId)}',
-            if (batches > 1) '$batches batches',
-            if (!planner.unlocked(r)) 'locked',
+                  ? tr('at the {artisan} (artisan)', {'artisan': gt(w.name)})
+                  : _stationAt(_a(gt(w.name)), w.itemId),
+            if (batches > 1) trn(batches, '{n} batch', '{n} batches'),
+            if (!planner.unlocked(r)) tr('locked'),
           ].join(' · '),
         ),
       );
@@ -225,6 +252,7 @@ class TaskPlan {
     final s = state;
     if (s == null) return;
     final shroud = <String>{}, cold = <String>{}, water = <String>{};
+    // names as shown: these sets only make the Prepare texts
     void look(String name, RankedSpot? r) {
       if (r == null) return;
       if ((r.shroudLevel != null && !r.shroudBlocked) || r.shroudHint) {
@@ -235,19 +263,29 @@ class TaskPlan {
     }
 
     for (final t in of(TaskKind.gather)) {
-      look(db.nameOf(t.itemId ?? ''), t.spots.firstOrNull);
+      look(db.shownName(t.itemId ?? ''), t.spots.firstOrNull);
     }
     for (final t in of(TaskKind.unlock)) {
       for (final st in t.steps) {
         if (st.itemId != null)
-          look(db.nameOf(st.itemId!), st.spots.firstOrNull);
+          look(db.shownName(st.itemId!), st.spots.firstOrNull);
       }
     }
     final sv = Survival(db, s);
     String food(List<String> labels) {
       final best = sv.bestFood(labels);
       if (best.isNotEmpty) {
-        return 'Bring ${best.map((f) => '${f.$1.name} (${f.$2}, ${f.$3} owned)').join(', ')}';
+        return tr('Bring {foods}', {
+          'foods': best
+              .map(
+                (f) => tr('{food} ({value}, {n} owned)', {
+                  'food': gt(f.$1.name),
+                  'value': f.$2,
+                  'n': f.$3,
+                }),
+              )
+              .join(', '),
+        });
       }
       // nothing owned: the strongest food in the game for it, to cook or find
       (Item, String)? top;
@@ -262,8 +300,11 @@ class TaskPlan {
         }
       }
       return top == null
-          ? 'No food for it in your bag or chests'
-          : 'None owned; ${top.$1.name} gives ${top.$2}';
+          ? tr('No food for it in your bag or chests')
+          : tr('None owned; {food} gives {value}', {
+            'food': gt(top.$1.name),
+            'value': top.$2,
+          });
     }
 
     String mins(int secs) => Survival.format(secs);
@@ -272,23 +313,44 @@ class TaskPlan {
       if (shroud.isNotEmpty)
         Task(
           TaskKind.prepare,
-          'Shroud: about ${mins(sv.shroudSeconds)} per trip',
-          detail:
-              'For ${shroud.take(4).join(', ')}. ${food(Survival.shroudLabels)}. Shroud Roots and Return Beacons on the map; Flame strength ${s.flameLevel} lets you in.',
+          tr('Shroud: about {time} per trip', {
+            'time': mins(sv.shroudSeconds),
+          }),
+          detail: tr(
+            'For {items}. {food}. Shroud Roots and Return Beacons on the map; Flame strength {n} lets you in.',
+            {
+              'items': shroud.take(4).join(', '),
+              'food': food(Survival.shroudLabels),
+              'n': s.flameLevel,
+            },
+          ),
         ),
       if (cold.isNotEmpty)
         Task(
           TaskKind.prepare,
-          'Cold: frost resistance ${sv.frostResistance} from your gear',
-          detail:
-              'For ${cold.take(4).join(', ')}. ${food(const ['Frost Resistance'])}. Flame strength ${db.balancing?.noFreezeFlameLevel ?? '?'} stops freezing.',
+          tr('Cold: frost resistance {n} from your gear', {
+            'n': sv.frostResistance,
+          }),
+          detail: tr(
+            'For {items}. {food}. Flame strength {n} stops freezing.',
+            {
+              'items': cold.take(4).join(', '),
+              'food': food(const ['Frost Resistance']),
+              'n': db.balancing?.noFreezeFlameLevel ?? '?',
+            },
+          ),
         ),
       if (water.isNotEmpty)
         Task(
           TaskKind.prepare,
-          'Underwater: ${mins(sv.oxygenSeconds)} of breath',
-          detail:
-              'For ${water.take(4).join(', ')}. ${food(const ['Maximum Oxygen'])}. Air bubbles are on the map (Water chip).',
+          tr('Underwater: {time} of breath', {'time': mins(sv.oxygenSeconds)}),
+          detail: tr(
+            'For {items}. {food}. Air bubbles are on the map (Water chip).',
+            {
+              'items': water.take(4).join(', '),
+              'food': food(const ['Maximum Oxygen']),
+            },
+          ),
         ),
     ];
     tasks.insertAll(at < 0 ? tasks.length : at, add);
@@ -299,26 +361,36 @@ class TaskPlan {
     final groups = <String?, List<String>>{};
     for (final p in places) {
       (groups[p.label == 'Bag' ? 'Bag' : p.base] ??= []).add(
-        p.label == 'Bag' ? '${p.count}' : '${p.label} ${p.count}',
+        p.label == 'Bag' ? '${p.count}' : '${shownLabel(p.label)} ${p.count}',
       );
     }
     return [
       for (final e in groups.entries)
         e.key == 'Bag'
-            ? 'Bag ${e.value.first}'
-            : '${e.key ?? 'base not known'}: ${e.value.join(', ')}',
+            ? tr('Bag {n}', {'n': e.value.first})
+            : '${e.key ?? tr('base not known')}: ${e.value.join(', ')}',
     ].join(' · ');
   }
 
-  /// " (Lakeside Keep)" when the save says which bases have the station.
-  String _stationBases(String? stationItem) {
-    if (stationItem == null || state == null) return '';
-    final at = state!.basesWith(stationItem);
-    return at.isEmpty ? '' : ' (${at.map((b) => b.label).join(', ')})';
+  /// "at a Workbench (Lakeside Keep)" when the save says which bases have the station.
+  String _stationAt(String station, String? stationItem) {
+    final at =
+        stationItem == null || state == null
+            ? const <Base>[]
+            : state!.basesWith(stationItem);
+    return at.isEmpty
+        ? tr('at {station}', {'station': station})
+        : tr('at {station} ({bases})', {
+          'station': station,
+          'bases': at.map((b) => b.label).join(', '),
+        });
   }
 
+  /// "a Workbench", "an Alchemist": the English article; other languages take the noun alone.
   static String _a(String noun) =>
-      '${'aeiouAEIOU'.contains(noun.isEmpty ? 'x' : noun[0]) ? 'an' : 'a'} $noun';
+      L10n.lang.code != 'En_Us'
+          ? noun
+          : '${'aeiouAEIOU'.contains(noun.isEmpty ? 'x' : noun[0]) ? 'an' : 'a'} $noun';
 
   bool _met(Unlock l) {
     final text = l.text ?? '';
@@ -342,7 +414,7 @@ class TaskPlan {
           u.knowledge != null || u.itemId != null || u.runtime != null;
       return [
         UnlockStep(
-          text.isEmpty ? 'An unnamed condition' : text,
+          text.isEmpty ? tr('An unnamed condition') : gt(text),
           itemId: u.itemId,
           checkable: checkable,
           spots: u.itemId == null ? const [] : where.best(u.itemId!, count: 2),
@@ -389,7 +461,9 @@ List<NextUp> nextUp(TaskPlan plan, PlayerPos? here) {
       ];
       if (chests.isNotEmpty) {
         rank = 0;
-        note = 'Here: ${chests.take(2).join(', ')}';
+        note = tr('Here: {chests}', {
+          'chests': chests.take(2).map(shownLabel).join(', '),
+        });
       }
     } else if (base != null &&
         s != null &&
@@ -397,7 +471,7 @@ List<NextUp> nextUp(TaskPlan plan, PlayerPos? here) {
         t.station != null &&
         s.basesWith(t.station!).contains(base)) {
       rank = 1;
-      note = 'The station is here';
+      note = tr('The station is here');
     } else if (here != null &&
         t.kind == TaskKind.gather &&
         t.spots.isNotEmpty) {
@@ -415,8 +489,14 @@ List<NextUp> nextUp(TaskPlan plan, PlayerPos? here) {
         rank = 1;
         note =
             best < 30
-                ? 'Right here'
-                : '${distanceText(best)} ${compassOf(near.spot.x - here.x, near.spot.y - here.y)} of you';
+                ? tr('Right here')
+                : tr('{distance} {direction} of you', {
+                  'distance': distanceText(best),
+                  'direction': compassOf(
+                    near.spot.x - here.x,
+                    near.spot.y - here.y,
+                  ),
+                });
       }
     }
     out.add(NextUp(t, note, rank));

@@ -1,3 +1,4 @@
+import '../l10n.dart';
 import 'game_db.dart';
 import 'live_state.dart';
 
@@ -15,7 +16,12 @@ class Survival {
     final neg = s < 0;
     s = s.abs();
     final m = s ~/ 60, r = (s % 60).round();
-    final t = m == 0 ? '$r s' : (r == 0 ? '$m min' : '$m min $r s');
+    final t =
+        m == 0
+            ? tr('{s} s', {'s': r})
+            : (r == 0
+                ? tr('{m} min', {'m': m})
+                : tr('{m} min {s} s', {'m': m, 's': r}));
     return neg ? '-$t' : t;
   }
 

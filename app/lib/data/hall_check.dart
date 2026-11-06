@@ -1,3 +1,4 @@
+import '../l10n.dart';
 import 'game_db.dart';
 import 'live_state.dart';
 import 'survival.dart';
@@ -6,8 +7,11 @@ import 'survival.dart';
 enum CheckMark { ok, warn, info }
 
 class CheckLine {
-  const CheckLine(this.mark, this.title, this.detail);
+  const CheckLine(this.mark, this.id, this.title, this.detail);
   final CheckMark mark;
+
+  /// What the line is about, in English ('Level', 'Gear', 'Damage'...): for logic and tests; [title] is shown.
+  final String id;
   final String title, detail;
 }
 
@@ -22,15 +26,15 @@ class HallCheck {
   final LiveState? state;
 
   /// The game's damage names (items' "dm") as a player reads them.
-  static const damageNames = {
-    'physicalCut': 'cutting',
-    'physicalPierce': 'piercing',
-    'physicalBlunt': 'blunt',
-    'magicalFire': 'fire',
-    'magicalIce': 'ice',
-    'magicalLightning': 'shock',
-    'magicalFog': 'shroud',
-    'poison': 'poison',
+  static Map<String, String> get damageNames => {
+    'physicalCut': tr('cutting'),
+    'physicalPierce': tr('piercing'),
+    'physicalBlunt': tr('blunt'),
+    'magicalFire': tr('fire'),
+    'magicalIce': tr('ice'),
+    'magicalLightning': tr('shock'),
+    'magicalFog': tr('shroud'),
+    'poison': tr('poison'),
   };
 
   static const _armour = [
@@ -52,18 +56,30 @@ class HallCheck {
   static String _list(List<String> l) =>
       l.length < 2
           ? l.join()
-          : '${l.sublist(0, l.length - 1).join(', ')} and ${l.last}';
+          : tr('{first} and {last}', {
+            'first': l.sublist(0, l.length - 1).join(', '),
+            'last': l.last,
+          });
 
   /// "282 Hollow (7 elite), 66 beasts, 16 rune barriers, 48 climbing walls, 34 traps".
   String get contents {
     final parts = [
       if (_n('hollow') > 0)
-        '${_n('hollow')} Hollow${_n('elite') > 0 ? ' (${_n('elite')} elite)' : ''}',
-      if (_n('fell') > 0) '${_n('fell')} Fell',
-      if (_n('beasts') > 0) '${_n('beasts')} beasts',
-      if (_n('raisers') > 0) '${_n('raisers')} bone piles',
-      if (_n('doors') > 0) '${_n('doors')} rune barriers',
-      if (_n('traps') > 0) '${_n('traps')} traps',
+        _n('elite') > 0
+            ? trn(
+              _n('hollow'),
+              '{n} Hollow ({elite} elite)',
+              '{n} Hollow ({elite} elite)',
+              {'elite': _n('elite')},
+            )
+            : trn(_n('hollow'), '{n} Hollow', '{n} Hollow'),
+      if (_n('fell') > 0) trn(_n('fell'), '{n} Fell', '{n} Fell'),
+      if (_n('beasts') > 0) trn(_n('beasts'), '{n} beast', '{n} beasts'),
+      if (_n('raisers') > 0)
+        trn(_n('raisers'), '{n} bone pile', '{n} bone piles'),
+      if (_n('doors') > 0)
+        trn(_n('doors'), '{n} rune barrier', '{n} rune barriers'),
+      if (_n('traps') > 0) trn(_n('traps'), '{n} trap', '{n} traps'),
     ];
     return parts.join(' · ');
   }
@@ -88,7 +104,11 @@ class HallCheck {
         CheckLine(
           s.level >= lv ? CheckMark.ok : CheckMark.warn,
           'Level',
-          'You are level ${s.level}; its enemies are level $lv.',
+          tr('Level'),
+          tr('You are level {you}; its enemies are level {level}.', {
+            'you': s.level,
+            'level': lv,
+          }),
         ),
       );
       // armour worn and the best weapon carried per slot
@@ -119,11 +139,23 @@ class HallCheck {
           CheckLine(
             low.isEmpty ? CheckMark.ok : CheckMark.warn,
             'Gear',
+            tr('Gear'),
             low.isEmpty
-                ? 'Worn armour and weapons are level $lo to $hi, all at or above $lv.'
-                : '${low.length} of ${pieces.length} pieces under level $lv: '
-                    '${low.take(3).map((p) => '${p.$1.name} ${p.$2.level}').join(', ')}'
-                    '${low.length > 3 ? '…' : ''}.',
+                ? tr(
+                  'Worn armour and weapons are level {lo} to {hi}, all at or above {level}.',
+                  {'lo': lo, 'hi': hi, 'level': lv},
+                )
+                : tr('{low} of {n} pieces under level {level}: {items}.', {
+                  'low': low.length,
+                  'n': pieces.length,
+                  'level': lv,
+                  'items':
+                      low
+                          .take(3)
+                          .map((p) => '${gt(p.$1.name)} ${p.$2.level}')
+                          .join(', ') +
+                      (low.length > 3 ? '…' : ''),
+                }),
           ),
         );
       }
@@ -148,24 +180,45 @@ class HallCheck {
           for (final d in mine.keys)
             if (dmg.strong.contains(d)) d,
         ];
-        final what = [
-          if (dmg.weak.isNotEmpty) 'Hollow take more from ${names(dmg.weak)}',
-          if (dmg.strong.isNotEmpty) 'resist ${names(dmg.strong)}',
-        ].join(' and ');
+        final weak = names(dmg.weak), strong = names(dmg.strong);
+        final what =
+            dmg.weak.isNotEmpty && dmg.strong.isNotEmpty
+                ? tr('Hollow take more from {weak} and resist {strong}.', {
+                  'weak': weak,
+                  'strong': strong,
+                })
+                : dmg.weak.isNotEmpty
+                ? tr('Hollow take more from {weak}.', {'weak': weak})
+                : dmg.strong.isNotEmpty
+                ? tr('resist {strong}.', {'strong': strong})
+                : '.';
         final have =
             hits.isNotEmpty
-                ? 'You carry ${_list([for (final d in hits) mine[d]!.name])}.'
-                : 'Nothing you carry deals ${names(dmg.weak)}.';
-        final off =
-            wasted.isEmpty
-                ? ''
-                : ' ${_list([for (final d in wasted) mine[d]!.name])} '
-                    'deal${wasted.length == 1 ? 's' : ''} ${names(wasted)}, which they resist.';
+                ? tr('You carry {items}.', {
+                  'items': _list([for (final d in hits) gt(mine[d]!.name)]),
+                })
+                : tr('Nothing you carry deals {damage}.', {'damage': weak});
+        final resisted = trn(
+          wasted.length,
+          '{items} deals {damage}, which they resist.',
+          '{items} deal {damage}, which they resist.',
+          {
+            'items': _list([for (final d in wasted) gt(mine[d]!.name)]),
+            'damage': names(wasted),
+          },
+        );
+        final off = wasted.isEmpty ? '' : ' $resisted';
         out.add(
           CheckLine(
             hits.isNotEmpty ? CheckMark.ok : CheckMark.warn,
             'Damage',
-            '$what. $have$off (wiki: ${_list(dmg.from)})',
+            tr('Damage'),
+            tr('{what} {have}{off} (wiki: {sources})', {
+              'what': what,
+              'have': have,
+              'off': off,
+              'sources': _list(dmg.from),
+            }),
           ),
         );
       }
@@ -176,8 +229,9 @@ class HallCheck {
           CheckLine(
             wears('HookShot') ? CheckMark.ok : CheckMark.warn,
             'Grappling hook',
-            '${_n('hook')} grapple points. '
-                '${wears('HookShot') ? 'You have one on.' : 'You have none on.'}',
+            tr('Grappling hook'),
+            '${trn(_n('hook'), '{n} grapple point.', '{n} grapple points.')} '
+                '${wears('HookShot') ? tr('You have one on.') : tr('You have none on.')}',
           ),
         );
       }
@@ -186,8 +240,9 @@ class HallCheck {
           CheckLine(
             wears('Glider') ? CheckMark.ok : CheckMark.warn,
             'Glider',
-            '${_n('glide')} updrafts and glider barriers. '
-                '${wears('Glider') ? 'You have one on.' : 'You have none on.'}',
+            tr('Glider'),
+            '${trn(_n('glide'), '{n} updraft or glider barrier.', '{n} updrafts and glider barriers.')} '
+                '${wears('Glider') ? tr('You have one on.') : tr('You have none on.')}',
           ),
         );
       }
@@ -196,8 +251,9 @@ class HallCheck {
           CheckLine(
             CheckMark.info,
             'Shroud',
-            '${_n('fell')} Fell inside, the Shroud\'s creatures. '
-                'Your time in the Shroud: ${Survival.format(Survival(db, s).shroudSeconds)}.',
+            tr('Shroud'),
+            '${trn(_n('fell'), '{n} Fell inside, the Shroud\'s creatures.', '{n} Fell inside, the Shroud\'s creatures.')} '
+                '${tr('Your time in the Shroud: {time}.', {'time': Survival.format(Survival(db, s).shroudSeconds)})}',
           ),
         );
       }
@@ -217,10 +273,11 @@ class HallCheck {
         CheckLine(
           heal.isEmpty ? CheckMark.warn : CheckMark.ok,
           'Healing',
+          tr('Healing'),
           heal.isEmpty
-              ? 'No potions or bandages in the bag.'
+              ? tr('No potions or bandages in the bag.')
               : (heal.entries.toList()..sort((a, b) => b.value - a.value))
-                  .map((e) => '${e.key} ×${e.value}')
+                  .map((e) => '${gt(e.key)} ×${e.value}')
                   .join(', '),
         ),
       );
@@ -229,7 +286,11 @@ class HallCheck {
         CheckLine(
           CheckMark.info,
           'Level',
-          'Its enemies are level $lv. Connect the PC agent to check your gear.',
+          tr('Level'),
+          tr(
+            'Its enemies are level {level}. Connect the PC agent to check your gear.',
+            {'level': lv},
+          ),
         ),
       );
     }
@@ -238,20 +299,30 @@ class HallCheck {
         CheckLine(
           CheckMark.info,
           'Bone piles',
-          '${_n('raisers')} piles raise more Hollow until broken: break them first.',
+          tr('Bone piles'),
+          trn(
+            _n('raisers'),
+            '{n} pile raises more Hollow until broken: break it first.',
+            '{n} piles raise more Hollow until broken: break them first.',
+          ),
         ),
       );
     }
     if (_n('traps') > 0) {
       final kinds = [
-        if (_n('fire') > 0) '${_n('fire')} fire',
-        if (_n('shock') > 0) '${_n('shock')} shock',
+        if (_n('fire') > 0) tr('{n} fire', {'n': _n('fire')}),
+        if (_n('shock') > 0) tr('{n} shock', {'n': _n('shock')}),
       ];
       out.add(
         CheckLine(
           CheckMark.info,
           'Traps',
-          '${_n('traps')} traps${kinds.isEmpty ? '' : ', ${kinds.join(' and ')}'}.',
+          tr('Traps'),
+          kinds.isEmpty
+              ? trn(_n('traps'), '{n} trap.', '{n} traps.')
+              : trn(_n('traps'), '{n} trap, {kinds}.', '{n} traps, {kinds}.', {
+                'kinds': _list(kinds),
+              }),
         ),
       );
     }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/survival.dart';
+import '../l10n.dart';
 import '../theme.dart';
 import '../nav.dart';
 import 'item_screen.dart';
@@ -26,8 +27,8 @@ class SurvivalScreen extends StatelessWidget {
     final b = db.balancing;
     if (s == null || b == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Survival')),
-        body: const Center(child: Text('No live data from the PC agent yet.')),
+        appBar: AppBar(title: Text(tr('Survival'))),
+        body: Center(child: Text(tr('No live data from the PC agent yet.'))),
       );
     }
     void open(Item it) => Navigator.push(
@@ -134,7 +135,7 @@ class SurvivalScreen extends StatelessWidget {
         );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Survival')),
+      appBar: AppBar(title: Text(tr('Survival'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
@@ -154,19 +155,25 @@ class SurvivalScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Flame strength $flame of ${b.flameMax}',
+                          tr('Flame strength {flame} of {max}', {
+                            'flame': flame,
+                            'max': b.flameMax,
+                          }),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          'Your Shroud Passage Level · up to ${b.altarsAt(flame)} Flame Altars',
+                          tr(
+                            'Your Shroud Passage Level · up to {n} Flame Altars',
+                            {'n': b.altarsAt(flame)},
+                          ),
                           style: const TextStyle(color: Palette.ash),
                         ),
-                        const Text(
-                          'Read from your save; check it matches the game.',
-                          style: TextStyle(color: Palette.ash, fontSize: 11),
+                        Text(
+                          tr('Read from your save; check it matches the game.'),
+                          style: const TextStyle(color: Palette.ash, fontSize: 11),
                         ),
                       ],
                     ),
@@ -175,43 +182,57 @@ class SurvivalScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SectionTitle('Time in the Shroud'),
+          SectionTitle(tr('Time in the Shroud')),
           row(
-            'Base ${fmtSeconds(b.fogBase)} + ${fmtSeconds(b.fogPerFlame)} × Flame $flame',
+            tr('Base {base} + {per} × Flame {flame}', {
+              'base': fmtSeconds(b.fogBase),
+              'per': fmtSeconds(b.fogPerFlame),
+              'flame': flame,
+            }),
             fmtSeconds(b.fogBase + b.fogPerFlame * flame),
           ),
           if (shroudFactor != 1)
-            row('World setting ×$shroudFactor', fmtSeconds(base)),
+            row(
+              tr('World setting ×{factor}', {'factor': shroudFactor}),
+              fmtSeconds(base),
+            ),
           for (final (it, secs) in gear)
-            row('${it.name} (worn)', '+${fmtSeconds(secs)}'),
+            row(
+              tr('{item} (worn)', {'item': gt(it.name)}),
+              '+${fmtSeconds(secs)}',
+            ),
           row(
-            'You can stay',
+            tr('You can stay'),
             fmtSeconds(base + gearTotal),
             color: Palette.flame,
             bold: true,
           ),
           if (bestBoost > 0)
             row(
-              'With your best flask or food (${boosts.first.$1.name})',
+              tr('With your best flask or food ({item})', {
+                'item': gt(boosts.first.$1.name),
+              }),
               fmtSeconds(base + gearTotal + bestBoost),
               color: Palette.spring,
               bold: true,
             ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 6, 16, 0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
             child: Text(
-              'Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).',
-              style: TextStyle(color: Palette.ash, fontSize: 12),
+              tr(
+                'Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).',
+              ),
+              style: const TextStyle(color: Palette.ash, fontSize: 12),
             ),
           ),
-          const SectionTitle('Refill inside the Shroud'),
+          SectionTitle(tr('Refill inside the Shroud')),
           ListTile(
             dense: true,
             leading: const Icon(Icons.cell_tower, color: Palette.spring),
-            title: Text('Return Beacons · $beacons on the map'),
-            subtitle: const Text(
-              'Stand near one to refill your Time in the Shroud.',
-              style: TextStyle(color: Palette.ash),
+            title: Text(tr('Return Beacons · {n} on the map', {'n': beacons})),
+            subtitle: Text(
+              tr('Stand near one to refill your Time in the Shroud.'),
+              style: const TextStyle(color: Palette.ash),
             ),
             trailing: const Icon(Icons.map_outlined, size: 20),
             onTap: () => showOnMap('shroud'),
@@ -219,10 +240,12 @@ class SurvivalScreen extends StatelessWidget {
           ListTile(
             dense: true,
             leading: const Icon(Icons.hourglass_bottom, color: Palette.flame),
-            title: Text('Hourglass capsules · $capsules on the map'),
-            subtitle: const Text(
-              '+5 min each, used on pickup.',
-              style: TextStyle(color: Palette.ash),
+            title: Text(
+              tr('Hourglass capsules · {n} on the map', {'n': capsules}),
+            ),
+            subtitle: Text(
+              tr('+5 min each, used on pickup.'),
+              style: const TextStyle(color: Palette.ash),
             ),
             trailing: const Icon(Icons.map_outlined, size: 20),
             onTap: () => showOnMap('shroud'),
@@ -231,9 +254,9 @@ class SurvivalScreen extends StatelessWidget {
             ListTile(
               dense: true,
               leading: const Icon(Icons.healing, color: Palette.spring),
-              title: Text('${it.name} ×$n'),
+              title: Text('${gt(it.name)} ×$n'),
               subtitle: Text(
-                it.description ?? '',
+                gtn(it.description) ?? '',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: Palette.ash, fontSize: 12),
@@ -252,10 +275,12 @@ class SurvivalScreen extends StatelessWidget {
                 size: 20,
               ),
               title: Text(
-                '${k.name}${s.skills.containsKey(k.id) ? ' · learned' : ''}',
+                s.skills.containsKey(k.id)
+                    ? tr('{skill} · learned', {'skill': gt(k.name)})
+                    : gt(k.name),
               ),
               subtitle: Text(
-                (k.description ?? '')
+                (gtn(k.description) ?? '')
                     .replaceAll('%k', '…')
                     .replaceAll(RegExp(r'<[^>]+>'), ''),
                 maxLines: 3,
@@ -264,7 +289,7 @@ class SurvivalScreen extends StatelessWidget {
               ),
             ),
           if (boosts.isNotEmpty) ...[
-            const SectionTitle('Extend before going in'),
+            SectionTitle(tr('Extend before going in')),
             for (final (it, secs, n) in boosts.take(6))
               ListTile(
                 dense: true,
@@ -272,7 +297,7 @@ class SurvivalScreen extends StatelessWidget {
                   Icons.science_outlined,
                   color: Palette.veil,
                 ),
-                title: Text('${it.name} ×$n'),
+                title: Text('${gt(it.name)} ×$n'),
                 trailing: Text(
                   '+${fmtSeconds(secs)}',
                   style: const TextStyle(fontWeight: FontWeight.w700),
@@ -280,34 +305,39 @@ class SurvivalScreen extends StatelessWidget {
                 onTap: () => open(it),
               ),
           ],
-          const SectionTitle('Cold'),
+          SectionTitle(tr('Cold')),
           row(
-            'Freezing stops at Flame strength',
+            tr('Freezing stops at Flame strength'),
             '${b.noFreezeFlameLevel}',
             color:
                 flame >= b.noFreezeFlameLevel ? Palette.spring : Palette.ember,
           ),
-          row('Frost Resistance from your gear', '$frostGear'),
+          row(tr('Frost Resistance from your gear'), '$frostGear'),
           for (final (it, v) in bestOwned('Frost Resistance'))
             ListTile(
               dense: true,
               leading: const Icon(Icons.ac_unit, color: Palette.spring),
-              title: Text(it.name),
+              title: Text(gt(it.name)),
               trailing: Text('+$v'),
               onTap: () => open(it),
             ),
-          const SectionTitle('Water'),
+          SectionTitle(tr('Water')),
           row(
-            'Oxygen ${fmtSeconds(b.oxygen)}${(s.settings['diving_time'] ?? 1) != 1 ? ' × ${s.settings['diving_time']}' : ''}',
+            (s.settings['diving_time'] ?? 1) != 1
+                ? tr('Oxygen {time} × {factor}', {
+                  'time': fmtSeconds(b.oxygen),
+                  'factor': s.settings['diving_time'],
+                })
+                : tr('Oxygen {time}', {'time': fmtSeconds(b.oxygen)}),
             fmtSeconds(oxygenBase),
           ),
           if (oxygenGear > 0)
-            row('From your gear', '+${fmtSeconds(oxygenGear)}'),
+            row(tr('From your gear'), '+${fmtSeconds(oxygenGear)}'),
           ListTile(
             dense: true,
-            title: const Text(
-              'Air bubbles on the map',
-              style: TextStyle(color: Palette.ash),
+            title: Text(
+              tr('Air bubbles on the map'),
+              style: const TextStyle(color: Palette.ash),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -326,7 +356,7 @@ class SurvivalScreen extends StatelessWidget {
             ListTile(
               dense: true,
               leading: const Icon(Icons.water, color: Palette.spring),
-              title: Text(it.name),
+              title: Text(gt(it.name)),
               trailing: Text('+$v'),
               onTap: () => open(it),
             ),

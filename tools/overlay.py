@@ -17,7 +17,9 @@ import sys
 import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import pc_text  # noqa: E402
 import world as W  # noqa: E402
+from pc_text import t  # noqa: E402
 
 FLAME = (242, 163, 58, 255)
 BONE = (236, 226, 204, 255)
@@ -68,14 +70,33 @@ def target_m(t, ground=None):
 def describe(cam, tm):
     """("120 m", "65 m below"): how far across, and how much up or down from the character's feet."""
     d = math.hypot(tm[0] - cam["x"], tm[2] - cam["z"])
-    dist = "Here" if d < ARRIVED_M else (f"{d / 1000:.1f} km" if d >= 1000 else f"{round(d / 5) * 5:.0f} m")
+    dist = t("Here") if d < ARRIVED_M else (t("{n} km", n=f"{d / 1000:.1f}") if d >= 1000
+                                            else t("{n} m", n=f"{round(d / 5) * 5:.0f}"))
     if tm[1] is None:
         return dist, ""
     c = round(tm[1] - (cam["y"] - CAMERA_HEIGHT))
-    return dist, ("level" if abs(c) < 4 else f"{abs(c)} m {'above' if c > 0 else 'below'}")
+    return dist, (t("level") if abs(c) < 4 else t("{n} m above", n=abs(c)) if c > 0 else t("{n} m below", n=abs(c)))
 
 
 # --- drawing --------------------------------------------------------------------------------------------------
+
+WIN_FONTS = pathlib.Path(r"C:\Windows\Fonts")
+# fonts with the language's script, (regular, bold); Cinzel has Latin only, Segoe UI Latin, Greek and Cyrillic
+SCRIPT_FONTS = {"Ja_Jp": ("YuGothM.ttc", "YuGothB.ttc"), "Ko_Kr": ("malgun.ttf", "malgunbd.ttf"),
+                "Zh_Cn": ("msyh.ttc", "msyhbd.ttc"), "Zh_Tw": ("msjh.ttc", "msjhbd.ttc"),
+                "Th_Th": ("LeelawUI.ttf", "LeelaUIb.ttf")}
+
+
+def fonts(fonts_dir):
+    """(title, regular, bold) font files for the overlay's language, best first."""
+    script = SCRIPT_FONTS.get(pc_text.lang)
+    if script:
+        reg, bold = WIN_FONTS / script[0], WIN_FONTS / script[1]
+        return [bold, reg], [reg, WIN_FONTS / "segoeui.ttf"], [bold, reg]
+    title = [WIN_FONTS / "georgiab.ttf"] if pc_text.lang in ("Ru_Ru", "Uk_Ua") else [fonts_dir / "Cinzel.ttf"]
+    return (title + [WIN_FONTS / "georgia.ttf"], [WIN_FONTS / "segoeui.ttf"],
+            [WIN_FONTS / "segoeuib.ttf", WIN_FONTS / "segoeui.ttf"])
+
 
 def _font(names, size):
     from PIL import ImageFont
@@ -92,10 +113,10 @@ class Painter:
     """The marker as an image: a diamond on the spot, or an arrow at the edge, with the text under it."""
 
     def __init__(self, fonts_dir, scale):
-        win = pathlib.Path(r"C:\Windows\Fonts")
-        self.s = scale
-        self.title = _font([fonts_dir / "Cinzel.ttf", win / "georgia.ttf"], round(19 * scale))
-        self.small = _font([win / "segoeuib.ttf", win / "segoeui.ttf"], round(15 * scale))
+        self.s, self.lang = scale, pc_text.lang
+        title, _, bold = fonts(fonts_dir)
+        self.title = _font(title, round(19 * scale))
+        self.small = _font(bold, round(15 * scale))
 
     def draw(self, title, line, arrow=None):
         """An RGBA image and the point in it that sits on the target (the diamond's centre or the arrow's tip's
@@ -139,11 +160,11 @@ class PanelPainter:
     along the collections are."""
 
     def __init__(self, fonts_dir, scale):
-        win = pathlib.Path(r"C:\Windows\Fonts")
-        self.s = scale
-        self.head = _font([fonts_dir / "Cinzel.ttf", win / "georgia.ttf"], round(17 * scale))
-        self.body = _font([win / "segoeui.ttf"], round(15 * scale))
-        self.note = _font([win / "segoeuib.ttf", win / "segoeui.ttf"], round(13 * scale))
+        self.s, self.lang = scale, pc_text.lang
+        title, regular, bold = fonts(fonts_dir)
+        self.head = _font(title, round(17 * scale))
+        self.body = _font(regular, round(15 * scale))
+        self.note = _font(bold, round(13 * scale))
 
     def _fit(self, text, font, width):
         if font.getlength(text) <= width:
@@ -160,16 +181,16 @@ class PanelPainter:
         inner = w - 2 * pad
         rows = []  # (text, font, colour, gap above)
         if tr.get("lines"):
-            rows.append((self._fit(tr.get("title") or "Plan", self.head, inner), self.head, FLAME, 0))
+            rows.append((self._fit(tr.get("title") or t("Plan"), self.head, inner), self.head, FLAME, 0))
             for ln in tr["lines"]:
                 rows.append((self._fit(ln["t"], self.body, inner), self.body, BONE, round(6 * s)))
                 if ln.get("n"):
                     rows.append((self._fit(ln["n"], self.note, inner), self.note, FLAME, round(1 * s)))
             more = int(tr.get("open") or 0) - len(tr["lines"])
             if more > 0:
-                rows.append((f"+{more} more on the phone", self.note, (170, 160, 140, 255), round(6 * s)))
+                rows.append((t("+{n} more on the phone", n=more), self.note, (170, 160, 140, 255), round(6 * s)))
         if not rows and tr.get("done"):
-            rows.append(("Completion", self.head, FLAME, 0))
+            rows.append((t("Completion"), self.head, FLAME, 0))
         for c in tr.get("done") or []:
             rows.append((self._fit(f"{c['label']}  {c['have']} / {c['of']}", self.body, inner), self.body, BONE,
                          round(10 * s) if rows and c is tr["done"][0] else round(3 * s)))
@@ -344,7 +365,7 @@ def run(stop, camera, target, game_pid, enabled, fonts_dir, ground=None, log=pri
             rect = game_rect(game_pid()) if (t or tr) else None
             if rect and tr:
                 left, top, w, h = rect
-                if panel_painter is None or panel_painter.s != h / 1080:
+                if panel_painter is None or (panel_painter.s, panel_painter.lang) != (h / 1080, pc_text.lang):
                     panel_painter, panel_key = PanelPainter(fonts_dir, h / 1080), None
                 key = (repr(tr), panel_painter.s, rect)
                 if key != panel_key:
@@ -363,7 +384,7 @@ def run(stop, camera, target, game_pid, enabled, fonts_dir, ground=None, log=pri
                 stop.wait(0.25 if (t or tr) else 0.5)
                 continue
             left, top, w, h = rect
-            if painter is None or painter.s != h / 1080:
+            if painter is None or (painter.s, painter.lang) != (h / 1080, pc_text.lang):
                 painter, last = Painter(fonts_dir, h / 1080), None
             tm = target_m(t, ground)
             aim = (tm[0], cam["y"] - CAMERA_HEIGHT if tm[1] is None else tm[1], tm[2])
@@ -373,7 +394,7 @@ def run(stop, camera, target, game_pid, enabled, fonts_dir, ground=None, log=pri
             arrow = None if seen else round(math.degrees(math.atan2(sx, sy)) / 5) * 5
             key = (t.get("title"), line, arrow, painter.s)
             if key != last:
-                img, anchor = painter.draw(str(t.get("title") or "Target")[:48], line, arrow)
+                img, anchor = painter.draw(str(t.get("title") or "")[:48] or pc_text.t("Target"), line, arrow)
                 last, size = key, img.size
             px = left + round((sx + 1) / 2 * w) - anchor[0]
             py = top + round((1 - sy) / 2 * h) - anchor[1]

@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n.dart';
+
 import 'buddy_auth.dart';
 import 'game_db.dart';
 import 'history.dart';
@@ -46,6 +48,28 @@ class StoredIn {
 
   /// The base it's in, when known.
   final String? base;
+}
+
+final _numbered = RegExp(r'^(.*) #(\d+)$');
+
+/// A [StoredIn.label] or container label as shown, in the chosen language: "Bag", "Equipped", "Cosmetic",
+/// or a container kind with its number ("Large Magic Chest #3"). The labels themselves stay English.
+String shownLabel(String label) {
+  switch (label) {
+    case 'Bag':
+      return tr('Bag');
+    case 'Equipped':
+      return tr('Equipped');
+    case 'Cosmetic':
+      return tr('Cosmetic');
+  }
+  final m = _numbered.firstMatch(label);
+  if (m == null) return label;
+  final kind = m[1]!;
+  return tr('{container} #{n}', {
+    'container': kind == 'Other storage' ? tr('Other storage') : gt(kind),
+    'n': m[2],
+  });
 }
 
 class Storage {
@@ -90,10 +114,11 @@ class Base {
 
   /// Objects placed in this base by item id (stations, chests, decorations) and how many.
   final Map<String, int> placed;
-  String get label => name ?? 'Unnamed base (${id.substring(4)})';
+  String get label =>
+      name ?? tr('Unnamed base ({n})', {'n': id.substring(4)});
 
   /// Side of the cubic build zone, from the box in the save ("120 m").
-  String get zone => '${(size[0] / 2).round()} m';
+  String get zone => tr('{n} m', {'n': (size[0] / 2).round()});
 }
 
 /// A snapped building piece in a base: position from the build box corner and size, in voxels (0.5 m);
@@ -227,7 +252,8 @@ class LiveState {
     ];
   }
 
-  /// Where an item is: "Bag 12", "Large Magic Chest #3 40", ...
+  /// Where an item is: "Bag 12", "Large Magic Chest #3 40", ... Labels stay English (logic compares
+  /// "Bag", "Equipped"); [shownLabel] turns one into the chosen language.
   List<StoredIn> whereIs(String itemId, String Function(String) name) {
     final out = <StoredIn>[];
     final carried = this.carried
@@ -703,6 +729,7 @@ class Live extends ChangeNotifier {
       final payload = utf8.encode(
         jsonEncode({
           'q': question,
+          'lang': L10n.lang.name,
           if (session != null) 'session': session,
           if (context != null) 'context': context,
         }),
@@ -736,6 +763,7 @@ class Live extends ChangeNotifier {
       final payload = utf8.encode(
         jsonEncode({
           'q': question,
+          'lang': L10n.lang.name,
           if (session != null) 'session': session,
           if (context != null) 'context': context,
         }),
@@ -761,7 +789,7 @@ class Live extends ChangeNotifier {
         yield ev;
         if (ev['done'] == true) return;
       }
-      throw StateError('the PC stopped answering');
+      throw StateError(tr('the PC stopped answering'));
     } finally {
       client.close(force: true);
     }
@@ -776,18 +804,22 @@ class Live extends ChangeNotifier {
       if (res.statusCode == 401) {
         if (await BuddyAuth.learnClock(res)) {
           throw StateError(
-            'the phone\'s clock is off from the PC\'s; trying again',
+            tr('the phone\'s clock is off from the PC\'s; trying again'),
           );
         }
         throw StateError(
-          'the pairing code is missing or wrong: Setup, then scan the agent\'s code',
+          tr(
+            'the pairing code is missing or wrong: Setup, then scan the agent\'s code',
+          ),
         );
       }
       if (res.statusCode != 200) throw HttpException('HTTP ${res.statusCode}');
       final body = await res.fold<List<int>>([], (a, c) => a..addAll(c));
       if (!BuddyAuth.replyOk(key, nonce, res, body)) {
         throw StateError(
-          'the reply didn\'t come from your agent (or it is older than this app)',
+          tr(
+            'the reply didn\'t come from your agent (or it is older than this app)',
+          ),
         );
       }
       return utf8.decode(body);
@@ -812,7 +844,7 @@ class Live extends ChangeNotifier {
       }
       final body = b.takeBytes();
       if (!BuddyAuth.replyOk(key, nonce, res, body)) {
-        throw StateError('the reply didn\'t come from your agent');
+        throw StateError(tr('the reply didn\'t come from your agent'));
       }
       return body;
     } finally {
@@ -829,7 +861,7 @@ class Live extends ChangeNotifier {
       final health = jsonDecode(await _get('/health')) as Map<String, dynamic>;
       agentVersion = health['version'] as String?;
       if (health['ok'] != true)
-        throw StateError(health['error'] ?? 'agent not ready');
+        throw StateError(health['error'] ?? tr('agent not ready'));
       if (!onlyIfNew || health['built_at'] != _builtAt || state == null) {
         final raw = await _get('/state');
         state = LiveState(
@@ -852,7 +884,10 @@ class Live extends ChangeNotifier {
     } catch (e) {
       // one missed 5 s check on a busy Wi-Fi isn't news: say so from the second in a row
       if (++_failures >= 2 || state == null || !onlyIfNew) {
-        error = 'Agent unreachable at $host ($e)';
+        error = tr('Agent unreachable at {host} ({error})', {
+          'host': host,
+          'error': e,
+        });
       }
       _posLost();
     } finally {

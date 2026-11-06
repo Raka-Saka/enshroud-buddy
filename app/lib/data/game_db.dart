@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import '../l10n.dart';
+
 /// The map grid and the world's size, from game.json "world" (tools/world.py reads them from the game's own
 /// map textures). Set when the game data loads; the defaults are this game version's.
 class World {
@@ -576,7 +578,7 @@ class Balancing {
   String zoneAt(int altar) =>
       zonePerAltar.isEmpty
           ? '?'
-          : '${zonePerAltar[altar.clamp(0, zonePerAltar.length - 1)]} m';
+          : tr('{n} m', {'n': zonePerAltar[altar.clamp(0, zonePerAltar.length - 1)]});
   final int skillPointsPerLevel;
 
   /// (knowledge id, points): skill points granted by discoveries.
@@ -890,6 +892,22 @@ class GameDb {
       return members.length > 3 ? 'Any of $names…' : 'Any of $names';
     }
     return items[ref]?.name ?? ref;
+  }
+
+  /// [nameOf] as shown, in the chosen language. [nameOf] stays English for sorting and matching.
+  String shownName(String ref) {
+    if (ref.startsWith('cat:')) {
+      final members = categories[ref.substring(4)] ?? const [];
+      if (members.isEmpty) return tr('Any material');
+      final names = members
+          .take(3)
+          .map((id) => gt(items[id]?.name ?? id))
+          .join(', ');
+      return members.length > 3
+          ? tr('Any of {items}…', {'items': names})
+          : tr('Any of {items}', {'items': names});
+    }
+    return gt(items[ref]?.name ?? ref);
   }
 
   /// Prefix matches first, then word starts, then anywhere.

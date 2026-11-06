@@ -58,6 +58,8 @@ import history as history_mod  # noqa: E402
 import livepos as livepos_mod  # noqa: E402
 import motion as motion_mod  # noqa: E402
 import overlay as overlay_mod  # noqa: E402
+import pc_text  # noqa: E402
+from pc_text import t  # noqa: E402
 import saves as saves_mod  # noqa: E402
 import state as state_mod  # noqa: E402
 from ksd import Save  # noqa: E402
@@ -421,7 +423,8 @@ def overlay_tracker(req):
                       for ln in list(req.get("lines") or [])[:5]],
             "done": [{"label": str(c.get("label") or "")[:40], "have": int(c.get("have") or 0),
                       "of": int(c.get("of") or 0)} for c in list(req.get("done") or [])[:4]],
-            "target": overlay_target(req.get("target"))}
+            "target": overlay_target(req.get("target")),
+            "lang": str(req.get("lang") or "")[:8]}
 
 
 def make_handler(agent, key):
@@ -550,8 +553,9 @@ def make_handler(agent, key):
             try:
                 if not q:
                     raise RuntimeError("Empty question")
-                send({"status": "Reading your question"})
-                gen = ask_mod.stream(q[:2000], req.get("session"), req.get("context"), agent.live_for_ask())
+                send({"status": t("Reading your question")})
+                gen = ask_mod.stream(q[:2000], req.get("session"), req.get("context"), agent.live_for_ask(),
+                                     req.get("lang"))
                 for ev in gen:
                     send(ev)
                     if ev.get("done"):
@@ -605,7 +609,7 @@ def make_handler(agent, key):
                 if not q:
                     raise RuntimeError("Empty question")
                 text, session, secs = ask_mod.answer(q[:2000], req.get("session"), req.get("context"),
-                                                     agent.live_for_ask())
+                                                     agent.live_for_ask(), req.get("lang"))
                 body = {"answer": text, "session": session, "seconds": secs}
                 log(f"ask: {len(q)} chars, answered in {secs} s")
             except Exception as e:
@@ -635,6 +639,7 @@ def make_handler(agent, key):
                     agent.target = overlay_target(req)
                 else:
                     agent.tracker = overlay_tracker(req)
+                    set_lang((agent.tracker or {}).get("lang"))
                 self.reply({"ok": True})
             except (ValueError, KeyError, TypeError, AttributeError) as e:
                 self.reply({"ok": False, "error": str(e)[:200]}, 400)
@@ -815,13 +820,13 @@ def self_install():
         except OSError:
             time.sleep(0.5)
     else:
-        message("Enshroud Buddy couldn't be installed: its folder is in use. Restart the PC and try again.")
+        message(t("Enshroud Buddy couldn't be installed: its folder is in use. Restart the PC and try again."))
         return True
     make_shortcut(START_MENU / "Enshroud Buddy.lnk", EXE, DATA)
     make_shortcut(shortcut_path(), EXE, DATA)
     subprocess.Popen([str(EXE)] + ([] if update else ["--pair"]), cwd=DATA)
     if update:
-        message("Enshroud Buddy is updated and running again (the round icon in the tray, bottom right).")
+        message(t("Enshroud Buddy is updated and running again (the round icon in the tray, bottom right)."))
     return True
 
 
@@ -847,23 +852,33 @@ def show_pairing():
     from PIL import ImageTk
 
     root = tk.Tk()
-    root.title("Enshroud Buddy: pair your phone")
+    root.title(t("Enshroud Buddy: pair your phone"))
     root.configure(bg="white")
     root.resizable(False, False)
     photo = ImageTk.PhotoImage(qrcode.make(pair_text(), box_size=8, border=2).get_image().convert("RGB"))
-    tk.Label(root, text="In the app, open Setup (gear icon on Home) and tap Scan the PC's code.",
+    tk.Label(root, text=t("In the app, open Setup (gear icon on Home) and tap Scan the PC's code."),
              bg="white", font=("Segoe UI", 11), wraplength=360).pack(padx=16, pady=(16, 8))
     tk.Label(root, image=photo, bg="white").pack(padx=16)
-    tk.Label(root, text="Or type it in:\n" + " or ".join(f"{ip}:{PORT}" for ip in lan_ips())
-             + f"\nPairing code {key_text(pairing_key())}", bg="white", font=("Segoe UI", 10),
+    tk.Label(root, text=t("Or type it in:") + "\n" + t(" or ").join(f"{ip}:{PORT}" for ip in lan_ips())
+             + "\n" + t("Pairing code {code}", code=key_text(pairing_key())), bg="white", font=("Segoe UI", 10),
              justify="center").pack(padx=16, pady=8)
-    tk.Button(root, text="Close", command=root.destroy, width=12).pack(pady=(0, 8))
-    tk.Label(root, text="Unofficial fan project. Not affiliated with or endorsed by Keen Games.\nEnshrouded and "
-             "its content are the property of Keen Games GmbH.", bg="white", fg="#666666", font=("Segoe UI", 8),
+    tk.Button(root, text=t("Close"), command=root.destroy, width=12).pack(pady=(0, 8))
+    tk.Label(root, text=t("Unofficial fan project. Not affiliated with or endorsed by Keen Games.") + "\n"
+             + t("Enshrouded and its content are the property of Keen Games GmbH."), bg="white", fg="#666666", font=("Segoe UI", 8),
              justify="center").pack(padx=16, pady=(0, 12))
     root.attributes("-topmost", True)
     root.after(500, lambda: root.attributes("-topmost", False))
     root.mainloop()
+
+
+def set_lang(code):
+    """The phone's language, for the tray, the pairing window and the overlay; kept for the next start."""
+    if code not in pc_text.CODES or code == pc_text.lang:
+        return
+    pc_text.load(code)
+    conf = load_config()
+    conf["lang"] = code
+    write_config(conf)
 
 
 def set_overlay(agent, on):
@@ -934,17 +949,17 @@ def run_tray(agent, stop, quit_now=None):
 
     def status(_item=None):
         h = agent.health
-        return f"Saved {h['saved_at'] or '—'}" if h["ok"] else f"Waiting: {h['error']}"
+        return t("Saved {time}", time=h['saved_at'] or '—') if h["ok"] else t("Waiting: {error}", error=h['error'])
 
     def reading(_item=None):
         h = agent.health
-        return f"{h.get('character') or '?'} in {h.get('world') or '?'}"
+        return t("{character} in {world}", character=h.get('character') or '?', world=h.get('world') or '?')
 
     def address(_item=None):
-        return "Phone address: " + " or ".join(f"{ip}:{PORT}" for ip in lan_ips())
+        return t("Phone address: {address}", address=t(" or ").join(f"{ip}:{PORT}" for ip in lan_ips()))
 
     def code(_item=None):
-        return f"Pairing code: {key_text(pairing_key())}"
+        return t("Pairing code: {code}", code=key_text(pairing_key()))
 
     def quit_(icon, _item):
         stop.set()
@@ -954,7 +969,7 @@ def run_tray(agent, stop, quit_now=None):
         quit_now.append(lambda: quit_(icon, None))
 
     def uninstall_(icon, item):
-        if message("Remove Enshroud Buddy and its data from this PC? Your game saves stay as they are.", ask=True):
+        if message(t("Remove Enshroud Buddy and its data from this PC? Your game saves stay as they are."), ask=True):
             uninstall()
             quit_(icon, item)
 
@@ -963,21 +978,21 @@ def run_tray(agent, stop, quit_now=None):
         pystray.MenuItem(lambda _i: code(), None, enabled=False),
         pystray.MenuItem(lambda _i: reading(), None, enabled=False),
         pystray.MenuItem(lambda _i: status(), None, enabled=False),
-        pystray.MenuItem("Pair a phone (QR code)", lambda i, it: threading.Thread(target=show_pairing,
+        pystray.MenuItem(lambda _i: t("Pair a phone (QR code)"), lambda i, it: threading.Thread(target=show_pairing,
                                                                                     daemon=True).start(),
                          default=True),
-        pystray.MenuItem("Live position (reads the game's memory)", lambda i, it: set_live(agent, not agent.live_on),
+        pystray.MenuItem(lambda _i: t("Live position (reads the game's memory)"), lambda i, it: set_live(agent, not agent.live_on),
                          checked=lambda _i: agent.live_on),
-        pystray.MenuItem("Guide over the game", lambda i, it: set_overlay(agent, not agent.overlay_on),
+        pystray.MenuItem(lambda _i: t("Guide over the game"), lambda i, it: set_overlay(agent, not agent.overlay_on),
                          checked=lambda _i: agent.overlay_on, enabled=lambda _i: agent.live_on),
-        pystray.MenuItem("Rebuild now", lambda i, it: setattr(agent, "last_sig", None)),  # the watch loop rebuilds
-        pystray.MenuItem("Open log folder", lambda i, it: os.startfile(DATA)),
-        pystray.MenuItem("Licences", lambda i, it: os.startfile(RES / "THIRD_PARTY_LICENSES.txt"),
+        pystray.MenuItem(lambda _i: t("Rebuild now"), lambda i, it: setattr(agent, "last_sig", None)),  # the watch loop rebuilds
+        pystray.MenuItem(lambda _i: t("Open log folder"), lambda i, it: os.startfile(DATA)),
+        pystray.MenuItem(lambda _i: t("Licences"), lambda i, it: os.startfile(RES / "THIRD_PARTY_LICENSES.txt"),
                          visible=(RES / "THIRD_PARTY_LICENSES.txt").exists()),
-        pystray.MenuItem("Open state in browser", lambda i, it: os.startfile(f"http://localhost:{PORT}/health")),
+        pystray.MenuItem(lambda _i: t("Open state in browser"), lambda i, it: os.startfile(f"http://localhost:{PORT}/health")),
         pystray.Menu.SEPARATOR,
-        pystray.MenuItem("Uninstall from this PC", uninstall_),
-        pystray.MenuItem("Quit", quit_),
+        pystray.MenuItem(lambda _i: t("Uninstall from this PC"), uninstall_),
+        pystray.MenuItem(lambda _i: t("Quit"), quit_),
     ))
     icon.run()
 
@@ -997,6 +1012,7 @@ def main():
     ap.add_argument("--uninstall-autostart", action="store_true")
     ap.add_argument("--pair", action="store_true", help="show the pairing QR code once started")
     a = ap.parse_args()
+    pc_text.load(load_config().get("lang"))
     if self_install():
         return 0
     if a.install_autostart:
@@ -1022,7 +1038,7 @@ def main():
     except OSError:  # the port is taken by another program
         log(f"port {a.port} is in use by another program")
         if FROZEN:
-            message(f"Enshroud Buddy can't start: another program uses port {a.port}.")
+            message(t("Enshroud Buddy can't start: another program uses port {port}.", port=a.port))
             return 1
         raise
     threading.Thread(target=server.serve_forever, daemon=True).start()

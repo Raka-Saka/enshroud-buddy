@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/game_db.dart';
 import '../data/history.dart';
 import '../data/live_state.dart';
+import '../l10n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
@@ -13,43 +14,45 @@ class JourneyScreen extends StatelessWidget {
   const JourneyScreen({super.key, required this.db});
   final GameDb db;
 
-  static const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+  static List<String> get months => [
+    tr('Jan'),
+    tr('Feb'),
+    tr('Mar'),
+    tr('Apr'),
+    tr('May'),
+    tr('Jun'),
+    tr('Jul'),
+    tr('Aug'),
+    tr('Sep'),
+    tr('Oct'),
+    tr('Nov'),
+    tr('Dec'),
   ];
-  static String day(DateTime t) => '${t.day} ${months[t.month - 1]}';
+  static String day(DateTime t) =>
+      tr('{day} {month}', {'day': t.day, 'month': months[t.month - 1]});
   static String time(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
     final h = LiveScope.of(context).history;
-    final name = (String id) => db.items[id]?.name ?? id;
+    final name = (String id) => gt(db.items[id]?.name ?? id);
     final steps =
         [
           for (var i = h.length - 1; i > 0; i--)
             (h[i], changes(h[i - 1], h[i], name, db.balancing)),
         ].where((s) => s.$2.isNotEmpty).toList();
     return Scaffold(
-      appBar: AppBar(title: const Text('Journey')),
+      appBar: AppBar(title: Text(tr('Journey'))),
       body:
           h.length < 2
-              ? const Center(
+              ? Center(
                 child: EmptyState(
                   icon: Icons.timeline,
-                  title: 'Your journey starts here',
-                  message:
-                      'The PC agent records a snapshot at every game save (and reads the game\'s own backups once), so this fills in as you play.',
+                  title: tr('Your journey starts here'),
+                  message: tr(
+                    'The PC agent records a snapshot at every game save (and reads the game\'s own backups once), so this fills in as you play.',
+                  ),
                 ),
               )
               : ListView(
@@ -59,22 +62,31 @@ class JourneyScreen extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: Row(
                       children: [
-                        for (final (v, l) in [
-                          ('+${h.last.level - h.first.level}', 'levels'),
-                          ('+${h.last.recipes - h.first.recipes}', 'recipes'),
+                        for (final (v, l, last) in [
+                          (
+                            '+${h.last.level - h.first.level}',
+                            tr('levels'),
+                            false,
+                          ),
+                          (
+                            '+${h.last.recipes - h.first.recipes}',
+                            tr('recipes'),
+                            false,
+                          ),
                           (
                             '+${h.last.roots - h.first.roots + h.last.wells - h.first.wells}',
-                            'Roots and Wells',
+                            tr('Roots and Wells'),
+                            true,
                           ),
                         ]) ...[
                           Expanded(child: StatTile(value: v, label: l)),
-                          if (l != 'Roots and Wells') const SizedBox(width: 8),
+                          if (!last) const SizedBox(width: 8),
                         ],
                       ],
                     ),
                   ),
                   DashCard(
-                    title: 'Level since ${day(h.first.t)}',
+                    title: tr('Level since {day}', {'day': day(h.first.t)}),
                     icon: Icons.show_chart,
                     child: SizedBox(
                       height: 140,
@@ -84,7 +96,7 @@ class JourneyScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SectionTitle('Milestones'),
+                  SectionTitle(tr('Milestones')),
                   for (final (s, lines) in steps)
                     IntrinsicHeight(
                       child: Row(
@@ -118,7 +130,11 @@ class JourneyScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${day(s.t)} · ${time(s.t)} · level ${s.level}',
+                                    tr('{day} · {time} · level {level}', {
+                                      'day': day(s.t),
+                                      'time': time(s.t),
+                                      'level': s.level,
+                                    }),
                                     style: const TextStyle(
                                       color: Palette.ash,
                                       fontSize: 12,
@@ -140,7 +156,10 @@ class JourneyScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                     child: Text(
-                      'Started ${day(h.first.t)} at level ${h.first.level}. Earlier play isn\'t in the game\'s backups.',
+                      tr(
+                        'Started {day} at level {level}. Earlier play isn\'t in the game\'s backups.',
+                        {'day': day(h.first.t), 'level': h.first.level},
+                      ),
                       style: const TextStyle(color: Palette.ash, fontSize: 12),
                     ),
                   ),

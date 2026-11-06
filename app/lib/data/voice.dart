@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n.dart';
+
 /// Speech in and out for Ask, through the phone's own recognizer and text-to-speech (MainActivity,
 /// channel "ensh/voice"). Nothing is recorded by the app.
 class Voice {
@@ -23,9 +25,9 @@ class Voice {
     try {
       return await _ch.invokeMethod<String>('listen');
     } on PlatformException catch (e) {
-      throw StateError(e.message ?? 'No speech recognition');
+      throw StateError(e.message ?? tr('No speech recognition'));
     } on MissingPluginException {
-      throw StateError('No speech recognition');
+      throw StateError(tr('No speech recognition'));
     }
   }
 
@@ -55,6 +57,6 @@ class Voice {
       .replaceAll('**', '')
       .replaceAllMapped(
         RegExp(r'\(?x\s*(\d{1,4})\s*,\s*y\s*(\d{1,4})\)?'),
-        (m) => 'at ${m[1]}, ${m[2]}',
+        (m) => tr('at {x}, {y}', {'x': m[1], 'y': m[2]}),
       );
 }

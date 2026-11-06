@@ -29,6 +29,7 @@ import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 from paths import DATA, RES  # noqa: E402
+from pc_text import t  # noqa: E402
 WORK = DATA / "ask"
 DB = RES / "app" / "assets" / "game.json"
 MODEL = os.environ.get("ENSH_ASK_MODEL", "sonnet")
@@ -260,12 +261,20 @@ def write_me(state):
 
 
 # what the phone shows while a tool runs
-TOOL_STATUS = {
-    "Grep": "Checking the game data",
-    "Read": "Checking the game data",
-    "Glob": "Checking the game data",
-    "WebFetch": "Reading the wiki",
-}
+def tool_status(name):
+    """What the phone shows while a tool runs, in the phone's language (pc_text)."""
+    if name in ("Grep", "Read", "Glob"):
+        return t("Checking the game data")
+    if name == "WebFetch":
+        return t("Reading the wiki")
+    return t("Looking it up")
+
+
+# the app's languages (its native names, lib/l10n.dart) -> how the prompt names them
+LANGUAGES = {"Deutsch": "German", "Français": "French", "Español": "Spanish", "Italiano": "Italian",
+             "Português (Brasil)": "Brazilian Portuguese", "Polski": "Polish", "Русский": "Russian",
+             "Українська": "Ukrainian", "Türkçe": "Turkish", "日本語": "Japanese", "한국어": "Korean",
+             "简体中文": "Simplified Chinese", "繁體中文": "Traditional Chinese", "ไทย": "Thai"}
 
 
 COMPASS = ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"]
@@ -308,7 +317,7 @@ def where(pos):
     return text
 
 
-def stream(question, session=None, context=None, live=None):
+def stream(question, session=None, context=None, live=None, lang=None):
     """Yields what the phone shows as the answer is written:
         {"status": "Searching the web"}   a tool started
         {"reset": true}                   a new turn of the model began: drop the text so far (it was a preamble)
@@ -317,7 +326,7 @@ def stream(question, session=None, context=None, live=None):
     Raises RuntimeError with a short reason on failure. Closing the generator stops Claude Code."""
     cmd = claude_cmd()
     if not cmd:
-        raise RuntimeError("Claude Code isn't installed on this PC (no `claude` on PATH)")
+        raise RuntimeError(t("Claude Code isn't installed on this PC (no `claude` on PATH)"))
     build_codex()
     (WORK / "guide.md").write_text(STYLE.replace("{facts}", facts()), encoding="utf-8")
     prompt = question.strip()
@@ -325,6 +334,10 @@ def stream(question, session=None, context=None, live=None):
         prompt += "\n\n(From the phone: " + context.strip()[:2000] + ")"
     if live:
         prompt += "\n\n(" + where(live) + ")"
+    if lang in LANGUAGES:
+        # the codex and the wiki are English: the answer is written in the player's language, with the game's
+        # names as its translation has them where known, else the English name
+        prompt += f"\n\n(Answer in {LANGUAGES[lang]}. Keep map positions as \"x 123, y 456\".)"
     if session and not SESSION.fullmatch(str(session)):
         raise RuntimeError("Not a conversation id")
     if not MODEL_NAME.fullmatch(MODEL):
@@ -340,7 +353,7 @@ def stream(question, session=None, context=None, live=None):
     if session:
         args += ["--resume", str(session)]
     if not _lock.acquire(timeout=5):
-        raise RuntimeError("Still answering the last question")
+        raise RuntimeError(t("Still answering the last question"))
     t0 = time.time()
     proc = err = None
     try:
@@ -367,7 +380,7 @@ def stream(question, session=None, context=None, live=None):
                     wrote = False
                     yield {"reset": True}
                 elif kind == "content_block_start" and ev.get("content_block", {}).get("type") == "tool_use":
-                    yield {"status": TOOL_STATUS.get(ev["content_block"].get("name"), "Looking it up")}
+                    yield {"status": tool_status(ev["content_block"].get("name"))}
                 elif kind == "content_block_delta" and ev.get("delta", {}).get("type") == "text_delta":
                     wrote = True
                     yield {"delta": ev["delta"]["text"]}
@@ -378,7 +391,7 @@ def stream(question, session=None, context=None, live=None):
         proc.wait(timeout=10)
         if result is None:
             if time.time() - t0 >= TIMEOUT - 1:
-                raise RuntimeError("Claude took too long")
+                raise RuntimeError(t("Claude took too long"))
             err.seek(0)
             raise RuntimeError(err.read().decode("utf-8", "replace").strip()[-300:] or "no answer")
         if result.get("is_error"):
@@ -403,9 +416,9 @@ def tidy(text):
     return "\n\n".join(keep or paras).strip()
 
 
-def answer(question, session=None, context=None, live=None):
+def answer(question, session=None, context=None, live=None, lang=None):
     """(answer text, session id, seconds). Raises RuntimeError with a short reason on failure."""
-    for ev in stream(question, session, context, live):
+    for ev in stream(question, session, context, live, lang):
         if ev.get("done"):
             return ev["answer"], ev["session"], ev["seconds"]
     raise RuntimeError("no answer")

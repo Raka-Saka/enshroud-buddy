@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/item_icons.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../theme.dart';
 import 'item_screen.dart';
 
@@ -22,6 +24,29 @@ const categoryLabels = {
   'FishingRod': 'Fishing',
   'Currency': 'Currency',
 };
+
+/// [categoryLabels] in the chosen language, for display (the map itself stays English).
+String categoryLabel(String category) => switch (category) {
+  'Materials' => tr('Materials'),
+  'Consumables' => tr('Food & potions'),
+  'Weapons' => tr('Weapons'),
+  'Equipment' => tr('Armor & rings'),
+  'Ammunition' => tr('Ammo & bait'),
+  'Tools' => tr('Tools'),
+  'BuildTools' => tr('Building'),
+  'Collectibles' => tr('Collectibles'),
+  'Blueprints' => tr('Blueprints'),
+  'WeaponGem' => tr('Gems'),
+  'AnimalFood' => tr('Animal food'),
+  'Instrument' => tr('Instruments'),
+  'FishingRod' => tr('Fishing'),
+  'Currency' => tr('Currency'),
+  _ => gt(category),
+};
+
+/// [text] in English or in the chosen language contains [q] (lowercased).
+bool _matches(String text, String q) =>
+    text.toLowerCase().contains(q) || gt(text).toLowerCase().contains(q);
 
 class ItemsScreen extends StatefulWidget {
   const ItemsScreen({
@@ -65,19 +90,32 @@ class _ItemsScreenState extends State<ItemsScreen> {
         effect == null
             ? db.search(query.text, category: category)
             : _withEffect(db, effect!, q, live);
+    // the name in the chosen language finds it too
+    if (effect == null && q.isNotEmpty) {
+      final found = {for (final i in results) i.id};
+      results = [
+        ...results,
+        for (final i in db.items.values)
+          if (!found.contains(i.id) &&
+              (category == null || i.category == category) &&
+              gt(i.name) != i.name &&
+              gt(i.name).toLowerCase().contains(q))
+            i,
+      ];
+    }
     // typing a skill or stat offers its gear ("fatal" -> Fatal Precision)
     final offers =
         effect == null && q.length >= 3
             ? [
               for (final e in db.byEffect.keys)
-                if (e.toLowerCase().contains(q)) e,
+                if (_matches(e, q)) e,
             ]
             : <String>[];
     offers.sort(
       (a, b) =>
           db.skillNames.contains(a) != db.skillNames.contains(b)
               ? (db.skillNames.contains(a) ? -1 : 1)
-              : a.compareTo(b),
+              : gt(a).compareTo(gt(b)),
     );
     if (live != null && unlocked != null) {
       results = [
@@ -101,8 +139,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
               decoration: InputDecoration(
                 hintText:
                     effect == null
-                        ? 'Search ${db.items.length} items, skills, stats'
-                        : 'Search gear with $effect',
+                        ? tr('Search {n} items, skills, stats', {
+                          'n': db.items.length,
+                        })
+                        : tr('Search gear with {effect}', {
+                          'effect': gt(effect!),
+                        }),
                 prefixIcon: const Icon(Icons.search, color: Palette.flame),
                 suffixIcon:
                     query.text.isEmpty
@@ -124,7 +166,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   padding: const EdgeInsets.only(right: 6),
                   child: InputChip(
                     avatar: const Icon(Icons.auto_awesome, size: 16),
-                    label: Text(effect ?? 'Skill or stat'),
+                    label: Text(gtn(effect) ?? tr('Skill or stat')),
                     selected: effect != null,
                     onPressed: () => _pickEffect(db),
                     onDeleted:
@@ -134,9 +176,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   ),
                 ),
                 if (live != null)
-                  for (final (value, label) in const [
-                    (true, 'Unlocked'),
-                    (false, 'Locked'),
+                  for (final (value, label) in [
+                    (true, tr('Unlocked')),
+                    (false, tr('Locked')),
                   ])
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
@@ -156,7 +198,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: FilterChip(
-                      label: Text(e.value),
+                      label: Text(categoryLabel(e.key)),
                       selected: category == e.key,
                       onSelected:
                           (on) => setState(() => category = on ? e.key : null),
@@ -183,7 +225,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                           size: 16,
                           color: Palette.flame,
                         ),
-                        label: Text('$e · ${db.byEffect[e]!.length}'),
+                        label: Text('${gt(e)} · ${db.byEffect[e]!.length}'),
                         onPressed:
                             () => setState(() {
                               effect = e;
@@ -197,10 +239,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
           Expanded(
             child:
                 results.isEmpty
-                    ? const Center(
+                    ? Center(
                       child: Text(
-                        'Nothing found in the Shroud',
-                        style: TextStyle(color: Palette.ash),
+                        tr('Nothing found in the Shroud'),
+                        style: const TextStyle(color: Palette.ash),
                       ),
                     )
                     : ListView.builder(
@@ -224,7 +266,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
     final picked = <String, Item>{};
     for (final i in db.byEffect[e] ?? const <Item>[]) {
       if (category != null && i.category != category) continue;
-      if (q.isNotEmpty && !i.name.toLowerCase().contains(q)) continue;
+      if (q.isNotEmpty && !_matches(i.name, q)) continue;
       final st = i.stats!;
       final key = '${i.name}|${i.rarity}|${st.levels}|${st.effects}';
       final had = picked[key];
@@ -249,12 +291,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
     final lv = st.levels;
     final shown = st.effects[effect] ?? '';
     return [
-      if (st.slot != null) st.slotLabel,
+      if (st.slot != null) slotName(st.slotLabel),
       if (lv != null && lv.isNotEmpty)
         lv.first == lv.last
-            ? 'level ${lv.first}'
-            : 'level ${lv.first}–${lv.last}',
-      shown.isEmpty ? effect! : '$effect $shown',
+            ? tr('level {n}', {'n': lv.first})
+            : tr('level {from}–{to}', {'from': lv.first, 'to': lv.last}),
+      shown.isEmpty ? gt(effect!) : '${gt(effect!)} ${gt(shown)}',
     ].join(' · ');
   }
 
@@ -274,19 +316,19 @@ class _ItemsScreenState extends State<ItemsScreen> {
                     final f = filter.text.trim().toLowerCase();
                     final names = [
                       for (final e in db.byEffect.keys)
-                        if (f.isEmpty || e.toLowerCase().contains(f)) e,
+                        if (f.isEmpty || _matches(e, f)) e,
                     ];
                     final skills = [
                       for (final e in names)
                         if (db.skillNames.contains(e)) e,
-                    ]..sort();
+                    ]..sort((a, b) => gt(a).compareTo(gt(b)));
                     final stats = [
                       for (final e in names)
                         if (!db.skillNames.contains(e)) e,
-                    ]..sort();
+                    ]..sort((a, b) => gt(a).compareTo(gt(b)));
                     Widget row(String e) => ListTile(
                       dense: true,
-                      title: Text(e),
+                      title: Text(gt(e)),
                       trailing: Text(
                         '${db.byEffect[e]!.length}',
                         style: const TextStyle(color: Palette.ash),
@@ -314,16 +356,16 @@ class _ItemsScreenState extends State<ItemsScreen> {
                           child: TextField(
                             controller: filter,
                             onChanged: (_) => set(() {}),
-                            decoration: const InputDecoration(
-                              hintText: 'Find a skill or stat',
-                              prefixIcon: Icon(Icons.search),
+                            decoration: InputDecoration(
+                              hintText: tr('Find a skill or stat'),
+                              prefixIcon: const Icon(Icons.search),
                             ),
                           ),
                         ),
                         if (skills.isNotEmpty)
-                          head('Skills the gear gives or strengthens'),
+                          head(tr('Skills the gear gives or strengthens')),
                         for (final e in skills) row(e),
-                        if (stats.isNotEmpty) head('Stats'),
+                        if (stats.isNotEmpty) head(tr('Stats')),
                         for (final e in stats) row(e),
                       ],
                     );
@@ -366,10 +408,10 @@ class ItemTile extends StatelessWidget {
         item,
         fallback: craftable ? Icons.handyman_outlined : Icons.diamond_outlined,
       ),
-      title: Text(item.name, style: const TextStyle(fontSize: 15)),
+      title: Text(gt(item.name), style: const TextStyle(fontSize: 15)),
       subtitle: Text(
         [
-          '${categoryLabels[item.category] ?? item.category} · ${item.rarity}',
+          '${categoryLabel(item.category)} · ${gt(item.rarity)}',
           if (detail != null) detail!,
         ].join('\n'),
         style: const TextStyle(color: Palette.ash, fontSize: 12),

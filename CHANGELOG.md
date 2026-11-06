@@ -3,6 +3,16 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.38.0 (2026-11-06)
+
+- **15 languages:** English, Deutsch, Français, Español, Italiano, Português (Brasil), Polski, Русский,
+  Українська, Türkçe, 日本語, 한국어, 简体中文, 繁體中文 and ไทย, the languages the game itself ships. The app follows
+  your phone's language; Setup → Language picks another.
+- Item names, descriptions, lore, quests, skills and places use **Keen's own translations** from the game, so
+  they read exactly as in your game. Menus and explanations are our translations; corrections are welcome.
+- The PC program (tray menu, pairing window, the guide over the game) follows the app's language, and Ask
+  answers in it.
+
 ## 0.37.0 (2026-11-05)
 
 - **Guide over the game:** pick a place on the phone's map (a missing unique piece, a chest, anything the guide

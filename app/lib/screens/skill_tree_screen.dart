@@ -8,6 +8,8 @@ import '../data/build.dart';
 import '../data/projection.dart';
 import '../data/game_db.dart';
 import '../data/live_state.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../theme.dart';
 import 'ask_screen.dart';
 import 'items_screen.dart';
@@ -136,7 +138,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                       ),
                     Expanded(
                       child: Text(
-                        k.name,
+                        gt(k.name),
                         style: Theme.of(ctx).textTheme.titleLarge,
                       ),
                     ),
@@ -145,10 +147,25 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                 const SizedBox(height: 4),
                 Text(
                   [
-                    k.archetype,
-                    if (k.cls != 'Neutral') k.cls,
-                    k.type.replaceAll('Skill', ' skill'),
-                    '${k.cost} point${k.cost > 1 ? 's' : ''}${k.maxLevel > 0 ? ' per rank' : ''}',
+                    gt(k.archetype),
+                    if (k.cls != 'Neutral') classLabel(k.cls),
+                    switch (k.type) {
+                      'ActiveSkill' => tr('Active skill'),
+                      'PassiveSkill' => tr('Passive skill'),
+                      'Attribute' => tr('Attribute'),
+                      _ => k.type.replaceAll('Skill', ' skill'),
+                    },
+                    k.maxLevel > 0
+                        ? (k.cost > 1
+                            ? trn(
+                              k.cost,
+                              '{n} point per rank',
+                              '{n} points per rank',
+                            )
+                            : tr('{n} point per rank', {'n': k.cost}))
+                        : (k.cost > 1
+                            ? trn(k.cost, '{n} point', '{n} points')
+                            : tr('{n} point', {'n': k.cost})),
                   ].join(' · '),
                   style: const TextStyle(color: Palette.ash),
                 ),
@@ -156,8 +173,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                 if (rank != null)
                   Text(
                     k.maxLevel > 0
-                        ? 'Learned: rank $rank of ${k.maxLevel}'
-                        : 'Learned',
+                        ? tr('Learned: rank {rank} of {max}', {
+                          'rank': rank,
+                          'max': k.maxLevel,
+                        })
+                        : tr('Learned'),
                     style: const TextStyle(
                       color: _gold,
                       fontWeight: FontWeight.w600,
@@ -167,7 +187,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      k.description!.replaceAll('%k', '…'),
+                      gt(k.description!).replaceAll('%k', '…'),
                       style: const TextStyle(height: 1.4),
                     ),
                   ),
@@ -175,16 +195,18 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      k.perLevel!.replaceAll('%k', '…'),
+                      gt(k.perLevel!).replaceAll('%k', '…'),
                       style: const TextStyle(color: Palette.ash),
                     ),
                   ),
                 if (k.guessed)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Numbers from the game files; which number goes where is a best guess.',
-                      style: TextStyle(color: Palette.ash, fontSize: 12),
+                      tr(
+                        'Numbers from the game files; which number goes where is a best guess.',
+                      ),
+                      style: const TextStyle(color: Palette.ash, fontSize: 12),
                     ),
                   ),
                 if (k.axes.isNotEmpty)
@@ -196,7 +218,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                             .map((a) => Projection.axisNames[a] ?? a)
                             .join(', '),
                         if (k.weapons.isNotEmpty)
-                          'with ${k.weapons.join(', ')}',
+                          tr('with {weapons}', {
+                            'weapons': k.weapons.map(weaponLabel).join(', '),
+                          }),
                       ].join(' · '),
                       style: const TextStyle(
                         color: Palette.spring,
@@ -214,8 +238,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                     ),
                     label: Text(
                       skillPlan.targets.contains(k.id)
-                          ? 'Remove from plan'
-                          : 'Plan this skill',
+                          ? tr('Remove from plan')
+                          : tr('Plan this skill'),
                     ),
                     onPressed: () {
                       skillPlan.toggle(k.id);
@@ -225,7 +249,9 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                 if (widget.db.byEffect[k.name] case final gear?)
                   TextButton.icon(
                     icon: const Icon(Icons.shield_outlined),
-                    label: Text('Gear with this skill (${gear.length})'),
+                    label: Text(
+                      tr('Gear with this skill ({n})', {'n': gear.length}),
+                    ),
                     onPressed: () {
                       Navigator.pop(ctx);
                       Navigator.push(
@@ -233,7 +259,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                         MaterialPageRoute(
                           builder:
                               (_) => Scaffold(
-                                appBar: AppBar(title: Text(k.name)),
+                                appBar: AppBar(title: Text(gt(k.name))),
                                 body: ItemsScreen(
                                   db: widget.db,
                                   effect: k.name,
@@ -247,7 +273,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
                 if (k.type != 'Root')
                   TextButton.icon(
                     icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Ask about this'),
+                    label: Text(tr('Ask about this')),
                     onPressed: () {
                       Navigator.pop(ctx);
                       askAbout(context, widget.db, k.name, skillPrompts(k));
@@ -281,11 +307,11 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
       backgroundColor: const Color(0xFF0E0716),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0E0716),
-        title: const Text('Skill tree'),
+        title: Text(tr('Skill tree')),
         actions: [
           if (skillPlan.targets.isNotEmpty)
             IconButton(
-              tooltip: 'Clear plan',
+              tooltip: tr('Clear plan'),
               icon: const Icon(Icons.layers_clear),
               onPressed: () async {
                 for (final t in skillPlan.targets.toList()) {
@@ -301,7 +327,15 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
               child: Text(
-                'Level ${s!.level} · ${points.spent} of ${points.total} points spent · ${points.free} free',
+                tr(
+                  'Level {level} · {spent} of {total} points spent · {free} free',
+                  {
+                    'level': s!.level,
+                    'spent': points.spent,
+                    'total': points.total,
+                    'free': points.free,
+                  },
+                ),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
@@ -309,12 +343,12 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
               child: Text(
-                'Plan: ${plan.length} nodes, $planCost points'
+                '${tr('Plan: {nodes} nodes, {points} points', {'nodes': plan.length, 'points': planCost})}'
                 '${points == null
                     ? ''
                     : planCost <= points.free
-                    ? ' (you can take it now)'
-                    : ' (${((planCost - points.free) / (db.balancing?.skillPointsPerLevel ?? 2)).ceil()} more levels)'}',
+                    ? tr(' (you can take it now)')
+                    : tr(' ({n} more levels)', {'n': ((planCost - points.free) / (db.balancing?.skillPointsPerLevel ?? 2)).ceil()})}',
                 style: const TextStyle(color: _gold),
               ),
             ),
@@ -358,14 +392,18 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: Wrap(
               spacing: 12,
               children: [
-                _Legend(Color(0xFFE0B060), 'learned', filled: true),
-                _Legend(Color(0xFF8A6A3A), 'can learn next', filled: true),
-                _Legend(_gold, 'planned'),
+                _Legend(const Color(0xFFE0B060), tr('learned'), filled: true),
+                _Legend(
+                  const Color(0xFF8A6A3A),
+                  tr('can learn next'),
+                  filled: true,
+                ),
+                _Legend(_gold, tr('planned')),
               ],
             ),
           ),
@@ -505,7 +543,7 @@ class _TreePainter extends CustomPainter {
       final p = centre + Offset(math.cos(a), math.sin(a)) * size.width * 0.46;
       final tp = TextPainter(
         text: TextSpan(
-          text: name.toUpperCase(),
+          text: gt(name).toUpperCase(),
           style: const TextStyle(
             color: Color(0x99D8C8E8),
             fontSize: 15,

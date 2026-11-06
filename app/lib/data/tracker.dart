@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../l10n.dart';
+
 import 'game_db.dart';
 import 'hall_check.dart';
 import 'live_state.dart';
@@ -32,7 +34,7 @@ Map<String, Object?>? trackerOf(
   final where = WhereToGet(db, state, terrain, here: here);
   final plan = TaskPlan(db, state, goals, where);
   final next = nextUp(plan, here);
-  final names = [for (final g in goals) db.nameOf(g.itemId)];
+  final names = [for (final g in goals) db.shownName(g.itemId)];
   Map<String, Object?>? target;
   for (final n in next) {
     final t = n.task;
@@ -55,9 +57,14 @@ Map<String, Object?>? trackerOf(
   }
   return {
     'title':
-        names.length <= 2
-            ? names.join(' and ')
-            : '${names.take(2).join(', ')} +${names.length - 2}',
+        names.length == 2
+            ? tr('{a} and {b}', {'a': names[0], 'b': names[1]})
+            : names.length < 2
+            ? names.join()
+            : tr('{items} +{n}', {
+              'items': names.take(2).join(', '),
+              'n': names.length - 2,
+            }),
     'open': next.length,
     'lines': [
       for (final n in next.take(5))
@@ -92,11 +99,13 @@ _completion(GameDb db, LiveState state, PlayerPos? here) {
   if (best case final p?) {
     final missing = [
       for (final id in p.loot)
-        if (finds.hasItem(id) == false) db.items[id]?.name ?? id,
+        if (finds.hasItem(id) == false) gt(db.items[id]?.name ?? id),
     ];
     nearest = {
       'title':
-          p.cat == 'lore' ? 'Lore: ${p.title}' : missing.take(2).join(', '),
+          p.cat == 'lore'
+              ? tr('Lore: {title}', {'title': gt(p.title)})
+              : missing.take(2).join(', '),
       'x': p.x,
       'y': p.y,
       'h': p.height,
@@ -105,11 +114,15 @@ _completion(GameDb db, LiveState state, PlayerPos? here) {
   return (
     counts: [
       {
-        'label': 'Lore',
+        'label': tr('Lore'),
         'have': pages.where((p) => p.done?.likely(k) ?? false).length,
         'of': pages.length,
       },
-      {'label': 'Unique loot', 'have': had.length, 'of': uniques.length},
+      {
+        'label': tr('Unique loot'),
+        'have': had.length,
+        'of': uniques.length,
+      },
     ],
     nearest: nearest,
   );

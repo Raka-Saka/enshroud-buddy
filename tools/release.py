@@ -23,11 +23,12 @@ SHIP = [
     "tools/ask.py", "tools/build_agent.py", "tools/build_db.py", "tools/build_map.py", "tools/export_poi.py", "tools/glide.py",
     "tools/history.py", "tools/icons.py", "tools/ksd.py", "tools/licences_dump.py", "tools/livepos.py", "tools/motion.py", "tools/overlay.py", "tools/paths.py", "tools/release.py",
     "tools/saves.py", "tools/state.py", "tools/world.py", "tools/eml-export", "tools/eml-poi",
+    "tools/pc_text.py", "tools/i18n.py", "tools/ui_strings.py", "tools/export_loca.py", "tools/eml-loca", "tools/i18n",
     # what the agent reads at runtime (tools/state.py, history.py, world.py)
     "data/export/items.jsonl", "data/export/recipes.jsonl", "data/export/skills.jsonl",
     "data/export/item_stats.jsonl", "data/export/balancing.json", "data/export/map/index.tsv",
 ]
-SKIP_DIRS = {"build", ".gradle", ".cxx", ".idea", ".dart_tool", "__pycache__"}
+SKIP_DIRS = {"build", "work", ".gradle", ".cxx", ".idea", ".dart_tool", "__pycache__"}  # work: tools/i18n/work, the translators' hand-back files
 SKIP_FILES = {"local.properties", "key.properties"}
 SKIP_SUFFIXES = {".jks", ".keystore", ".iml", ".pyc"}
 

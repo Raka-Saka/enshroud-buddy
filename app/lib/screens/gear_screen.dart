@@ -3,9 +3,19 @@ import 'package:flutter/material.dart';
 import '../data/game_db.dart';
 import '../data/live_state.dart';
 import '../data/item_icons.dart';
+import '../l10n.dart';
+import '../labels.dart';
 import '../theme.dart';
 import 'item_screen.dart';
 import 'widgets.dart';
+
+/// [_Owned.where] for display: the fixed places and chest labels translated.
+String _whereText(String where) => switch (where) {
+  'Equipped' => tr('Equipped'),
+  'Cosmetic' => tr('Cosmetic'),
+  'Bag' => tr('Bag'),
+  _ => shownLabel(where),
+};
 
 /// One owned piece of gear and where it is.
 class _Owned {
@@ -54,8 +64,8 @@ class GearScreen extends StatelessWidget {
     final s = LiveScope.of(context).state;
     if (s == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Gear & food')),
-        body: const Center(child: Text('No live data from the PC agent yet.')),
+        appBar: AppBar(title: Text(tr('Gear & food'))),
+        body: Center(child: Text(tr('No live data from the PC agent yet.'))),
       );
     }
     final labels = s.labels((id) => db.items[id]?.name ?? id);
@@ -124,21 +134,21 @@ class GearScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gear & food')),
+      appBar: AppBar(title: Text(tr('Gear & food'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
-          const SectionTitle('Best food you own'),
+          SectionTitle(tr('Best food you own')),
           if (bestFood.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('No food with buffs in your bag or chests.'),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(tr('No food with buffs in your bag or chests.')),
             ),
           for (final e in bestFood.entries)
             ListTile(
               dense: true,
               title: Text(
-                e.key,
+                gt(e.key),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Wrap(
@@ -148,7 +158,7 @@ class GearScreen extends StatelessWidget {
                   for (final f in e.value)
                     ActionChip(
                       label: Text(
-                        '${f.item.name} +${f.item.stats!.value(e.key)}',
+                        '${gt(f.item.name)} +${f.item.stats!.value(e.key)}',
                       ),
                       onPressed: () => open(f.item),
                     ),
@@ -158,7 +168,7 @@ class GearScreen extends StatelessWidget {
           for (final slot in shown)
             if (bySlot[slot] case final list?) ...[
               SectionTitle(
-                '${ItemStats.slotLabels[slot] ?? slot} · ${list.length}',
+                '${slotName(ItemStats.slotLabels[slot] ?? slot)} · ${list.length}',
               ),
               for (final g in list)
                 ListTile(
@@ -169,19 +179,19 @@ class GearScreen extends StatelessWidget {
                     ring: g.where == 'Equipped' ? Palette.flame : null,
                   ),
                   title: Text(
-                    '${g.item.name}${g.o.level != null ? ' · L${g.o.level}' : ''}',
+                    '${gt(g.item.name)}${g.o.level != null ? ' · ${tr('L{n}', {'n': g.o.level})}' : ''}',
                   ),
                   subtitle: Text(
                     [
-                      g.where,
+                      _whereText(g.where),
                       ...g.item.stats!.values
                           .take(3)
-                          .map((v) => '${v.$1} ${v.$2}'),
+                          .map((v) => '${gt(v.$1)} ${gt(v.$2)}'),
                     ].join(' · '),
                     style: const TextStyle(color: Palette.ash, fontSize: 12),
                   ),
                   trailing: Text(
-                    g.item.rarity,
+                    gt(g.item.rarity),
                     style: TextStyle(
                       color: Palette.rarity(g.item.rarity),
                       fontSize: 12,

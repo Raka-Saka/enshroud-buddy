@@ -1,0 +1,3873 @@
+{
+ " (locked)": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ " (you can take it now)": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ " ({n} more levels)": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ " · can cook now": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ " · locked": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ " · rank {n}": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ " · {n} owned": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "(estimate until you glide a bit)": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "+5 min each, used on pickup.": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "+{n} Elixir Wells cleared": {
+  "files": [
+   "data/history.dart"
+  ],
+  "plural": true
+ },
+ "+{n} Shroud Roots claimed": {
+  "files": [
+   "data/history.dart"
+  ],
+  "plural": true
+ },
+ "+{n} discoveries": {
+  "files": [
+   "data/history.dart"
+  ],
+  "plural": true
+ },
+ "+{n} levels": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "+{n} recipes": {
+  "files": [
+   "data/history.dart"
+  ],
+  "plural": true
+ },
+ "+{n} skill ranks": {
+  "files": [
+   "data/history.dart"
+  ],
+  "plural": true
+ },
+ "A place, a piece of unique loot (\"{garb}\"), or a whole set (\"{set}\"): the map then shows only where it lies.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "About": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Active skill": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Add missing gear from Character, or tap + on any item. The plan then lists unlocks, stations, where to gather and what to craft.": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Add to list": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Add to plan": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Add to shopping list": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Add to the plan": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Add {prop} to your station": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Add {prop} to your {station}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Agent unreachable at {host} ({error})": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "Air bubbles": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Air bubbles on the map": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "All": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "All of:": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Altar {level} · build zone {zone}": {
+  "files": [
+   "screens/character_screen.dart",
+   "screens/home_screen.dart"
+  ]
+ },
+ "Altar {level} · {zone} build zone": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Always holds": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Always in a {chest}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Am I ready for the Shroud in {region}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Am I ready for the {place} at x {x}, y {y}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Ammo & bait": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "An unnamed condition": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Animal food": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Animals & other storage · {n}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Any item of this kind": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Any material": {
+  "files": [
+   "data/game_db.dart"
+  ]
+ },
+ "Any of {items}": {
+  "files": [
+   "data/game_db.dart"
+  ]
+ },
+ "Any of {items}…": {
+  "files": [
+   "data/game_db.dart"
+  ]
+ },
+ "Any of:": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Apr": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Archer": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Area damage": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Area level {level}: loot drops at about level {level}. Examples above fit that level. Every {chest} shares this pool and these odds; the area sets the level. Chests refill over time.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Armor & rings": {
+  "files": [
+   "screens/items_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Arrows": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Ask": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Ask a follow-up": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Ask about this": {
+  "files": [
+   "screens/item_screen.dart",
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Ask about this place": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Ask about your game": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Ask about {topic}": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Ask anything": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Ask anything about your game": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Ask out loud": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Assassin": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "At {place}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "Attribute": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Aug": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Axe": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Back to the full map": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Backpack": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Backstab": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Bag": {
+  "files": [
+   "data/build.dart",
+   "data/live_state.dart",
+   "screens/gear_screen.dart"
+  ]
+ },
+ "Bag {n}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Bag · {n}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Barbarian": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Bars: share of what the tree offers this build, now (dark) and after {n} points (bright).": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Base {base} + {per} × Flame {flame}": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Bases": {
+  "files": [
+   "screens/character_screen.dart",
+   "screens/home_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Battlemage": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Before you go": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Best food you own": {
+  "files": [
+   "screens/gear_screen.dart"
+  ]
+ },
+ "Best places for you": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Better food to get": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Better: {where}": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Bites here · share of fish": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Blueprints": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Bone piles": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Bow": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Bow at range, daggers up close": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Bow damage with staff and wand magic": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Bow damage, crits and arrows": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Bows": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Breath": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Bring {foods}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Browse items": {
+  "files": [
+   "screens/home_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Build": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/character_screen.dart"
+  ]
+ },
+ "Build stations": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Build target": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Build {station}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Building": {
+  "files": [
+   "data/projection.dart",
+   "screens/items_screen.dart"
+  ]
+ },
+ "Can contain {n} items: {kinds}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Cancel": {
+  "files": [
+   "screens/map_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Centre on my main base": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Character": {
+  "files": [
+   "main.dart",
+   "screens/character_screen.dart",
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Chest": {
+  "files": [
+   "labels.dart",
+   "screens/item_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Chest / loot": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Chests": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Chests · base not known": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Chests · {base}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Claude Code on your PC answers from your latest save, the game data and the wiki. It uses your Claude plan, and your question with what it needs from your save goes to Anthropic. Tap a name in an answer to open it, plan it or find it on the map. Or tap the mic and ask out loud: the answer is read back.": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Clear plan": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Cleared camps, claimed Shroud Roots, found lore": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Climb {n} m to high ground {distance} {direction}": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Clothes": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Codex": {
+  "files": [
+   "main.dart",
+   "screens/codex_screen.dart"
+  ]
+ },
+ "Cold": {
+  "files": [
+   "screens/map_screen.dart",
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Cold zone: frost resistance from gear or food, or a high enough Flame": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Cold: frost resistance {n} from your gear": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Collectibles": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Comfort +{n}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Connect": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Connecting…": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "Consumable": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Cosmetic": {
+  "files": [
+   "data/live_state.dart",
+   "screens/gear_screen.dart"
+  ]
+ },
+ "Cosmetic (look only)": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Could not load game data\n{error}": {
+  "files": [
+   "main.dart"
+  ]
+ },
+ "Couldn't answer: {error}": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Couldn't scan: {error}. Type the details below.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Couldn't switch: {error}": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Craft at {station}": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Craft at {station} (locked)": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Craft {n} × {item}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Craft, in this order": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Critical strikes": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Currency": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Dagger": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Daggers": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Daggers, backstabs and sneak attacks": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Damage": {
+  "files": [
+   "data/hall_check.dart",
+   "data/projection.dart"
+  ]
+ },
+ "Danger": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Dec": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Delete": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Details": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Done": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Download it, then open it to install over this one: nothing is lost.": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Download the new EnshroudBuddy.exe from the release page and open it: it replaces the old one.": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Durability {have}/{max}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Edit pin": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Eleven directions with the skills to take, scored on damage, area, survival, gathering, building and passives": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Empty": {
+  "files": [
+   "screens/farm_screen.dart"
+  ]
+ },
+ "End the route": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Equipped": {
+  "files": [
+   "data/live_state.dart",
+   "screens/character_screen.dart",
+   "screens/gear_screen.dart"
+  ]
+ },
+ "Everything I own, per slot": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Everything is in hand: craft away.": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Everything the save can check is done; the rest is runtime state.": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Exploration": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Explored": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Explorer and builder": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Extend before going in": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Falling": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Falling: open the glider": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Farm": {
+  "files": [
+   "screens/character_screen.dart",
+   "screens/farm_screen.dart"
+  ]
+ },
+ "Fast wand casting and mana": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Feb": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Feeders · {n}": {
+  "files": [
+   "screens/farm_screen.dart"
+  ]
+ },
+ "Feeders, produce to collect, seeds": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Feet": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Find a skill or stat": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Find in my gear, bag and chests": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Find {n} × {item}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Fire": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Fishing": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Fishing spots": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Flame Altars": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Flame Altars · {n} of {max}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Flame strength": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Flame strength {flame} of {max}": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Flame strength {flame} sets how many; an altar's own level sets its build zone ({zones} a side).": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Flame strength {flame} sets how many; an altar's own level sets its build zone.": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Flame strength {n} (+{up})": {
+  "files": [
+   "data/history.dart"
+  ]
+ },
+ "Follow me (live from the game)": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Food & potions": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Food · {n} slots": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "For {items}. {food}. Air bubbles are on the map (Water chip).": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "For {items}. {food}. Flame strength {n} stops freezing.": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "For {items}. {food}. Shroud Roots and Return Beacons on the map; Flame strength {n} lets you in.": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Found almost everywhere": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Free now ({n})": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Freezing stops at Flame strength": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "From the companion": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "From your gear": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "From your {n} learned skills and {planned} planned (counted 1.5×).": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "From your {n} learned skills. Plan skills in the tree to steer it.": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Frost (no freezing)": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Frost Resistance from your gear": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Frost resist": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Game data updated from your PC ({built})": {
+  "files": [
+   "main.dart"
+  ]
+ },
+ "Game save": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Gather": {
+  "files": [
+   "screens/item_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Gather and find": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Gather {n} × {item}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Gathering": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Gathering, building, travel and passive buffs": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Gear": {
+  "files": [
+   "data/hall_check.dart",
+   "screens/build_screen.dart",
+   "screens/character_screen.dart"
+  ]
+ },
+ "Gear & food": {
+  "files": [
+   "screens/gear_screen.dart"
+  ]
+ },
+ "Gear with this skill ({n})": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Gems": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Glide all the way: {cost}": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Glide {glide} ({cost}), then walk {walk}": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Glider": {
+  "files": [
+   "data/hall_check.dart",
+   "labels.dart"
+  ]
+ },
+ "Gliding": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Goals": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Grappling hook": {
+  "files": [
+   "data/hall_check.dart",
+   "labels.dart"
+  ]
+ },
+ "Greatsword": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Hammer": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Hands": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Head": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Head straight there: you come down {distance} short, then walk": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Head straight there: you just make it": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Head straight there: you make it with {n} m to spare": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Healing": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Health": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Here now": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Here: {chests}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Hide completed places": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Hollow take more from {weak} and resist {strong}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Hollow take more from {weak}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Home": {
+  "files": [
+   "main.dart"
+  ]
+ },
+ "Hourglass capsules · {n} on the map": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "How do I make {item}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "How to get it": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Ice": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "In a chest": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "In a chest right here.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "In one of {n} chests around here.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "In one of {n} chests around there": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "In one of {n} chests in an area": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "In the Shroud": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "In your bag": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "In {base}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "In {n} places": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Inside: {contents}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Install Enshroud Buddy on your PC and start it, then open Setup and scan the code it shows. Your character appears within seconds.": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Instruments": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Inventory": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Is {item} good for my build?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Is {skill} worth it for my build?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Item page": {
+  "files": [
+   "screens/map_screen.dart",
+   "screens/plans_screen.dart",
+   "screens/sets_screen.dart"
+  ]
+ },
+ "Items": {
+  "files": [
+   "screens/codex_screen.dart",
+   "screens/home_screen.dart"
+  ]
+ },
+ "Its enemies are level {level}. Connect the PC agent to check your gear.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Jan": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Journal pages and loot these chests always hold. Connect the PC agent to see what you have.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Journal pages you haven't read, and loot these chests always hold that isn't in your gear, bag or chests. Missing ones glow on the map.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Journey": {
+  "files": [
+   "screens/home_screen.dart",
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Jul": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Jun": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Keep my direction": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Kindling the Flame…": {
+  "files": [
+   "main.dart"
+  ]
+ },
+ "Knight": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Language": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Layers": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Learned": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Learned: rank {rank} of {max}": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Legs": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Level": {
+  "files": [
+   "data/hall_check.dart",
+   "screens/home_screen.dart"
+  ]
+ },
+ "Level since {day}": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Level with you": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Level {from}–{to}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Level {level} · {spent} of {total} points spent · {free} free": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Level {n}": {
+  "files": [
+   "screens/character_screen.dart",
+   "screens/item_screen.dart",
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Level {n} (+{up})": {
+  "files": [
+   "data/history.dart"
+  ]
+ },
+ "Licenses and credits": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Live position": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "Live · saved {ago}": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "Locked": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Locked. Its unlock condition is not in the game data.": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Loot and lore": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Loot chest": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Loot level scales with you here. Chests refill over time.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Lore": {
+  "files": [
+   "data/tracker.dart",
+   "screens/codex_screen.dart",
+   "screens/lore_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Lore note": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Lore pages found": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Lore: {title}": {
+  "files": [
+   "data/tracker.dart"
+  ]
+ },
+ "L{from}–{to}": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "L{n}": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/gear_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Mace": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Mage": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Magic": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Mana": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Mana & stamina": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Map": {
+  "files": [
+   "main.dart",
+   "screens/item_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Mar": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Materials": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "May": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Melee": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Melee and wand together": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Melee weapon": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Merciless attacks": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Milestones": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Mine": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Missing gear": {
+  "files": [
+   "screens/home_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "More of what your build already does": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "My build": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "My gear by slot": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "My pins · {n}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Navigate": {
+  "files": [
+   "screens/ask_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Needed for {items}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Needs": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Neutral": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "New base: {base}": {
+  "files": [
+   "data/history.dart"
+  ]
+ },
+ "New conversation": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "New pin": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "New route": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Next up": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "No Enshrouded saves on that PC yet: play once, then come back.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "No buff food in your bag or chests, and none you can cook from stock.": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "No data from the PC agent": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "No drop to glide from here": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "No drop to glide from here: {n} m higher would do it": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "No food for it in your bag or chests": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "No food with buffs in your bag or chests.": {
+  "files": [
+   "screens/gear_screen.dart"
+  ]
+ },
+ "No live data from the PC agent yet.": {
+  "files": [
+   "screens/farm_screen.dart",
+   "screens/gear_screen.dart",
+   "screens/projections_screen.dart",
+   "screens/survival_screen.dart"
+  ]
+ },
+ "No live data from the PC agent: counting as if you own nothing.": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "No live data yet": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/character_screen.dart"
+  ]
+ },
+ "No mapped spot: mined from terrain, or from vendors or quests": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "No potions or bandages in the bag.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "No recipe: gather it": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "No snapped pieces here": {
+  "files": [
+   "screens/base_view_screen.dart"
+  ]
+ },
+ "No speech recognition": {
+  "files": [
+   "data/voice.dart"
+  ]
+ },
+ "None owned; {food} gives {value}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Not found yet: not in your gear, bag or chests.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Not reachable yet: {items}.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Note": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Nothing by that name on the map. Loot that only drops at random from a kind of chest has no place: its item page says which chests.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Nothing found in the Shroud": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Nothing left to gain for this direction.": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Nothing on the shopping list to fetch.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Nothing planned": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Nothing planned yet": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Nothing waiting in your animals.": {
+  "files": [
+   "screens/farm_screen.dart"
+  ]
+ },
+ "Nothing you carry deals {damage}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Nov": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Numbers from the game files; which number goes where is a best guess.": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Oct": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Offline · saved {ago}": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "On foot": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "On the PC: right-click the Enshroud Buddy icon in the tray, Pair a phone. Or type the details:": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "One fewer": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "One more": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "One-handed": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "One-handed weapon and shield, hard to kill": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Open": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Open in Codex": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Open in skill tree": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Other": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Other storage": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "Overlays": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Oxygen {time}": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Oxygen {time} × {factor}": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "PC agent": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Paired with your PC": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Pairing code, also in the tray menu: keeps other devices out": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Parry": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Part of a set": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Passive buffs": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Passive skill": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Perks": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Phone language": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Phone language ({lang})": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Pick something to make or find; the plan works out unlocks, stations, gathering and crafting.": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Pin \"{title}\" deleted": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Place": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Places": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Places · {shown} of {all}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Places, items in chests, sets": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Plan": {
+  "files": [
+   "main.dart",
+   "screens/build_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Plan it": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Plan set. The skill tree and Build screen now follow it.": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Plan this skill": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Plan {item}": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Plan: {nodes} nodes, {points} points": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Playing in a friend's world? The world is saved on the host's PC, so only your character is on yours: pick a world you host to see bases and chests.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Points per area": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Prepare": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Produce to collect · {n}": {
+  "files": [
+   "screens/farm_screen.dart"
+  ]
+ },
+ "Progress": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Quests": {
+  "files": [
+   "screens/codex_screen.dart",
+   "screens/lore_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Quests completed": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Random loot in: {chests}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Random loot · rarity odds": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Random loot: {kinds}": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Ranged": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Ranger": {
+  "files": [
+   "data/projection.dart",
+   "labels.dart"
+  ]
+ },
+ "Read aloud": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Read from your save; check it matches the game.": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Read this save": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Reading this save": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Reading {character} in {world}; it shows in a few seconds": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Recipe": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Recipes ({n})": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Recipes unlocked": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Refill inside the Shroud": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Refresh": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Remove from plan": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Reset the view": {
+  "files": [
+   "screens/base_view_screen.dart"
+  ]
+ },
+ "Resource": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Retry": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Return Beacons · {n} on the map": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Rewards": {
+  "files": [
+   "screens/lore_screen.dart"
+  ]
+ },
+ "Right here": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Ring": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Roots and Wells": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Route": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Route done.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Runes: {runes} · Legendary Runes: {legendary} (from the 4th upgrade)": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Save": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Scan the PC's code": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Search gear with {effect}": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Search items": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Search places and loot": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Search {n} items, skills, stats": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Search {n} lore texts": {
+  "files": [
+   "screens/lore_screen.dart"
+  ]
+ },
+ "Search {n} quests texts": {
+  "files": [
+   "screens/lore_screen.dart"
+  ]
+ },
+ "Search {n} {what} texts": {
+  "files": [
+   "screens/lore_screen.dart"
+  ]
+ },
+ "See inside": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "See it in 3D": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Seeds you own · {n}": {
+  "files": [
+   "screens/farm_screen.dart"
+  ]
+ },
+ "Send": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Sending…": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Sep": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Set pieces collected": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Sets": {
+  "files": [
+   "screens/codex_screen.dart"
+  ]
+ },
+ "Sets · {n}": {
+  "files": [
+   "screens/sets_screen.dart"
+  ]
+ },
+ "Setup": {
+  "files": [
+   "screens/home_screen.dart",
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Setup: PC agent and game save": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Shield": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Shock": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Shopping": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Show on map": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Show on the map": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Show where to get everything on the map": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Shown in the agent's tray menu on the PC: \"Phone address\"": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Shroud": {
+  "files": [
+   "data/hall_check.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Shroud level {level} (estimated): above your passage level {passage}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Shroud level {level} (estimated): you can enter (passage level {passage})": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Shroud time": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Shroud {n}: above your Flame": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "Shroud {n}: timer runs": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "Shroud {shroud} · breath {breath}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Shroud: about {time} per trip": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Since {day}: +{levels} levels, +{recipes} recipes, +{roots} Shroud Roots": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Skill or stat": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Skill plan": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Skill plan · {n} points": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Skill points": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Skill tree": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/home_screen.dart",
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "Skills learned": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Skills the gear gives or strengthens": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Skillshots": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Slot {slot} · saved {time}": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Sneak attacks": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Spell": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Spellbow": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Stacks to {n}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Staff": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Staff / wand": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Staff blasts, auras and heals": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Staff caster and healer": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Stamina": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Stand near one to refill your Time in the Shroud.": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Started {day} at level {level}. Earlier play isn't in the game's backups.": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Station not built yet": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Stations built · {n}": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Stats": {
+  "files": [
+   "screens/item_screen.dart",
+   "screens/items_screen.dart"
+  ]
+ },
+ "Staves": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Steps · {n}": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Still missing": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Stock counts your bag and every chest in every base. Splitting it by base needs chest positions (the two-chest test).": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Stop guiding": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Stop reading": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Stop {at} of {all}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Suggested builds": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Suggestions": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Survivability": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Survival": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Survival: Shroud, cold, water": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Sword": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Take from storage": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Take {n} × {item}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Tap a node in the skill tree to plan the path to it, or adopt a suggested build.": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Tasks · {n} to do": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "That isn't the agent's code: on the PC, right-click the tray icon, Pair a phone.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "The PC agent records a snapshot at every game save (and reads the game's own backups once), so this fills in as you play.": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "The PC didn't answer. Is the phone on the same Wi-Fi as the PC? On the PC, allow Enshroud Buddy on private networks if Windows asked.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "The agent didn't answer, or it is older than this app. Check the address above.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "The game data has no unlock condition for this recipe: usually an artisan or a quest.": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "The save can't tell whether this is done": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "The save has something the reader doesn't know yet, so some of it may be missing:\n{warnings}": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "The station is here": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Thinking…": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "This base is built from free blocks (or not at all). Only snapped pieces such as walls, floors and roofs are drawn so far.": {
+  "files": [
+   "screens/base_view_screen.dart"
+  ]
+ },
+ "Time in the Shroud": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Tip: tap the map for the Shroud level or cold there; long-press to drop a pin.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Title": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "To do": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "To find": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "To find · all {n} found": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "To find · {left} of {all} missing": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "To find: {item}": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "To unlock": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Tool": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Tools": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "Traps": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Two-handed": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Two-handed axe": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Two-handed weapons, big hits and sweeps": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Underwater: {time} of breath": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Undo": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Unique loot": {
+  "files": [
+   "data/tracker.dart",
+   "screens/item_screen.dart",
+   "screens/map_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Unique loot only": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Unique loot: {n} spots on the map": {
+  "files": [
+   "data/build.dart"
+  ],
+  "plural": true
+ },
+ "Unknown station": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Unlock recipes": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Unlock {item}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "Unlocked": {
+  "files": [
+   "screens/item_screen.dart",
+   "screens/items_screen.dart"
+  ]
+ },
+ "Unnamed base ({n})": {
+  "files": [
+   "data/history.dart",
+   "data/live_state.dart"
+  ]
+ },
+ "Unofficial fan project. Not affiliated with or endorsed by Keen Games.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Unofficial fan project. Not affiliated with or endorsed by Keen Games. Enshrouded and its content are the property of Keen Games GmbH. App code: MIT license.": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "Update": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Update the PC program too": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Updrafts": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Use as my skill plan": {
+  "files": [
+   "screens/projections_screen.dart"
+  ]
+ },
+ "Used to make ({n})": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Utility": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Version {version} is out": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Waiting for the PC agent": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Waiting for your position from the game": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Walk {distance} {direction} to the drop": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Wand": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Wand mage": {
+  "files": [
+   "data/projection.dart"
+  ]
+ },
+ "Wands": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Warrior": {
+  "files": [
+   "labels.dart"
+  ]
+ },
+ "Water": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Weapons": {
+  "files": [
+   "screens/items_screen.dart",
+   "screens/map_screen.dart"
+  ]
+ },
+ "Wearing {item}": {
+  "files": [
+   "data/history.dart"
+  ]
+ },
+ "What can I craft with what I have?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "What does {skill} do at each rank?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "What is at the {place} at x {x}, y {y}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "What is the best food for my build?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "What is {item} good for?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "What should I bring to the {place} at x {x}, y {y}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "What should I do next?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Where do I find {item}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Where to find it": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "Which skills go well with {skill}?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "Which skills should I take next?": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "With your best flask or food ({item})": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "World": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "World setting ×{factor}": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Worn": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "Worn armour and weapons are level {lo} to {hi}, all at or above {level}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "You are level {you}; its enemies are level {level}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "You can stay": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "You carry {items}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "You have it (in gear, bag, a chest, or its recipe).": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "You have none": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "You have none on.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "You have none.": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "You have one on.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "You have {n}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "You have {n}: {where}": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "You're there": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "Your Shroud Passage Level · up to {n} Flame Altars": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "Your bag and chests appear after the PC agent reads a save.": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "Your build": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "Your build appears after the PC agent reads a save.": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "Your journey starts here": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "Your time in the Shroud: {time}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "Zone: {zone}": {
+  "files": [
+   "data/where.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Zones above your Shroud Passage Level are shown in red on the map (Shroud layer).": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "agent not ready": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "all found": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "area level {level}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "area level {n}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "area level {n} (+{gap})": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "at the {artisan} (artisan)": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "at {station}": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "at {station} ({bases})": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "at {x}, {y}": {
+  "files": [
+   "data/voice.dart"
+  ]
+ },
+ "base not known": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "bear left": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "bear right": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "behind you": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "blunt": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "can learn next": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "cold (your Flame stops freezing)": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "cold: frost resistance": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "completed": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "craft {n}× at {station}": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "cutting": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "done": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "drops at level {n}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "east": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "fire": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "fishing spot · {share}% of fish": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "found": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "free skill points": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "gather {n}": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "have {n}": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "have {n}, ": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "ice": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "in the Shroud": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "in {n} animals": {
+  "files": [
+   "screens/farm_screen.dart"
+  ],
+  "plural": true
+ },
+ "in {n} chests": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "inside the Hollow Halls, {height} m up": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "interrupted": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "just now": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "learned": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "level with it": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "level with you": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "level {from}–{to}": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "level {n}": {
+  "files": [
+   "screens/items_screen.dart"
+  ]
+ },
+ "levels": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "locked": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "makes {n}": {
+  "files": [
+   "screens/item_screen.dart"
+  ]
+ },
+ "missing": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "never": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "no answer": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "north": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "north-east": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "north-west": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "not learned": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "nothing here": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "open": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "piercing": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "planned": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "poison": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "random container": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "rank {rank} of {max}": {
+  "files": [
+   "screens/ask_screen.dart"
+  ]
+ },
+ "recipes": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "resist {strong}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "shock": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "shroud": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "somewhere in {zone}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "south": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "south-east": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "south-west": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "straight ahead": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "the PC stopped answering": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "the pairing code is missing or wrong: Setup, then scan the agent's code": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "the phone's clock is off from the PC's; trying again": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "the reply didn't come from your agent": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "the reply didn't come from your agent (or it is older than this app)": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "turn left": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "turn right": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "underwater: oxygen": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "upgraded {done}/{all}": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "veins in the Shroud": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "west": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "with {weapons}": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "{a} and {b}": {
+  "files": [
+   "data/tracker.dart"
+  ]
+ },
+ "{base} · altar {level}": {
+  "files": [
+   "screens/home_screen.dart"
+  ]
+ },
+ "{base}: altar {n} ({zone} zone)": {
+  "files": [
+   "data/history.dart"
+  ]
+ },
+ "{category} · {n} pieces on the map": {
+  "files": [
+   "screens/map_screen.dart"
+  ],
+  "plural": true
+ },
+ "{container} #{n}": {
+  "files": [
+   "data/live_state.dart"
+  ]
+ },
+ "{day} {month}": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "{day} · {time} · level {level}": {
+  "files": [
+   "screens/journey_screen.dart"
+  ]
+ },
+ "{distance} from you": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{distance} from {base}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{distance} {direction} of you": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "{distance} {direction} of {place}": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{first} and {last}": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "{fish} · {time} only": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{food} ({value}, {n} owned)": {
+  "files": [
+   "data/tasks.dart"
+  ]
+ },
+ "{from} to {to} m": {
+  "files": [
+   "screens/character_screen.dart"
+  ]
+ },
+ "{go}, then glide {glide} · about {saved} quicker": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{had} of {all}": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{hall}, level {level}. The game keeps every hall's inside in one far corner of the world; the map shows this one there with its chests, notes and save points. Inside, it follows you: your floor bright, the others faint.": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{items} +{n}": {
+  "files": [
+   "data/tracker.dart"
+  ]
+ },
+ "{items} deal {damage}, which they resist.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{item} (worn)": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "{item} added to the plan": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "{item} ×{n} added to the shopping list": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "{item} ×{n} · running low": {
+  "files": [
+   "screens/farm_screen.dart"
+  ]
+ },
+ "{kind} {slot}": {
+  "files": [
+   "screens/setup_screen.dart"
+  ]
+ },
+ "{levels} levels · {found} found": {
+  "files": [
+   "screens/build_screen.dart"
+  ]
+ },
+ "{low} of {n} pieces under level {level}: {items}.": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "{m} m down": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{m} m up": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{m} min": {
+  "files": [
+   "data/survival.dart"
+  ]
+ },
+ "{m} min {s} s": {
+  "files": [
+   "data/survival.dart"
+  ]
+ },
+ "{n} Fell": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} Fell inside, the Shroud's creatures.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} Hollow": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} Hollow ({elite} elite)": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} batches": {
+  "files": [
+   "data/tasks.dart"
+  ],
+  "plural": true
+ },
+ "{n} beasts": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} bone piles": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} d ago": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "{n} feeders look empty": {
+  "files": [
+   "screens/farm_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} fire": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "{n} grapple points.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} h ago": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "{n} items added to the plan, with where to get them": {
+  "files": [
+   "screens/build_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} km": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{n} m": {
+  "files": [
+   "data/game_db.dart",
+   "data/live_state.dart",
+   "data/where.dart"
+  ]
+ },
+ "{n} m above it": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{n} m above the ground": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{n} m above you": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{n} m below it": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{n} m below you": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{n} m higher would do it": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{n} m more height (an updraft) would do it": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{n} m under the surface": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{n} m up": {
+  "files": [
+   "data/guide.dart",
+   "data/where.dart"
+  ]
+ },
+ "{n} min": {
+  "files": [
+   "data/guide.dart",
+   "screens/item_screen.dart"
+  ]
+ },
+ "{n} min ago": {
+  "files": [
+   "screens/widgets.dart"
+  ]
+ },
+ "{n} pages": {
+  "files": [
+   "screens/lore_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} pieces · altar {altar} · {zone} build zone · drag to turn, pinch to zoom": {
+  "files": [
+   "screens/base_view_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} piles raise more Hollow until broken: break them first.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} places": {
+  "files": [
+   "screens/map_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} point": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "{n} point per rank": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ]
+ },
+ "{n} points": {
+  "files": [
+   "screens/skill_tree_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} points per rank": {
+  "files": [
+   "screens/ask_screen.dart",
+   "screens/skill_tree_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} points to spend. Each path starts from your learned skills and follows the tree's links.": {
+  "files": [
+   "screens/projections_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} pt": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/projections_screen.dart"
+  ]
+ },
+ "{n} pts": {
+  "files": [
+   "screens/build_screen.dart",
+   "screens/projections_screen.dart"
+  ]
+ },
+ "{n} random containers": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{n} rune barriers": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} s": {
+  "files": [
+   "data/guide.dart",
+   "screens/item_screen.dart"
+  ]
+ },
+ "{n} sets": {
+  "files": [
+   "screens/sets_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} shock": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ },
+ "{n} spots": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{n} stacks": {
+  "files": [
+   "screens/character_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} stops, {distance} as the crow flies.": {
+  "files": [
+   "screens/map_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} tasks": {
+  "files": [
+   "screens/home_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} to find": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{n} traps": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} traps, {kinds}.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} traps.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} updrafts and glider barriers.": {
+  "files": [
+   "data/hall_check.dart"
+  ],
+  "plural": true
+ },
+ "{n} upgrades left (L{level})": {
+  "files": [
+   "screens/build_screen.dart"
+  ],
+  "plural": true
+ },
+ "{n} upgrades to find": {
+  "files": [
+   "screens/build_screen.dart"
+  ],
+  "plural": true
+ },
+ "{percent}% a wet boot": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{percent}% of casts land treasure or trash (your bait decides which)": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{rarity} {odds}%": {
+  "files": [
+   "data/where.dart"
+  ]
+ },
+ "{region} Hollow Halls": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "{sets} sets in {groups} groups": {
+  "files": [
+   "screens/sets_screen.dart"
+  ]
+ },
+ "{set} · {n} items": {
+  "files": [
+   "screens/sets_screen.dart"
+  ],
+  "plural": true
+ },
+ "{skill} · learned": {
+  "files": [
+   "screens/survival_screen.dart"
+  ]
+ },
+ "{stat} +{value}": {
+  "files": [
+   "data/build.dart"
+  ]
+ },
+ "{s} s": {
+  "files": [
+   "data/survival.dart"
+  ]
+ },
+ "{s} s, about {stamina} stamina": {
+  "files": [
+   "data/guide.dart"
+  ]
+ },
+ "{what} {have}{off} (wiki: {sources})": {
+  "files": [
+   "data/hall_check.dart"
+  ]
+ }
+}

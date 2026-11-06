@@ -1,13 +1,15 @@
 name: ensh_companion
 description: "Enshrouded companion: offline game data, save reader, planner."
 publish_to: 'none'
-version: 0.37.0+51
+version: 0.38.0+52
 
 environment:
   sdk: ^3.7.0
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   crypto: ^3.0.7
   flutter_map: ^8.3.2
@@ -24,6 +26,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/game.json
+    - assets/i18n/ui/
+    - assets/i18n/game/
     - assets/map/
     - assets/shroud_levels.png
     - assets/cold.png

@@ -74,6 +74,9 @@ lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces 
 
 ## Good to know
 
+- **Languages:** the app and the PC program speak the 15 languages Enshrouded ships, following your phone (Setup →
+  Language picks another). Game names, lore and quests are Keen's own translations from the game; menus and
+  explanations are ours, so corrections from native speakers are welcome.
 - **Only your phone gets in.** The agent answers only devices on your home network whose requests are signed
   with its pairing code. The code itself never crosses the network, so others on your Wi-Fi can't pick it up,
   and web pages open in a browser get nothing. The code is made once per PC and kept in `config.json` (in

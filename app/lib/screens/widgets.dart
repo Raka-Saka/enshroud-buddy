@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/live_state.dart';
+import '../l10n.dart';
 import '../theme.dart';
 
 class SectionTitle extends StatelessWidget {
@@ -295,15 +296,15 @@ class LiveBadge extends StatelessWidget {
   final Live live;
 
   static String ago(DateTime? t) {
-    if (t == null) return 'never';
+    if (t == null) return tr('never');
     final d = DateTime.now().difference(t);
     return d.inMinutes < 1
-        ? 'just now'
+        ? tr('just now')
         : d.inHours < 1
-        ? '${d.inMinutes} min ago'
+        ? tr('{n} min ago', {'n': d.inMinutes})
         : d.inDays < 1
-        ? '${d.inHours} h ago'
-        : '${d.inDays} d ago';
+        ? tr('{n} h ago', {'n': d.inHours})
+        : tr('{n} d ago', {'n': d.inDays});
   }
 
   @override
@@ -314,8 +315,12 @@ class LiveBadge extends StatelessWidget {
         ok ? Palette.spring : (s == null ? Palette.ash : Palette.amber);
     final text =
         s == null
-            ? (live.loading ? 'Connecting…' : 'No data from the PC agent')
-            : '${ok ? 'Live' : 'Offline'} · saved ${ago(s.savedAt)}';
+            ? (live.loading
+                ? tr('Connecting…')
+                : tr('No data from the PC agent'))
+            : ok
+            ? tr('Live · saved {ago}', {'ago': ago(s.savedAt)})
+            : tr('Offline · saved {ago}', {'ago': ago(s.savedAt)});
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

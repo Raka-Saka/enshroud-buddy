@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../data/game_db.dart';
 import '../data/live_state.dart';
+import '../l10n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
@@ -55,6 +56,12 @@ class _BaseViewScreenState extends State<BaseViewScreen> {
     final db = widget.db;
     final b = widget.base;
     String name(String id) => db.items[id]?.name ?? id;
+    // for display: the translated name, or the English one without " Block"
+    String shownMat(String id) {
+      final en = name(id), t = gt(en);
+      return t == en ? en.replaceAll(' Block', '') : t;
+    }
+
     final byMat = <String, int>{};
     final byShape = <String, int>{};
     for (final p in b.pieces) {
@@ -75,7 +82,7 @@ class _BaseViewScreenState extends State<BaseViewScreen> {
         title: Text(b.label),
         actions: [
           IconButton(
-            tooltip: 'Reset the view',
+            tooltip: tr('Reset the view'),
             icon: const Icon(Icons.center_focus_strong),
             onPressed:
                 () => setState(() {
@@ -88,12 +95,13 @@ class _BaseViewScreenState extends State<BaseViewScreen> {
       ),
       body:
           b.pieces.isEmpty
-              ? const Center(
+              ? Center(
                 child: EmptyState(
                   icon: Icons.view_in_ar,
-                  title: 'No snapped pieces here',
-                  message:
-                      'This base is built from free blocks (or not at all). Only snapped pieces such as walls, floors and roofs are drawn so far.',
+                  title: tr('No snapped pieces here'),
+                  message: tr(
+                    'This base is built from free blocks (or not at all). Only snapped pieces such as walls, floors and roofs are drawn so far.',
+                  ),
                 ),
               )
               : Column(
@@ -138,7 +146,12 @@ class _BaseViewScreenState extends State<BaseViewScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${b.pieces.length} pieces · altar ${b.altarLevel} · ${b.zone} build zone · drag to turn, pinch to zoom',
+                          trn(
+                            b.pieces.length,
+                            '{n} pieces · altar {altar} · {zone} build zone · drag to turn, pinch to zoom',
+                            '{n} pieces · altar {altar} · {zone} build zone · drag to turn, pinch to zoom',
+                            {'altar': b.altarLevel, 'zone': b.zone},
+                          ),
                           style: const TextStyle(
                             color: Palette.ash,
                             fontSize: 12,
@@ -159,7 +172,7 @@ class _BaseViewScreenState extends State<BaseViewScreen> {
                                       radius: 7,
                                     ),
                                     label: Text(
-                                      '${name(e.key).replaceAll(' Block', '')} · ${e.value}',
+                                      '${shownMat(e.key)} · ${e.value}',
                                     ),
                                     selected: !hidden.contains(e.key),
                                     onSelected: (on) {
@@ -180,7 +193,7 @@ class _BaseViewScreenState extends State<BaseViewScreen> {
                         Text(
                           shapes
                               .take(6)
-                              .map((e) => '${e.value} ${name(e.key)}')
+                              .map((e) => '${e.value} ${gt(name(e.key))}')
                               .join(' · '),
                           style: const TextStyle(
                             color: Palette.ash,

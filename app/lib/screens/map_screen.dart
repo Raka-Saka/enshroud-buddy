@@ -23,6 +23,7 @@ import '../data/route.dart';
 import '../data/shroud.dart';
 import '../data/where.dart';
 import 'plans_screen.dart';
+import '../l10n.dart';
 import '../nav.dart';
 import '../theme.dart';
 import 'ask_screen.dart';
@@ -55,6 +56,28 @@ IconData pinIcon(String kind) => switch (kind) {
   'danger' => Icons.warning_amber_rounded,
   'todo' => Icons.flag_outlined,
   _ => Icons.push_pin_outlined,
+};
+
+/// A pin kind's name on screen (Pin.kinds keeps the English one, which a pin stores as its default title).
+String _pinKindLabel(String key, String en) => switch (key) {
+  'note' => tr('Note'),
+  'resource' => tr('Resource'),
+  'chest' => tr('Chest / loot'),
+  'danger' => tr('Danger'),
+  'todo' => tr('To do'),
+  _ => en,
+};
+
+/// A place kind's name on screen: the game's, or "Other" for places without one.
+String _kindLabel(String k) => k == 'Other' ? tr('Other') : gt(k);
+
+/// A loot group's name on screen (GameDb.lootGroups keeps the English one).
+String _lootGroupLabel(String g) => switch (g) {
+  'Clothes' => tr('Clothes'),
+  'Weapons' => tr('Weapons'),
+  'Armor & rings' => tr('Armor & rings'),
+  'Other' => tr('Other'),
+  _ => g,
 };
 
 /// Icon and colour for a map point.
@@ -195,8 +218,12 @@ class _MapScreenState extends State<MapScreen> {
   ];
 
   /// "Springlands Hollow Halls": the region its entrance stands in.
-  String hallName(Hall h) =>
-      '${h.region ?? widget.db.regionAt(h.x, h.y) ?? ''} Hollow Halls'.trim();
+  String hallName(Hall h) {
+    final region = h.region ?? widget.db.regionAt(h.x, h.y);
+    return region == null || region.isEmpty
+        ? gt('Hollow Halls')
+        : tr('{region} Hollow Halls', {'region': gt(region)});
+  }
 
   /// Floor plans per hall and floor (4 m steps; "all" for the whole hall), built once in the background.
   final _plans = <String, HallPlan>{};
@@ -277,11 +304,18 @@ class _MapScreenState extends State<MapScreen> {
       routeAt = 0;
     });
     final msg = [
-      if (r.stops.isEmpty) 'Nothing on the shopping list to fetch.',
+      if (r.stops.isEmpty) tr('Nothing on the shopping list to fetch.'),
       if (r.stops.isNotEmpty)
-        '${r.stops.length} stops, ${distanceText(r.lengthFrom(from.$1, from.$2))} as the crow flies.',
+        trn(
+          r.stops.length,
+          '{n} stop, {distance} as the crow flies.',
+          '{n} stops, {distance} as the crow flies.',
+          {'distance': distanceText(r.lengthFrom(from.$1, from.$2))},
+        ),
       if (r.skipped.isNotEmpty)
-        'Not reachable yet: ${r.skipped.map(widget.db.nameOf).join(', ')}.',
+        tr('Not reachable yet: {items}.', {
+          'items': r.skipped.map((id) => widget.db.shownName(id)).join(', '),
+        }),
     ].join(' ');
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -297,7 +331,7 @@ class _MapScreenState extends State<MapScreen> {
       navTarget.value = null;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('Route done.')));
+        ..showSnackBar(SnackBar(content: Text(tr('Route done.'))));
       return;
     }
     final stop = r.stops[routeAt];
@@ -420,7 +454,9 @@ class _MapScreenState extends State<MapScreen> {
       _say(
         at,
         (terrain?.cold.isCold(x, y) ?? false)
-            ? 'Cold zone: frost resistance from gear or food, or a high enough Flame'
+            ? tr(
+              'Cold zone: frost resistance from gear or food, or a high enough Flame',
+            )
             : null,
       );
       return;
@@ -428,8 +464,14 @@ class _MapScreenState extends State<MapScreen> {
     _say(
       at,
       lv > passage
-          ? 'Shroud level $lv (estimated): above your passage level $passage'
-          : 'Shroud level $lv (estimated): you can enter (passage level $passage)',
+          ? tr(
+            'Shroud level {level} (estimated): above your passage level {passage}',
+            {'level': lv, 'passage': passage},
+          )
+          : tr(
+            'Shroud level {level} (estimated): you can enter (passage level {passage})',
+            {'level': lv, 'passage': passage},
+          ),
     );
   }
 
@@ -602,20 +644,20 @@ class _MapScreenState extends State<MapScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          pin == null ? 'New pin' : 'Edit pin',
+                          pin == null ? tr('New pin') : tr('Edit pin'),
                           style: Theme.of(ctx).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: title,
                           autofocus: pin == null,
-                          decoration: const InputDecoration(hintText: 'Title'),
+                          decoration: InputDecoration(hintText: tr('Title')),
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: note,
                           maxLines: 3,
-                          decoration: const InputDecoration(hintText: 'Note'),
+                          decoration: InputDecoration(hintText: tr('Note')),
                         ),
                         const SizedBox(height: 8),
                         Wrap(
@@ -624,7 +666,7 @@ class _MapScreenState extends State<MapScreen> {
                             for (final e in Pin.kinds.entries)
                               ChoiceChip(
                                 avatar: Icon(pinIcon(e.key), size: 16),
-                                label: Text(e.value),
+                                label: Text(_pinKindLabel(e.key, e.value)),
                                 selected: kind == e.key,
                                 onSelected: (_) => setSheet(() => kind = e.key),
                               ),
@@ -635,7 +677,7 @@ class _MapScreenState extends State<MapScreen> {
                           children: [
                             if (pin != null)
                               IconButton(
-                                tooltip: 'Delete',
+                                tooltip: tr('Delete'),
                                 icon: const Icon(
                                   Icons.delete_outline,
                                   color: Palette.ember,
@@ -644,7 +686,7 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                             if (pin != null)
                               IconButton(
-                                tooltip: 'Navigate',
+                                tooltip: tr('Navigate'),
                                 icon: const Icon(
                                   Icons.near_me,
                                   color: Palette.flame,
@@ -654,11 +696,11 @@ class _MapScreenState extends State<MapScreen> {
                             const Spacer(),
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancel'),
+                              child: Text(tr('Cancel')),
                             ),
                             FilledButton(
                               onPressed: () => Navigator.pop(ctx, 'save'),
-                              child: const Text('Save'),
+                              child: Text(tr('Save')),
                             ),
                           ],
                         ),
@@ -675,9 +717,9 @@ class _MapScreenState extends State<MapScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text('Pin "${pin.title}" deleted'),
+            content: Text(tr('Pin "{title}" deleted', {'title': pin.title})),
             action: SnackBarAction(
-              label: 'Undo',
+              label: tr('Undo'),
               onPressed: () => widget.pins.add(pin),
             ),
           ),
@@ -742,7 +784,7 @@ class _MapScreenState extends State<MapScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            p.title,
+                            gt(p.title),
                             style: Theme.of(ctx).textTheme.titleLarge,
                           ),
                         ),
@@ -752,14 +794,16 @@ class _MapScreenState extends State<MapScreen> {
                     Text(
                       [
                         switch (p.cat) {
-                          'lore' => 'Lore note',
-                          'chest' => 'Loot chest',
-                          'special' => 'Unique loot',
-                          _ => p.kind ?? '',
+                          'lore' => tr('Lore note'),
+                          'chest' => tr('Loot chest'),
+                          'special' => tr('Unique loot'),
+                          _ => gtn(p.kind) ?? '',
                         },
                         if (p.inside && p.height != null)
-                          'inside the Hollow Halls, ${p.height!.round()} m up',
-                        if (done) p.cat == 'lore' ? 'found' : 'completed',
+                          tr('inside the Hollow Halls, {height} m up', {
+                            'height': p.height!.round(),
+                          }),
+                        if (done) p.cat == 'lore' ? tr('found') : tr('completed'),
                       ].join(' · '),
                       style: TextStyle(
                         color: done ? Palette.spring : Palette.ash,
@@ -777,7 +821,7 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         TextButton.icon(
                           icon: const Icon(Icons.near_me, size: 18),
-                          label: const Text('Navigate'),
+                          label: Text(tr('Navigate')),
                           onPressed: () {
                             Navigator.pop(ctx);
                             navigateTo(NavTarget.poi(p));
@@ -785,7 +829,7 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                         TextButton.icon(
                           icon: const Icon(Icons.auto_awesome, size: 18),
-                          label: const Text('Ask about this place'),
+                          label: Text(tr('Ask about this place')),
                           onPressed: () {
                             Navigator.pop(ctx);
                             askAbout(context, db, p.title, placePrompts(p));
@@ -797,7 +841,7 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(height: 8),
                       ActionChip(
                         avatar: const Icon(Icons.shopping_basket, size: 16),
-                        label: const Text('Item page'),
+                        label: Text(tr('Item page')),
                         onPressed: () => openItem(p.itemId!),
                       ),
                     ],
@@ -805,8 +849,10 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(height: 10),
                       Text(
                         p.candidates > 1
-                            ? 'In one of ${p.candidates} chests around here.'
-                            : 'In a chest right here.',
+                            ? tr('In one of {n} chests around here.', {
+                              'n': p.candidates,
+                            })
+                            : tr('In a chest right here.'),
                       ),
                       const SizedBox(height: 8),
                       ActionChip(
@@ -815,14 +861,14 @@ class _MapScreenState extends State<MapScreen> {
                           size: 16,
                           color: Palette.gold,
                         ),
-                        label: Text(p.title),
+                        label: Text(gt(p.title)),
                         onPressed: () => openItem(p.itemId!),
                       ),
                     ],
                     if (p.fixed.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      const Text(
-                        'Always holds',
+                      Text(
+                        tr('Always holds'),
                         style: TextStyle(
                           color: Palette.gold,
                           fontWeight: FontWeight.w700,
@@ -850,7 +896,7 @@ class _MapScreenState extends State<MapScreen> {
                                   color: Palette.gold,
                                 ),
                               },
-                              label: Text(db.nameOf(id)),
+                              label: Text(db.shownName(id)),
                               onPressed: () => openItem(id),
                             ),
                         ],
@@ -861,8 +907,12 @@ class _MapScreenState extends State<MapScreen> {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             had
-                                ? 'You have it (in gear, bag, a chest, or its recipe).'
-                                : 'Not found yet: not in your gear, bag or chests.',
+                                ? tr(
+                                  'You have it (in gear, bag, a chest, or its recipe).',
+                                )
+                                : tr(
+                                  'Not found yet: not in your gear, bag or chests.',
+                                ),
                             style: TextStyle(
                               color: had ? Palette.spring : Palette.flame,
                               fontSize: 12,
@@ -872,8 +922,8 @@ class _MapScreenState extends State<MapScreen> {
                     ],
                     if (setting != null) ...[
                       const SizedBox(height: 14),
-                      const Text(
-                        'Random loot · rarity odds',
+                      Text(
+                        tr('Random loot · rarity odds'),
                         style: TextStyle(
                           color: Palette.flame,
                           fontWeight: FontWeight.w700,
@@ -889,7 +939,7 @@ class _MapScreenState extends State<MapScreen> {
                                 SizedBox(
                                   width: 90,
                                   child: Text(
-                                    LootSetting.rarities[r],
+                                    gt(LootSetting.rarities[r]),
                                     style: TextStyle(
                                       color: Palette.rarity(
                                         LootSetting.rarities[r],
@@ -918,7 +968,13 @@ class _MapScreenState extends State<MapScreen> {
                           ),
                       const SizedBox(height: 10),
                       Text(
-                        'Can contain ${setting.poolSize} items: ${(setting.categories.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).map((e) => '${e.value} ${e.key.toLowerCase()}').join(', ')}',
+                        tr('Can contain {n} items: {kinds}', {
+                          'n': setting.poolSize,
+                          'kinds': (setting.categories.entries.toList()
+                                ..sort((a, b) => b.value.compareTo(a.value)))
+                              .map((e) => '${e.value} ${gt(e.key).toLowerCase()}')
+                              .join(', '),
+                        }),
                         style: const TextStyle(color: Palette.ash),
                       ),
                       const SizedBox(height: 8),
@@ -928,7 +984,7 @@ class _MapScreenState extends State<MapScreen> {
                         children: [
                           for (final id in _examplesFor(setting, p.areaLevel))
                             ActionChip(
-                              label: Text(db.nameOf(id)),
+                              label: Text(db.shownName(id)),
                               onPressed: () => openItem(id),
                             ),
                         ],
@@ -936,9 +992,17 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(height: 6),
                       Text(
                         p.areaLevel > 0
-                            ? 'Area level ${p.areaLevel}: loot drops at about level ${p.areaLevel}. Examples above fit that level. '
-                                'Every ${p.title.split(' · ').first.toLowerCase()} shares this pool and these odds; the area sets the level. Chests refill over time.'
-                            : 'Loot level scales with you here. Chests refill over time.',
+                            ? tr(
+                              'Area level {level}: loot drops at about level {level}. Examples above fit that level. Every {chest} shares this pool and these odds; the area sets the level. Chests refill over time.',
+                              {
+                                'level': p.areaLevel,
+                                'chest':
+                                    gt(p.title).split(' · ').first.toLowerCase(),
+                              },
+                            )
+                            : tr(
+                              'Loot level scales with you here. Chests refill over time.',
+                            ),
                         style: const TextStyle(
                           color: Palette.ash,
                           fontSize: 12,
@@ -950,7 +1014,7 @@ class _MapScreenState extends State<MapScreen> {
                         const SizedBox(height: 8),
                         FilledButton.icon(
                           icon: const Icon(Icons.account_tree_outlined),
-                          label: const Text('See inside'),
+                          label: Text(tr('See inside')),
                           onPressed: () {
                             Navigator.pop(ctx);
                             openHall(k);
@@ -958,10 +1022,13 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '${hallName(db.halls!.halls[k])}, level ${db.halls!.halls[k].level}. The game keeps '
-                          'every hall\'s inside in one far corner of the world; the map shows this one there '
-                          'with its chests, notes and save points. Inside, it follows you: your floor bright, '
-                          'the others faint.',
+                          tr(
+                            '{hall}, level {level}. The game keeps every hall\'s inside in one far corner of the world; the map shows this one there with its chests, notes and save points. Inside, it follows you: your floor bright, the others faint.',
+                            {
+                              'hall': hallName(db.halls!.halls[k]),
+                              'level': db.halls!.halls[k].level,
+                            },
+                          ),
                           style: const TextStyle(
                             color: Palette.ash,
                             fontSize: 12,
@@ -1002,8 +1069,8 @@ class _MapScreenState extends State<MapScreen> {
                       ],
                     if (db.fish[p.fishTable] case final ft?) ...[
                       const SizedBox(height: 12),
-                      const Text(
-                        'Bites here · share of fish',
+                      Text(
+                        tr('Bites here · share of fish'),
                         style: TextStyle(
                           color: Palette.flame,
                           fontWeight: FontWeight.w700,
@@ -1023,8 +1090,11 @@ class _MapScreenState extends State<MapScreen> {
                                   Expanded(
                                     child: Text(
                                       f.time.isEmpty
-                                          ? it.name
-                                          : '${it.name} · ${f.time.toLowerCase()} only',
+                                          ? gt(it.name)
+                                          : tr('{fish} · {time} only', {
+                                            'fish': gt(it.name),
+                                            'time': gt(f.time).toLowerCase(),
+                                          }),
                                     ),
                                   ),
                                   Text('${f.share.toStringAsFixed(1)}%'),
@@ -1036,10 +1106,16 @@ class _MapScreenState extends State<MapScreen> {
                       Text(
                         [
                           if (ft.trash > 0)
-                            '${ft.trash.toStringAsFixed(0)}% of casts land treasure or trash (your bait decides which)',
+                            tr(
+                              '{percent}% of casts land treasure or trash (your bait decides which)',
+                              {'percent': ft.trash.toStringAsFixed(0)},
+                            ),
                           if (ft.boot > 0)
-                            '${ft.boot.toStringAsFixed(0)}% a wet boot',
-                          if (p.areaLevel > 0) 'area level ${p.areaLevel}',
+                            tr('{percent}% a wet boot', {
+                              'percent': ft.boot.toStringAsFixed(0),
+                            }),
+                          if (p.areaLevel > 0)
+                            tr('area level {level}', {'level': p.areaLevel}),
                         ].join(' · '),
                         style: const TextStyle(
                           color: Palette.ash,
@@ -1051,7 +1127,8 @@ class _MapScreenState extends State<MapScreen> {
                       const SizedBox(height: 12),
                       FilledButton.icon(
                         icon: const Icon(Icons.auto_stories_outlined),
-                        label: const Text('Open in Codex'),
+                        label: Text(tr('Open in Codex')),
+
                         onPressed: () {
                           Navigator.pop(ctx);
                           Navigator.push(
@@ -1252,49 +1329,49 @@ class _MapScreenState extends State<MapScreen> {
                       controller: scroll,
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                       children: [
-                        group('Overlays', [
+                        group(tr('Overlays'), [
                           chip(
-                            'Explored',
+                            tr('Explored'),
                             Icons.visibility_outlined,
                             showFog,
                             (v) => showFog = v,
                           ),
                           chip(
-                            'Shroud',
+                            tr('Shroud'),
                             Icons.cloud_outlined,
                             showShroud,
                             (v) => showShroud = v,
                           ),
                           chip(
-                            'Cold',
+                            tr('Cold'),
                             Icons.ac_unit,
                             showCold,
                             (v) => showCold = v,
                           ),
                         ]),
-                        group('Mine', [
+                        group(tr('Mine'), [
                           chip(
-                            'Bases',
+                            tr('Bases'),
                             Icons.local_fire_department,
                             showBases,
                             (v) => showBases = v,
                           ),
                           chip(
-                            'My pins · ${widget.pins.all.length}',
+                            tr('My pins · {n}', {'n': widget.pins.all.length}),
                             Icons.push_pin_outlined,
                             showPins,
                             (v) => showPins = v,
                           ),
                           chip(
-                            'Shopping',
+                            tr('Shopping'),
                             Icons.shopping_basket_outlined,
                             showShopping.value,
                             (v) => showShopping.value = v,
                           ),
                         ]),
-                        group('Loot and lore', [
+                        group(tr('Loot and lore'), [
                           chip(
-                            'Unique loot only',
+                            tr('Unique loot only'),
                             Icons.star,
                             lootOnly,
                             (v) => _lootHunt(
@@ -1303,48 +1380,51 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                           ),
                           chip(
-                            'Unique loot',
+                            tr('Unique loot'),
                             Icons.star_outline,
                             showUnique,
                             (v) => showUnique = v,
                           ),
                           chip(
-                            'Chests',
+                            tr('Chests'),
                             Icons.inventory_2_outlined,
                             showChests,
                             (v) => showChests = v,
                           ),
                           chip(
-                            'Lore',
+                            tr('Lore'),
                             Icons.menu_book_outlined,
                             showLore,
                             (v) => showLore = v,
                           ),
                           chip(
-                            'Air bubbles',
+                            tr('Air bubbles'),
                             Icons.bubble_chart_outlined,
                             showWater,
                             (v) => showWater = v,
                           ),
                           chip(
-                            'Fishing spots',
+                            tr('Fishing spots'),
                             Icons.phishing,
                             showFish,
                             (v) => showFish = v,
                           ),
                           chip(
-                            'Updrafts',
+                            tr('Updrafts'),
                             Icons.air,
                             showUpdrafts,
                             (v) => showUpdrafts = v,
                           ),
                         ]),
                         group(
-                          'Places · ${kinds.length} of ${allKinds.length}',
+                          tr('Places · {shown} of {all}', {
+                            'shown': kinds.length,
+                            'all': allKinds.length,
+                          }),
                           [
                             for (final k in allKinds.toList()..sort())
                               FilterChip(
-                                label: Text(k),
+                                label: Text(_kindLabel(k)),
                                 selected: kinds.contains(k),
                                 onSelected:
                                     (v) => flip(
@@ -1355,16 +1435,18 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Hide completed places'),
-                          subtitle: const Text(
-                            'Cleared camps, claimed Shroud Roots, found lore',
+                          title: Text(tr('Hide completed places')),
+                          subtitle: Text(
+                            tr('Cleared camps, claimed Shroud Roots, found lore'),
                           ),
                           value: hideDone,
                           onChanged: (v) => flip(() => hideDone = v),
                         ),
-                        const Text(
-                          'Tip: tap the map for the Shroud level or cold there; long-press to drop a pin.',
-                          style: TextStyle(color: Palette.ash, fontSize: 12),
+                        Text(
+                          tr(
+                            'Tip: tap the map for the Shroud level or cold there; long-press to drop a pin.',
+                          ),
+                          style: const TextStyle(color: Palette.ash, fontSize: 12),
                         ),
                       ],
                     ),
@@ -1583,13 +1665,18 @@ class _MapScreenState extends State<MapScreen> {
                 icon: PoiIcon(p),
                 text:
                     p.cat == 'lore'
-                        ? p.title
-                        : p.loot.map(widget.db.nameOf).toSet().join(', '),
+                        ? gt(p.title)
+                        : p.loot
+                            .map((id) => widget.db.shownName(id))
+                            .toSet()
+                            .join(', '),
                 // another floor: which way, and how far
                 note:
                     dh.abs() <= 6
                         ? null
-                        : '${dh.abs().round()} m ${dh > 0 ? 'up' : 'down'}',
+                        : dh > 0
+                        ? tr('{m} m up', {'m': dh.abs().round()})
+                        : tr('{m} m down', {'m': dh.abs().round()}),
               ),
             ),
           ),
@@ -1621,7 +1708,7 @@ class _MapScreenState extends State<MapScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        p.title,
+                        gt(p.title),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -1759,11 +1846,11 @@ class _MapScreenState extends State<MapScreen> {
                                       : Icons.account_tree_outlined,
                               color: _hallColors[k % _hallColors.length],
                               text:
-                                  '${h.halls[k].region ?? hallName(h.halls[k])} · L${h.halls[k].level}'
+                                  '${gtn(h.halls[k].region) ?? hallName(h.halls[k])} · ${tr('L{n}', {'n': h.halls[k].level})}'
                                   '${switch (finds.missing(k)) {
                                     null => '',
-                                    0 => ' · all found',
-                                    final n => ' · $n to find',
+                                    0 => ' · ${tr('all found')}',
+                                    final n => ' · ${tr('{n} to find', {'n': n})}',
                                   }}',
                             ),
                           ),
@@ -1845,7 +1932,7 @@ class _MapScreenState extends State<MapScreen> {
                           child: _Label(
                             icon: Icons.shopping_basket,
                             color: Palette.risk(r.risk),
-                            text: widget.db.nameOf(id),
+                            text: widget.db.shownName(id),
                           ),
                         ),
                       ),
@@ -1859,7 +1946,7 @@ class _MapScreenState extends State<MapScreen> {
                           child: _Label(
                             icon: Icons.shopping_basket,
                             color: Palette.flame,
-                            text: f.title,
+                            text: gt(f.title),
                           ),
                         ),
                       ),
@@ -2024,18 +2111,18 @@ class _MapScreenState extends State<MapScreen> {
                           child: InkWell(
                             customBorder: const StadiumBorder(),
                             onTap: search,
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
                                 vertical: 14,
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.search, color: Palette.flame),
-                                  SizedBox(width: 12),
+                                  const Icon(Icons.search, color: Palette.flame),
+                                  const SizedBox(width: 12),
                                   Text(
-                                    'Search places and loot',
-                                    style: TextStyle(color: Palette.ash),
+                                    tr('Search places and loot'),
+                                    style: const TextStyle(color: Palette.ash),
                                   ),
                                 ],
                               ),
@@ -2048,7 +2135,7 @@ class _MapScreenState extends State<MapScreen> {
                         isLabelVisible: _activeLayers > 0,
                         label: Text('$_activeLayers'),
                         child: IconButton.filledTonal(
-                          tooltip: 'Layers',
+                          tooltip: tr('Layers'),
                           style: IconButton.styleFrom(
                             backgroundColor: Palette.shroud.withValues(
                               alpha: 0.94,
@@ -2071,37 +2158,37 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         for (final (label, icon, value, set) in [
                           (
-                            'Unique loot only',
+                            tr('Unique loot only'),
                             Icons.star_outline,
                             lootOnly,
                             (bool v) => _lootHunt(v, missing: s != null),
                           ),
                           (
-                            'Shopping',
+                            tr('Shopping'),
                             Icons.shopping_basket_outlined,
                             showShopping.value,
                             (bool v) => showShopping.value = v,
                           ),
                           (
-                            'Shroud',
+                            tr('Shroud'),
                             Icons.cloud_outlined,
                             showShroud,
                             (bool v) => showShroud = v,
                           ),
                           (
-                            'Chests',
+                            tr('Chests'),
                             Icons.inventory_2_outlined,
                             showChests,
                             (bool v) => showChests = v,
                           ),
                           (
-                            'Lore',
+                            tr('Lore'),
                             Icons.menu_book_outlined,
                             showLore,
                             (bool v) => showLore = v,
                           ),
                           (
-                            'Cold',
+                            tr('Cold'),
                             Icons.ac_unit,
                             showCold,
                             (bool v) => showCold = v,
@@ -2122,13 +2209,14 @@ class _MapScreenState extends State<MapScreen> {
                               },
                             ),
                           ),
-                          if (label == 'Shopping' && showShopping.value)
+                          if (icon == Icons.shopping_basket_outlined &&
+                              showShopping.value)
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
                               child: ActionChip(
                                 avatar: const Icon(Icons.route, size: 16),
                                 label: Text(
-                                  route == null ? 'Route' : 'New route',
+                                  route == null ? tr('Route') : tr('New route'),
                                 ),
                                 backgroundColor: Palette.shroud.withValues(
                                   alpha: 0.9,
@@ -2152,7 +2240,7 @@ class _MapScreenState extends State<MapScreen> {
                   if (lootOnly) ...[
                     const SizedBox(height: 8),
                     _LootBar(
-                      title: lootTitle ?? 'Unique loot',
+                      title: lootTitle == null ? tr('Unique loot') : gt(lootTitle!),
                       places: shown.length,
                       missing: s == null ? null : lootMissingIds.length,
                       missingOnly: lootMissing,
@@ -2302,7 +2390,7 @@ class _MapScreenState extends State<MapScreen> {
                                 child: FloatingActionButton(
                                   heroTag: 'me',
                                   shape: const CircleBorder(),
-                                  tooltip: 'Follow me (live from the game)',
+                                  tooltip: tr('Follow me (live from the game)'),
                                   backgroundColor:
                                       following
                                           ? Palette.flame
@@ -2317,7 +2405,7 @@ class _MapScreenState extends State<MapScreen> {
                 FloatingActionButton(
                   heroTag: 'home',
                   shape: const CircleBorder(),
-                  tooltip: 'Centre on my main base',
+                  tooltip: tr('Centre on my main base'),
                   backgroundColor: Palette.shroud,
                   foregroundColor: Palette.flame,
                   onPressed: () {
@@ -2367,15 +2455,22 @@ class _Loot {
 
   String get where {
     if (set != null) {
-      return '${set!.category} · $pieces piece${pieces == 1 ? '' : 's'} on the map';
+      return trn(
+        pieces,
+        '{category} · {n} piece on the map',
+        '{category} · {n} pieces on the map',
+        {'category': gt(set!.category)},
+      );
     }
     final p = places.first;
     if (places.length == 1 && p.cat == 'special') {
       return p.candidates > 1
-          ? 'In one of ${p.candidates} chests around there'
-          : 'In a chest';
+          ? tr('In one of {n} chests around there', {'n': p.candidates})
+          : tr('In a chest');
     }
-    return places.length == 1 ? 'In a chest' : 'In ${places.length} places';
+    return places.length == 1
+        ? tr('In a chest')
+        : tr('In {n} places', {'n': places.length});
   }
 }
 
@@ -2385,7 +2480,7 @@ class _PoiSearch extends SearchDelegate<_Pick?> {
   final List<_Loot> loot;
 
   @override
-  String get searchFieldLabel => 'Places, items in chests, sets';
+  String get searchFieldLabel => tr('Places, items in chests, sets');
 
   @override
   ThemeData appBarTheme(BuildContext context) => Theme.of(context);
@@ -2408,30 +2503,37 @@ class _PoiSearch extends SearchDelegate<_Pick?> {
   Widget buildSuggestions(BuildContext context) {
     final q = query.trim().toLowerCase();
     if (q.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(24),
+      return Padding(
+        padding: const EdgeInsets.all(24),
         child: Text(
-          'A place, a piece of unique loot ("Farmer Garb"), or a whole set ("Farmer Set"): '
-          'the map then shows only where it lies.',
-          style: TextStyle(color: Palette.ash, height: 1.4),
+          tr(
+            'A place, a piece of unique loot ("{garb}"), or a whole set ("{set}"): the map then shows only where it lies.',
+            {'garb': gt('Farmer Garb'), 'set': gt('Farmer Set')},
+          ),
+          style: const TextStyle(color: Palette.ash, height: 1.4),
         ),
       );
     }
+    // the English name and the shown one both match
+    bool hit(String name) =>
+        name.toLowerCase().contains(q) || gt(name).toLowerCase().contains(q);
     // names starting with the query first; sets before their pieces
-    int rank(String name) => name.toLowerCase().startsWith(q) ? 0 : 1;
+    int rank(String name) =>
+        name.toLowerCase().startsWith(q) || gt(name).toLowerCase().startsWith(q)
+            ? 0
+            : 1;
     final items = [
       for (final l in loot)
-        if (l.name.toLowerCase().contains(q)) l,
+        if (hit(l.name)) l,
     ]..sort(
       (a, b) =>
           rank(a.name) != rank(b.name)
               ? rank(a.name) - rank(b.name)
               : (a.set == null) != (b.set == null)
               ? (a.set == null ? 1 : -1)
-              : a.name.compareTo(b.name),
+              : gt(a.name).compareTo(gt(b.name)),
     );
-    final places =
-        all.where((p) => p.title.toLowerCase().contains(q)).take(40).toList();
+    final places = all.where((p) => hit(p.title)).take(40).toList();
     Widget head(String t) => Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Text(
@@ -2444,7 +2546,7 @@ class _PoiSearch extends SearchDelegate<_Pick?> {
     );
     return ListView(
       children: [
-        if (items.isNotEmpty) head('Unique loot'),
+        if (items.isNotEmpty) head(tr('Unique loot')),
         for (final l in items.take(40))
           ListTile(
             leading: SizedBox(
@@ -2461,12 +2563,12 @@ class _PoiSearch extends SearchDelegate<_Pick?> {
                         ),
               ),
             ),
-            title: Text(l.name),
+            title: Text(gt(l.name)),
             subtitle: Text(l.where, style: const TextStyle(color: Palette.ash)),
             trailing: switch (l.had) {
               null => null,
               final h when l.set != null => Text(
-                '$h of ${l.pieces}',
+                tr('{had} of {all}', {'had': h, 'all': l.pieces}),
                 style: TextStyle(
                   color: h == l.pieces ? Palette.spring : Palette.ash,
                 ),
@@ -2478,24 +2580,25 @@ class _PoiSearch extends SearchDelegate<_Pick?> {
             },
             onTap: () => close(context, _Pick.loot(l.name, l.ids)),
           ),
-        if (places.isNotEmpty) head('Places'),
+        if (places.isNotEmpty) head(tr('Places')),
         for (final p in places)
           ListTile(
             leading: SizedBox(width: 32, child: Center(child: PoiIcon(p))),
-            title: Text(p.title),
+            title: Text(gt(p.title)),
             subtitle: Text(
-              p.cat == 'lore' ? 'Lore note' : p.kind ?? '',
+              p.cat == 'lore' ? tr('Lore note') : gtn(p.kind) ?? '',
               style: const TextStyle(color: Palette.ash),
             ),
             onTap: () => close(context, _Pick.place(p)),
           ),
         if (items.isEmpty && places.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(24),
+          Padding(
+            padding: const EdgeInsets.all(24),
             child: Text(
-              'Nothing by that name on the map. Loot that only drops at random from a kind of chest has no place: '
-              'its item page says which chests.',
-              style: TextStyle(color: Palette.ash, height: 1.4),
+              tr(
+                'Nothing by that name on the map. Loot that only drops at random from a kind of chest has no place: its item page says which chests.',
+              ),
+              style: const TextStyle(color: Palette.ash, height: 1.4),
             ),
           ),
       ],
@@ -2569,10 +2672,12 @@ class _LootBar extends StatelessWidget {
                           text: [
                             '',
                             places == 0
-                                ? 'nothing here'
-                                : '$places place${places == 1 ? '' : 's'}',
+                                ? tr('nothing here')
+                                : trn(places, '{n} place', '{n} places'),
                             if (missing != null)
-                              missing == 0 ? 'all found' : '$missing to find',
+                              missing == 0
+                                  ? tr('all found')
+                                  : tr('{n} to find', {'n': missing}),
                           ].join(' · '),
                           style: const TextStyle(color: Palette.ash),
                         ),
@@ -2583,7 +2688,7 @@ class _LootBar extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Back to the full map',
+                  tooltip: tr('Back to the full map'),
                   icon: const Icon(Icons.close, size: 18),
                   onPressed: onClose,
                 ),
@@ -2595,10 +2700,14 @@ class _LootBar extends StatelessWidget {
                 child: Row(
                   children: [
                     if (onMissing case final set?)
-                      chip('Still missing', missingOnly, set),
+                      chip(tr('Still missing'), missingOnly, set),
                     if (onGroup case final set?)
                       for (final g in GameDb.lootGroups)
-                        chip(g, group == g, (v) => set(v ? g : null)),
+                        chip(
+                          _lootGroupLabel(g),
+                          group == g,
+                          (v) => set(v ? g : null),
+                        ),
                   ],
                 ),
               ),
@@ -2667,7 +2776,7 @@ class _GuideCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      target.title,
+                      gt(target.title),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -2712,7 +2821,7 @@ class _GuideCard extends StatelessWidget {
                       ),
                     ),
                   IconButton(
-                    tooltip: 'Stop guiding',
+                    tooltip: tr('Stop guiding'),
                     visualDensity: VisualDensity.compact,
                     icon: const Icon(Icons.close, size: 18),
                     onPressed: onClose,
@@ -2720,9 +2829,9 @@ class _GuideCard extends StatelessWidget {
                 ],
               ),
               if (g == null)
-                const Text(
-                  'Waiting for your position from the game',
-                  style: TextStyle(color: Palette.ash, fontSize: 12),
+                Text(
+                  tr('Waiting for your position from the game'),
+                  style: const TextStyle(color: Palette.ash, fontSize: 12),
                 )
               else ...[
                 Row(
@@ -3116,12 +3225,15 @@ class _RouteBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Stop ${at + 1} of ${route.stops.length}',
+                    tr('Stop {at} of {all}', {
+                      'at': at + 1,
+                      'all': route.stops.length,
+                    }),
                     style: const TextStyle(color: Palette.ash, fontSize: 11),
                   ),
                   Text(
                     stop.items.entries
-                        .map((e) => '${db.nameOf(e.key)} ×${e.value}')
+                        .map((e) => '${db.shownName(e.key)} ×${e.value}')
                         .join(', '),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -3136,9 +3248,9 @@ class _RouteBar extends StatelessWidget {
                 ],
               ),
             ),
-            TextButton(onPressed: onDone, child: const Text('Done')),
+            TextButton(onPressed: onDone, child: Text(tr('Done'))),
             IconButton(
-              tooltip: 'End the route',
+              tooltip: tr('End the route'),
               icon: const Icon(Icons.close, size: 18),
               onPressed: onClose,
             ),
@@ -3159,20 +3271,23 @@ class _HallCheckView extends StatelessWidget {
   Widget build(BuildContext context) {
     final lines = check.lines();
     final gearLow = lines.any(
-      (l) => l.title == 'Gear' && l.mark == CheckMark.warn,
+      (l) => l.id == 'Gear' && l.mark == CheckMark.warn,
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 14),
-        const Text(
-          'Before you go',
-          style: TextStyle(color: Palette.flame, fontWeight: FontWeight.w700),
+        Text(
+          tr('Before you go'),
+          style: const TextStyle(
+            color: Palette.flame,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         if (check.contents.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
-            'Inside: ${check.contents}',
+            tr('Inside: {contents}', {'contents': check.contents}),
             style: const TextStyle(color: Palette.ash, fontSize: 12),
           ),
         ],
@@ -3222,7 +3337,7 @@ class _HallCheckView extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               icon: const Icon(Icons.shield_outlined, size: 18),
-              label: const Text('My gear by slot'),
+              label: Text(tr('My gear by slot')),
               onPressed: onGear,
             ),
           ),
@@ -3296,9 +3411,12 @@ class _FindsView extends StatelessWidget {
         Text(
           known
               ? left == 0
-                  ? 'To find · all ${finds.length} found'
-                  : 'To find · $left of ${finds.length} missing'
-              : 'To find',
+                  ? tr('To find · all {n} found', {'n': finds.length})
+                  : tr('To find · {left} of {all} missing', {
+                    'left': left,
+                    'all': finds.length,
+                  })
+              : tr('To find'),
           style: const TextStyle(
             color: Palette.flame,
             fontWeight: FontWeight.w700,
@@ -3307,9 +3425,12 @@ class _FindsView extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           known
-              ? 'Journal pages you haven\'t read, and loot these chests always hold that isn\'t in your gear, '
-                  'bag or chests. Missing ones glow on the map.'
-              : 'Journal pages and loot these chests always hold. Connect the PC agent to see what you have.',
+              ? tr(
+                'Journal pages you haven\'t read, and loot these chests always hold that isn\'t in your gear, bag or chests. Missing ones glow on the map.',
+              )
+              : tr(
+                'Journal pages and loot these chests always hold. Connect the PC agent to see what you have.',
+              ),
           style: const TextStyle(color: Palette.ash, fontSize: 12),
         ),
         for (final f in finds)
@@ -3327,18 +3448,21 @@ class _FindsView extends StatelessWidget {
                       : Palette.gold,
             ),
             title: Text(
-              f.name,
+              gt(f.name),
               style: TextStyle(
                 color: f.have == true ? Palette.ash : null,
                 fontWeight: f.have == false ? FontWeight.w600 : null,
               ),
             ),
-            subtitle: f.places > 1 ? Text('in ${f.places} chests') : null,
+            subtitle:
+                f.places > 1
+                    ? Text(tr('in {n} chests', {'n': f.places}))
+                    : null,
             trailing: switch (f.have) {
               true => const Icon(Icons.check, color: Palette.spring),
-              false => const Text(
-                'missing',
-                style: TextStyle(color: Palette.flame, fontSize: 12),
+              false => Text(
+                tr('missing'),
+                style: const TextStyle(color: Palette.flame, fontSize: 12),
               ),
               null => null,
             },
@@ -3362,9 +3486,12 @@ class _HallQuestsView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 14),
-        const Text(
-          'Quests',
-          style: TextStyle(color: Palette.flame, fontWeight: FontWeight.w700),
+        Text(
+          tr('Quests'),
+          style: const TextStyle(
+            color: Palette.flame,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         for (final (q, done) in quests)
           ListTile(
@@ -3376,15 +3503,16 @@ class _HallQuestsView extends StatelessWidget {
               color: done == true ? Palette.ash : Palette.parchment,
             ),
             title: Text(
-              q.name,
+              gt(q.name),
               style: TextStyle(color: done == true ? Palette.ash : null),
             ),
             trailing: switch (done) {
               true => const Icon(Icons.check, color: Palette.spring),
-              false => const Text(
-                'open',
-                style: TextStyle(color: Palette.flame, fontSize: 12),
+              false => Text(
+                tr('open'),
+                style: const TextStyle(color: Palette.flame, fontSize: 12),
               ),
+
               null => null,
             },
           ),

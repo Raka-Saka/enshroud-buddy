@@ -1,0 +1,7 @@
+{
+  "id": "ensh_companion_loca",
+  "name": "Enshroud Buddy text export",
+  "version": "0.1.0",
+  "description": "Exports the game's text in every language it ships. Export only. Driven by tools/export_loca.py.",
+  "capabilities": ["export"]
+}

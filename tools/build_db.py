@@ -62,6 +62,19 @@ def split_stack(s):
     return [":".join(ref), int(count)]
 
 
+# texts build_db writes itself, for tools/i18n.py: the English result -> (template, its English arguments),
+# so each language can fill its own template with the game's own translations of the arguments
+COMPOSED = {}
+# skill texts with their numbers filled in: the result -> (the game's text with %k, what went in each %k)
+FILLED = {}
+
+
+def say(template, **args):
+    text = template.format(**args)
+    COMPOSED[text] = (template, {k: v for k, v in args.items()})
+    return text
+
+
 ARTISANS = {"huntress": "Hunter", "hunter": "Hunter", "carpenter": "Carpenter", "farmer": "Farmer",
             "alchemist": "Alchemist", "blacksmith": "Blacksmith", "bard": "Bard", "barber": "Barber",
             "collector": "Collector", "cryptkeeper": "Collector", "researcher": "Researcher"}
@@ -71,7 +84,7 @@ def humanize(name):
     if not name:
         return "Hidden condition"
     if name.lower() in ARTISANS:
-        return f"Rescue the {ARTISANS[name.lower()]}"
+        return say("Rescue the {npc}", npc=ARTISANS[name.lower()])
     words = re.sub(r"([a-z])([A-Z])", r"\1 \2", name).replace("_", " ").split()
     words = [w for w in words if w.lower() not in {"wk", "knowledge", "pickup"}]
     return " ".join(words).capitalize() or name
@@ -137,19 +150,19 @@ class Unlocks:
         npc = self.workshops.get(ws, {}).get("n") or self.npc_names.get(q.get("npc_id"), "artisan")
         who = {"n": self.workshops[ws]["it"]} if self.workshops.get(ws, {}).get("it") else {}
         if t == "Inventory":
-            return {"t": f"Carry {self.item_name(q['item_id'])}", "i": q["item_id"]}
+            return {"t": say("Carry {item}", item=self.item_name(q['item_id'])), "i": q["item_id"]}
         if t == "InventoryCounter":
-            return {"t": f"Carry {v} × {self.item_name(q['item_id'])}", "i": q["item_id"]}
+            return {"t": say("Carry {n} × {item}", n=v, item=self.item_name(q['item_id'])), "i": q["item_id"]}
         if t == "Npc":
             act = q.get("npc_action")
             if act == "CraftingPropPlaced":
                 prop = self.workshops.get(q.get("prop"), {}).get("n", "an upgrade")
                 placed = self._station_items([q.get("prop")])
-                return {"t": f"Place {prop} for the {npc}", **who, **({"pl": placed} if placed else {})}
+                return {"t": say("Place {prop} for the {npc}", prop=prop, npc=npc), **who, **({"pl": placed} if placed else {})}
             if act == "IsSheltered":
                 placed = self._station_items(self.stations.get(ws, ()))
-                return {"t": f"Give the {npc} a shelter", **who, "sh": 1, **({"pl": placed} if placed else {})}
-            return {"t": f"Rescue the {npc}", **who}
+                return {"t": say("Give the {npc} a shelter", npc=npc), **who, "sh": 1, **({"pl": placed} if placed else {})}
+            return {"t": say("Rescue the {npc}", npc=npc), **who}
         # number conditions keep their operator: "MotherFlameLevel > 5" means strength 6 or more, and
         # "< 8" closes a window (a recipe for Flame 6-7 that a stronger version replaces at 8)
         op = {"GreaterThan": ">", "LessThan": "<", "Equals": "="}.get(q.get("op"), ">")
@@ -161,7 +174,7 @@ class Unlocks:
         }
         if t in words:
             kind, more, less, equal = words[t]
-            text = {">": more, "<": less, "=": equal}[op].format(n=v + 1, v=v)
+            text = say({">": more, "<": less, "=": equal}[op], n=v + 1, v=v)
             return {"t": text, "rt": [kind, op, v]}
         return {"t": humanize(q.get("name"))}
 
@@ -192,10 +205,10 @@ class Unlocks:
         ref = a["ref"]
         if a["type"] == "Knowledge":
             if ref in self.items:
-                return {"t": f"Pick up {self.item_name(ref)}", "k": ref, "i": ref}
+                return {"t": say("Pick up {item}", item=self.item_name(ref)), "k": ref, "i": ref}
             if ref in self.recipe_outputs:
                 out = self.recipe_outputs[ref]
-                return {"t": f"Craft {self.item_name(out)}", "k": ref, "i": out}
+                return {"t": say("Craft {item}", item=self.item_name(out)), "k": ref, "i": out}
             return {"t": humanize(a["name"]), "k": ref}
         return self.query(ref, depth + 1) or ({"t": humanize(a["name"])} if a["name"] else None)
 
@@ -215,7 +228,8 @@ def stat_values(values):
             continue
         if ("Duration" in label or "Time" in label or "Oxygen" in label) and abs(n) >= 1000 and not pct:
             secs = abs(n) / 1000
-            text = ("-" if n < 0 else "") + (f"{secs / 60:.0f} min" if secs >= 60 else f"{secs:.0f} s")
+            sign = "-" if n < 0 else ""
+            text = say("{n} min", n=f"{sign}{secs / 60:.0f}") if secs >= 60 else say("{n} s", n=f"{sign}{secs:.0f}")
         else:
             text = f"{n}%" if pct else str(n)
         out.append([label, text])
@@ -266,7 +280,7 @@ def item_stats(export):
             if name and name != "None":
                 perks[name] = perks.get(name, 0) + 1
         if perks:
-            row["pk"] = [f"{k} ×{n}" if n > 1 else k for k, n in perks.items()]
+            row["pk"] = [say("{perk} ×{n}", perk=k, n=n) if n > 1 else k for k, n in perks.items()]
         if st["armor"]:
             row["ar"] = st["armor"]
         if st["damage"]:
@@ -442,7 +456,7 @@ def points(export, unlocks, lore_pages, loot=None, halls=None):
             if kind is None or not title:
                 continue
             if kind == "Ancient Spire" and "Spire" not in title:
-                title = f"Ancient Spire — {title}"
+                title = say("Ancient Spire — {name}", name=title)
             p.update(c="label", k=kind, t=title)
             if kind == "Dungeon" and base + off:
                 p["lv"] = base + off  # a dungeon's own level (the Hollow Halls' are 10 to 45)
@@ -992,7 +1006,9 @@ def fill_skill(desc, values, max_level):
             c = {**c, "v": -c["v"]}  # "reduced by -1 seconds" reads as "reduced by 1 seconds"
         out.append(fmt_value(c, max_level))
     out.append(text[pos:])
-    return "".join(out).replace("%%", "%"), guessed
+    result = "".join(out).replace("%%", "%")
+    FILLED[result] = (text, out[1::2])
+    return result, guessed
 
 
 # What a skill does, from its filled-in effect text: axis -> pattern. Used for build projections.
@@ -1263,6 +1279,9 @@ def main():
             for iid in p.get("sp", []) + ([p["i"]] if p.get("c") == "special" else []):
                 items[iid]["fx"] = items[iid].get("fx", 0) + 1  # fixed placements in the world
     a.out.write_text(json.dumps(db, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    if (a.export / "loca").exists():
+        import i18n
+        i18n.write(db, COMPOSED, FILLED, a.export / "loca", a.out.parent / "i18n" / "game")
     print(f"{a.out}: {a.out.stat().st_size // 1024} KB, {len(items)} items, {len(recipes)} recipes, "
           f"{len(sets)} sets, {len(db['lore'])} lore docs, {len(db['quests'])} quests")
 

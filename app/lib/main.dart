@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'data/db_store.dart';
 import 'data/game_db.dart';
@@ -14,6 +15,7 @@ import 'data/planner.dart';
 import 'data/tracker.dart';
 import 'data/updates.dart';
 import 'data/where.dart';
+import 'l10n.dart';
 import 'nav.dart';
 import 'screens/character_screen.dart';
 import 'screens/codex_screen.dart';
@@ -60,7 +62,7 @@ class _CompanionAppState extends State<CompanionApp> {
   late Future<GameDb> db = _load();
 
   static Future<GameDb> _load() async {
-    final icons = Future.wait([ItemIcons.load(), MapIcons.load()]);
+    final icons = Future.wait([ItemIcons.load(), MapIcons.load(), L10n.load()]);
     final db = await DbStore.load();
     await icons;
     return db;
@@ -72,6 +74,7 @@ class _CompanionAppState extends State<CompanionApp> {
   @override
   void initState() {
     super.initState();
+    L10n.changed.addListener(_relang);
     live.addListener(_maybeUpdate);
     navTarget.addListener(_sendTarget);
     _sendTarget();
@@ -91,8 +94,16 @@ class _CompanionAppState extends State<CompanionApp> {
     final current = await db;
     final terrain = await Terrain.instance;
     _trackTimer = null;
+    final tracker = trackerOf(
+      current,
+      live.state,
+      goals.all,
+      terrain,
+      live.pos.value,
+    );
+    // the PC shows its tray, pairing window and overlay in the app's language
     live.setTracker(
-      trackerOf(current, live.state, goals.all, terrain, live.pos.value),
+      tracker == null ? null : {...tracker, 'lang': L10n.lang.code},
     );
   }
 
@@ -100,12 +111,23 @@ class _CompanionAppState extends State<CompanionApp> {
   void _sendTarget() {
     final t = navTarget.value;
     live.setTarget(
-      t == null ? null : {'title': t.title, 'x': t.x, 'y': t.y, 'h': t.height},
+      t == null
+          ? null
+          : {'title': gt(t.title), 'x': t.x, 'y': t.y, 'h': t.height},
     );
+  }
+
+  /// Another language picked in Setup: load its texts, then every screen starts over in it.
+  Future<void> _relang() async {
+    await L10n.load();
+    if (!mounted) return;
+    setState(() {});
+    _trackSoon();
   }
 
   @override
   void dispose() {
+    L10n.changed.removeListener(_relang);
     live.removeListener(_maybeUpdate);
     navTarget.removeListener(_sendTarget);
     for (final l in [goals, live, live.pos]) {
@@ -127,7 +149,11 @@ class _CompanionAppState extends State<CompanionApp> {
     setState(() => db = Future.value(fresh));
     messenger.currentState?.showSnackBar(
       SnackBar(
-        content: Text('Game data updated from your PC (${fresh.built})'),
+        content: Text(
+          tr('Game data updated from your PC ({built})', {
+            'built': fresh.built,
+          }),
+        ),
       ),
     );
   }
@@ -141,6 +167,9 @@ class _CompanionAppState extends State<CompanionApp> {
         scaffoldMessengerKey: messenger,
         title: 'Enshroud Buddy',
         debugShowCheckedModeBanner: false,
+        locale: L10n.lang.locale,
+        supportedLocales: [for (final l in languages) l.locale],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         theme: buildTheme(),
         home: FutureBuilder<GameDb>(
           future: db,
@@ -148,14 +177,18 @@ class _CompanionAppState extends State<CompanionApp> {
             if (snap.hasError) {
               return Scaffold(
                 body: Center(
-                  child: Text('Could not load game data\n${snap.error}'),
+                  child: Text(
+                    tr('Could not load game data\n{error}', {
+                      'error': snap.error,
+                    }),
+                  ),
                 ),
               );
             }
             if (!snap.hasData) return const _Splash();
             // a new key when the data changes, so every screen starts over with it
             return Home(
-              key: ValueKey(snap.data!.built),
+              key: ValueKey('${snap.data!.built} ${L10n.lang.code}'),
               db: snap.data!,
               pins: pins,
             );
@@ -170,16 +203,20 @@ class _Splash extends StatelessWidget {
   const _Splash();
 
   @override
-  Widget build(BuildContext context) => const Scaffold(
+  Widget build(BuildContext context) => Scaffold(
     body: Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.local_fire_department, size: 56, color: Palette.flame),
-          SizedBox(height: 16),
+          const Icon(
+            Icons.local_fire_department,
+            size: 56,
+            color: Palette.flame,
+          ),
+          const SizedBox(height: 16),
           Text(
-            'Kindling the Flame…',
-            style: TextStyle(
+            tr('Kindling the Flame…'),
+            style: const TextStyle(
               fontFamily: 'Cinzel',
               fontSize: 18,
               color: Palette.bone,
@@ -253,10 +290,10 @@ class _HomeState extends State<Home> {
             goTo(i);
           },
           destinations: [
-            const NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Home',
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home),
+              label: tr('Home'),
             ),
             NavigationDestination(
               icon: Badge(
@@ -269,22 +306,22 @@ class _HomeState extends State<Home> {
                 label: Text('$goals'),
                 child: const Icon(Icons.checklist),
               ),
-              label: 'Plan',
+              label: tr('Plan'),
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.map_outlined),
-              selectedIcon: Icon(Icons.map),
-              label: 'Map',
+            NavigationDestination(
+              icon: const Icon(Icons.map_outlined),
+              selectedIcon: const Icon(Icons.map),
+              label: tr('Map'),
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.shield_outlined),
-              selectedIcon: Icon(Icons.shield),
-              label: 'Character',
+            NavigationDestination(
+              icon: const Icon(Icons.shield_outlined),
+              selectedIcon: const Icon(Icons.shield),
+              label: tr('Character'),
             ),
-            const NavigationDestination(
-              icon: Icon(Icons.auto_stories_outlined),
-              selectedIcon: Icon(Icons.auto_stories),
-              label: 'Codex',
+            NavigationDestination(
+              icon: const Icon(Icons.auto_stories_outlined),
+              selectedIcon: const Icon(Icons.auto_stories),
+              label: tr('Codex'),
             ),
           ],
         ),

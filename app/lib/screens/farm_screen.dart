@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/game_db.dart';
 import '../data/live_state.dart';
+import '../l10n.dart';
 import '../theme.dart';
 import 'item_screen.dart';
 import 'widgets.dart';
@@ -24,11 +25,13 @@ class FarmScreen extends StatelessWidget {
     final s = LiveScope.of(context).state;
     if (s == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Farm')),
-        body: const Center(child: Text('No live data from the PC agent yet.')),
+        appBar: AppBar(title: Text(tr('Farm'))),
+        body: Center(child: Text(tr('No live data from the PC agent yet.'))),
       );
     }
+    // English for the checks below (feeder, seeds), [shown] for the screen
     String name(String id) => db.items[id]?.name ?? id;
+    String shown(String id) => gt(name(id));
     void open(String id) {
       final it = db.items[id];
       if (it != null)
@@ -70,11 +73,11 @@ class FarmScreen extends StatelessWidget {
           ..sort((a, b) => b.value.compareTo(a.value));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Farm')),
+      appBar: AppBar(title: Text(tr('Farm'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 32),
         children: [
-          SectionTitle('Feeders · ${feeders.length}'),
+          SectionTitle(tr('Feeders · {n}', {'n': feeders.length})),
           if (emptyFeeders > 0)
             ListTile(
               dense: true,
@@ -83,7 +86,11 @@ class FarmScreen extends StatelessWidget {
                 color: Palette.ember,
               ),
               title: Text(
-                '$emptyFeeders feeder${emptyFeeders > 1 ? 's look' : ' looks'} empty',
+                trn(
+                  emptyFeeders,
+                  '{n} feeder looks empty',
+                  '{n} feeders look empty',
+                ),
               ),
             ),
           for (final c in feeders)
@@ -97,11 +104,16 @@ class FarmScreen extends StatelessWidget {
                           ? Palette.ember
                           : Palette.spring,
                 ),
-                title: Text(labels[c.index]),
+                title: Text(shownLabel(labels[c.index])),
                 subtitle: Text(
                   o == null
-                      ? 'Empty'
-                      : '${name(o.itemId)} ×${o.count}${o.count < lowFeed ? ' · running low' : ''}',
+                      ? tr('Empty')
+                      : o.count < lowFeed
+                      ? tr('{item} ×{n} · running low', {
+                        'item': shown(o.itemId),
+                        'n': o.count,
+                      })
+                      : '${shown(o.itemId)} ×${o.count}',
                   style: TextStyle(
                     color:
                         (o?.count ?? 0) < lowFeed ? Palette.ember : Palette.ash,
@@ -109,19 +121,19 @@ class FarmScreen extends StatelessWidget {
                 ),
                 onTap: o == null ? null : () => open(o.itemId),
               ),
-          SectionTitle('Produce to collect · ${produce.length}'),
+          SectionTitle(tr('Produce to collect · {n}', {'n': produce.length})),
           if (produce.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Nothing waiting in your animals.'),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(tr('Nothing waiting in your animals.')),
             ),
           for (final e in produce.entries)
             ListTile(
               dense: true,
               leading: const Icon(Icons.egg_alt_outlined, color: Palette.flame),
-              title: Text(name(e.key)),
+              title: Text(shown(e.key)),
               subtitle: Text(
-                'in ${e.value.$1} animal${e.value.$1 > 1 ? 's' : ''}',
+                trn(e.value.$1, 'in {n} animal', 'in {n} animals'),
                 style: const TextStyle(color: Palette.ash),
               ),
               trailing: Text(
@@ -130,12 +142,12 @@ class FarmScreen extends StatelessWidget {
               ),
               onTap: () => open(e.key),
             ),
-          SectionTitle('Seeds you own · ${seeds.length}'),
+          SectionTitle(tr('Seeds you own · {n}', {'n': seeds.length})),
           for (final e in seeds)
             ListTile(
               dense: true,
               leading: const Icon(Icons.grass, color: Palette.spring),
-              title: Text(name(e.key)),
+              title: Text(shown(e.key)),
               trailing: Text(
                 '×${e.value}',
                 style: const TextStyle(fontWeight: FontWeight.w700),

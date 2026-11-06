@@ -6,6 +6,7 @@ import '../data/live_state.dart';
 import '../data/planner.dart';
 import '../data/tasks.dart';
 import '../data/where.dart';
+import '../l10n.dart';
 import '../nav.dart';
 import '../theme.dart';
 import 'item_screen.dart';
@@ -30,7 +31,7 @@ Future<void> addGoal(BuildContext context, Item item, int suggested) async {
         (ctx) => StatefulBuilder(
           builder:
               (ctx, set) => AlertDialog(
-                title: Text('Plan ${item.name}'),
+                title: Text(tr('Plan {item}', {'item': gt(item.name)})),
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -58,11 +59,11 @@ Future<void> addGoal(BuildContext context, Item item, int suggested) async {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancel'),
+                    child: Text(tr('Cancel')),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Add to list'),
+                    child: Text(tr('Add to list')),
                   ),
                 ],
               ),
@@ -72,7 +73,14 @@ Future<void> addGoal(BuildContext context, Item item, int suggested) async {
     await goals.add(item.id, n);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${item.name} ×$n added to the shopping list')),
+        SnackBar(
+          content: Text(
+            tr('{item} ×{n} added to the shopping list', {
+              'item': gt(item.name),
+              'n': n,
+            }),
+          ),
+        ),
       );
     }
   }
@@ -103,11 +111,11 @@ class PlansScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plan'),
+        title: Text(tr('Plan')),
         actions: [
           if (gather.isNotEmpty)
             IconButton(
-              tooltip: 'Show where to get everything on the map',
+              tooltip: tr('Show where to get everything on the map'),
               icon: const Icon(Icons.map_outlined),
               onPressed: () {
                 Navigator.of(context).popUntil((r) => r.isFirst);
@@ -121,9 +129,10 @@ class PlansScreen extends StatelessWidget {
               ? Center(
                 child: EmptyState(
                   icon: Icons.checklist,
-                  title: 'Nothing planned yet',
-                  message:
-                      'Add missing gear from Character, or tap + on any item. The plan then lists unlocks, stations, where to gather and what to craft.',
+                  title: tr('Nothing planned yet'),
+                  message: tr(
+                    'Add missing gear from Character, or tap + on any item. The plan then lists unlocks, stations, where to gather and what to craft.',
+                  ),
                   actions: [
                     FilledButton.tonal(
                       onPressed:
@@ -131,11 +140,11 @@ class PlansScreen extends StatelessWidget {
                             Tabs.character,
                             character: CharacterTabs.gear,
                           ),
-                      child: const Text('Missing gear'),
+                      child: Text(tr('Missing gear')),
                     ),
                     OutlinedButton(
                       onPressed: () => goTo(Tabs.codex),
-                      child: const Text('Browse items'),
+                      child: Text(tr('Browse items')),
                     ),
                   ],
                 ),
@@ -144,11 +153,13 @@ class PlansScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 32),
                 children: [
                   if (state == null)
-                    const Padding(
-                      padding: EdgeInsets.all(12),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
                       child: Text(
-                        'No live data from the PC agent: counting as if you own nothing.',
-                        style: TextStyle(color: Palette.ember),
+                        tr(
+                          'No live data from the PC agent: counting as if you own nothing.',
+                        ),
+                        style: const TextStyle(color: Palette.ember),
                       ),
                     ),
                   FutureBuilder<Terrain>(
@@ -176,7 +187,7 @@ class PlansScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  const SectionTitle('Goals'),
+                  SectionTitle(tr('Goals')),
                   for (var i = 0; i < goals.all.length; i++)
                     Card(
                       child: ExpansionTile(
@@ -187,12 +198,12 @@ class PlansScreen extends StatelessWidget {
                           fallback: Icons.flag_outlined,
                         ),
                         title: Text(
-                          '${db.nameOf(goals.all[i].itemId)} ×${goals.all[i].count}',
+                          '${db.shownName(goals.all[i].itemId)} ×${goals.all[i].count}',
                         ),
                         subtitle: Text(
                           steps[i].recipe == null
-                              ? 'No recipe: gather it'
-                              : '${db.workshops[steps[i].recipe!.workshopId]?.name ?? ''}${planner.unlocked(steps[i].recipe!) ? '' : ' · locked'}',
+                              ? tr('No recipe: gather it')
+                              : '${gtn(db.workshops[steps[i].recipe!.workshopId]?.name) ?? ''}${planner.unlocked(steps[i].recipe!) ? '' : tr(' · locked')}',
                           style: TextStyle(
                             color:
                                 steps[i].recipe != null &&
@@ -206,7 +217,7 @@ class PlansScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              tooltip: 'One fewer',
+                              tooltip: tr('One fewer'),
                               icon: const Icon(Icons.remove),
                               onPressed:
                                   () => goals.setCount(
@@ -215,7 +226,7 @@ class PlansScreen extends StatelessWidget {
                                   ),
                             ),
                             IconButton(
-                              tooltip: 'One more',
+                              tooltip: tr('One more'),
                               icon: const Icon(Icons.add),
                               onPressed:
                                   () => goals.setCount(
@@ -267,18 +278,22 @@ class _StepView extends StatelessWidget {
   Widget build(BuildContext context) {
     final (icon, color, text) =
         step.missing == 0
-            ? (Icons.check_circle, Palette.spring, 'have ${step.need}')
+            ? (
+              Icons.check_circle,
+              Palette.spring,
+              tr('have {n}', {'n': step.need}),
+            )
             : step.crafted
             ? (
               Icons.handyman_outlined,
               planner.unlocked(step.recipe!) ? Palette.flame : Palette.ember,
-              '${step.fromStock > 0 ? 'have ${step.fromStock}, ' : ''}craft ${step.batches}× at ${db.workshops[step.recipe!.workshopId]?.name ?? '?'}'
-                  '${planner.unlocked(step.recipe!) ? '' : ' (locked)'}',
+              '${step.fromStock > 0 ? tr('have {n}, ', {'n': step.fromStock}) : ''}${tr('craft {n}× at {station}', {'n': step.batches, 'station': gtn(db.workshops[step.recipe!.workshopId]?.name) ?? '?'})}'
+                  '${planner.unlocked(step.recipe!) ? '' : tr(' (locked)')}',
             )
             : (
               Icons.hardware_outlined,
               Palette.ember,
-              '${step.fromStock > 0 ? 'have ${step.fromStock}, ' : ''}gather ${step.missing}',
+              '${step.fromStock > 0 ? tr('have {n}, ', {'n': step.fromStock}) : ''}${tr('gather {n}', {'n': step.missing})}',
             );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,7 +311,7 @@ class _StepView extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: '${step.need} × ${db.nameOf(step.ref)}',
+                          text: '${step.need} × ${db.shownName(step.ref)}',
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         TextSpan(
@@ -325,10 +340,10 @@ class _StepView extends StatelessWidget {
 }
 
 String _kindLabel(RankedSpot r) => switch (r.spot.kind) {
-  'gather' => 'Gather',
-  'unique' => 'Unique loot',
-  'zone' => 'Zone: ${r.spot.zone}',
-  _ => r.spot.poi?.title.split(' · ').first ?? 'Chest',
+  'gather' => tr('Gather'),
+  'unique' => tr('Unique loot'),
+  'zone' => tr('Zone: {zone}', {'zone': gtn(r.spot.zone)}),
+  _ => gtn(r.spot.poi?.title)?.split(' · ').first ?? tr('Chest'),
 };
 
 void _showOnMap(
@@ -358,13 +373,13 @@ class _TaskList extends StatelessWidget {
   /// Tasks you can do where you stand (live position), shown first.
   final List<NextUp> here;
 
-  static const stages = [
-    (TaskKind.unlock, 'Unlock recipes'),
-    (TaskKind.station, 'Build stations'),
-    (TaskKind.prepare, 'Prepare'),
-    (TaskKind.gather, 'Gather and find'),
-    (TaskKind.fetch, 'Take from storage'),
-    (TaskKind.craft, 'Craft, in this order'),
+  static List<(TaskKind, String)> get stages => [
+    (TaskKind.unlock, tr('Unlock recipes')),
+    (TaskKind.station, tr('Build stations')),
+    (TaskKind.prepare, tr('Prepare')),
+    (TaskKind.gather, tr('Gather and find')),
+    (TaskKind.fetch, tr('Take from storage')),
+    (TaskKind.craft, tr('Craft, in this order')),
   ];
 
   @override
@@ -374,7 +389,7 @@ class _TaskList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionTitle('Tasks · $open to do'),
+        SectionTitle(tr('Tasks · {n} to do', {'n': open})),
         if (here.isNotEmpty)
           Card(
             color: Palette.spring.withValues(alpha: 0.10),
@@ -383,15 +398,19 @@ class _TaskList extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 6, 16, 2),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
                     child: Row(
                       children: [
-                        Icon(Icons.near_me, size: 18, color: Palette.spring),
-                        SizedBox(width: 8),
+                        const Icon(
+                          Icons.near_me,
+                          size: 18,
+                          color: Palette.spring,
+                        ),
+                        const SizedBox(width: 8),
                         Text(
-                          'Here now',
-                          style: TextStyle(
+                          tr('Here now'),
+                          style: const TextStyle(
                             fontFamily: 'Cinzel',
                             fontWeight: FontWeight.w700,
                             color: Palette.spring,
@@ -470,11 +489,13 @@ class _TaskList extends StatelessWidget {
                 ),
               ),
             ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
           child: Text(
-            'Stock counts your bag and every chest in every base. Splitting it by base needs chest positions (the two-chest test).',
-            style: TextStyle(color: Palette.ash, fontSize: 12),
+            tr(
+              'Stock counts your bag and every chest in every base. Splitting it by base needs chest positions (the two-chest test).',
+            ),
+            style: const TextStyle(color: Palette.ash, fontSize: 12),
           ),
         ),
       ],
@@ -526,8 +547,8 @@ class _TaskTile extends StatelessWidget {
                     s.spots.isEmpty
                         ? (s.checkable
                             ? null
-                            : const Text(
-                              'The save can\'t tell whether this is done',
+                            : Text(
+                              tr('The save can\'t tell whether this is done'),
                               style: sub,
                             ))
                         : Text(
@@ -545,7 +566,7 @@ class _TaskTile extends StatelessWidget {
                                 s.itemId!,
                                 s.spots.first,
                               ),
-                          child: const Text('Map'),
+                          child: Text(tr('Map')),
                         ),
               ),
             if (t.itemId != null)
@@ -553,7 +574,7 @@ class _TaskTile extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => open(t.itemId!),
-                  child: const Text('Item page'),
+                  child: Text(tr('Item page')),
                 ),
               ),
           ],
@@ -569,7 +590,7 @@ class _TaskTile extends StatelessWidget {
               craftable
                   ? TextButton(
                     onPressed: () => addGoal(context, db.items[t.itemId]!, 1),
-                    child: const Text('Plan it'),
+                    child: Text(tr('Plan it')),
                   )
                   : null,
           onTap: () => open(t.itemId!),
@@ -598,7 +619,9 @@ class _TaskTile extends StatelessWidget {
                 t.detail!,
               if (best != null) '${_kindLabel(best)} · ${best.describe()}',
               if (best == null && t.detail == null)
-                'No mapped spot: mined from terrain, or from vendors or quests',
+                tr(
+                  'No mapped spot: mined from terrain, or from vendors or quests',
+                ),
             ].join('\n'),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
@@ -613,7 +636,7 @@ class _TaskTile extends StatelessWidget {
                 subtitle: Text(r.describe(), style: sub),
                 trailing: TextButton(
                   onPressed: () => _showOnMap(context, where, t.itemId!, r),
-                  child: const Text('Map'),
+                  child: Text(tr('Map')),
                 ),
               ),
             if (t.detail != null &&
@@ -628,7 +651,7 @@ class _TaskTile extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => open(t.itemId!),
-                  child: const Text('Item page'),
+                  child: Text(tr('Item page')),
                 ),
               ),
           ],
@@ -650,7 +673,10 @@ class _TaskTile extends StatelessWidget {
             ring: t.ready ? Palette.spring : Palette.flame,
           ),
           title: Text(t.title),
-          subtitle: Text(t.ready ? 'In your bag' : t.detail ?? '', style: sub),
+          subtitle: Text(
+            t.ready ? tr('In your bag') : t.detail ?? '',
+            style: sub,
+          ),
           onTap: t.itemId == null ? null : () => open(t.itemId!),
         );
       case TaskKind.craft:

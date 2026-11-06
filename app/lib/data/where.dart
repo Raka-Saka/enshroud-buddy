@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 
+import '../l10n.dart';
+
 import 'game_db.dart';
 import 'live_state.dart';
 import 'shroud.dart';
@@ -155,54 +157,74 @@ class RankedSpot {
 
   /// "1.4 km from Copper Camp · area level 22 · Shroud 3 · cold".
   String describe() => [
-    if (spot.zone != null) 'somewhere in ${spot.zone}',
-    if (base != null) '${distanceText(distanceM)} from $base',
+    if (spot.zone != null) tr('somewhere in {zone}', {'zone': gt(spot.zone!)}),
+    if (base != null)
+      base == 'you'
+          ? tr('{distance} from you', {'distance': distanceText(distanceM)})
+          : tr('{distance} from {base}', {
+            'distance': distanceText(distanceM),
+            'base': base,
+          }),
     if (spot.areaLevel > 0)
-      'area level ${spot.areaLevel}${levelGap > 3 ? ' (+$levelGap)' : ''}',
+      levelGap > 3
+          ? tr('area level {n} (+{gap})', {
+            'n': spot.areaLevel,
+            'gap': levelGap,
+          })
+          : tr('area level {n}', {'n': spot.areaLevel}),
     if (shroudLevel != null)
       shroudBlocked
-          ? 'Shroud $shroudLevel: above your Flame'
-          : 'Shroud $shroudLevel: timer runs',
+          ? tr('Shroud {n}: above your Flame', {'n': shroudLevel})
+          : tr('Shroud {n}: timer runs', {'n': shroudLevel}),
     if (cold)
       coldProtected
-          ? 'cold (your Flame stops freezing)'
-          : 'cold: frost resistance',
+          ? tr('cold (your Flame stops freezing)')
+          : tr('cold: frost resistance'),
     if (spot.share != null)
-      'fishing spot · ${spot.share!.toStringAsFixed(spot.share! < 10 ? 1 : 0)}% of fish',
+      tr('fishing spot · {share}% of fish', {
+        'share': spot.share!.toStringAsFixed(spot.share! < 10 ? 1 : 0),
+      }),
     if (spot.count > 1)
-      '${spot.count} ${spot.mixed ? 'random containers' : 'spots'}',
-    if (spot.mixed && spot.count <= 1) 'random container',
-    if (odds != null) '$rarity ${odds!.toStringAsFixed(odds! < 10 ? 1 : 0)}%',
-    if (dropsLow) 'drops at level ${spot.areaLevel}',
-    if (underwater) 'underwater: oxygen',
+      spot.mixed
+          ? tr('{n} random containers', {'n': spot.count})
+          : tr('{n} spots', {'n': spot.count}),
+    if (spot.mixed && spot.count <= 1) tr('random container'),
+    if (odds != null)
+      tr('{rarity} {odds}%', {
+        'rarity': gtn(rarity),
+        'odds': odds!.toStringAsFixed(odds! < 10 ? 1 : 0),
+      }),
+    if (dropsLow) tr('drops at level {n}', {'n': spot.areaLevel}),
+    if (underwater) tr('underwater: oxygen'),
     if (shroudHint && shroudLevel == null)
-      spot.mixed ? 'veins in the Shroud' : 'in the Shroud',
+      spot.mixed ? tr('veins in the Shroud') : tr('in the Shroud'),
   ].join(' · ');
 }
 
-const _compass = [
-  'north',
-  'north-east',
-  'east',
-  'south-east',
-  'south',
-  'south-west',
-  'west',
-  'north-west',
-];
+/// The eight compass points, as shown.
+String _compass(int i) => switch (i) {
+  0 => tr('north'),
+  1 => tr('north-east'),
+  2 => tr('east'),
+  3 => tr('south-east'),
+  4 => tr('south'),
+  5 => tr('south-west'),
+  6 => tr('west'),
+  _ => tr('north-west'),
+};
 
 /// A compass point for a map direction (dx east, dy south, in map pixels).
 /// "35 m", "340 m", "1.4 km": to 5 m up close, 10 m under a kilometre. Every distance in the app.
 String distanceText(double m) =>
     m >= 1000
-        ? '${(m / 1000).toStringAsFixed(1)} km'
+        ? tr('{n} km', {'n': (m / 1000).toStringAsFixed(1)})
         : m < 100
-        ? '${(m / 5).round() * 5} m'
-        : '${(m / 10).round() * 10} m';
+        ? tr('{n} m', {'n': (m / 5).round() * 5})
+        : tr('{n} m', {'n': (m / 10).round() * 10});
 
 String compassOf(double dx, double dy) {
   final deg = (math.atan2(dx, -dy) * 180 / math.pi) % 360;
-  return _compass[((deg + 22.5) ~/ 45) % 8];
+  return _compass(((deg + 22.5) ~/ 45) % 8);
 }
 
 /// The base whose build box the player stands in, if any.
@@ -222,7 +244,9 @@ Base? baseAt(LiveState? state, PlayerPos p) {
 class Whereabouts {
   factory Whereabouts(GameDb db, LiveState? state, PlayerPos p) {
     final base = baseAt(state, p);
-    if (base != null) return Whereabouts._(p, 'In ${base.label}', null);
+    if (base != null) {
+      return Whereabouts._(p, tr('In {base}', {'base': base.label}), null);
+    }
     Poi? best;
     var bestD = double.infinity;
     for (final q in db.poi) {
@@ -231,12 +255,16 @@ class Whereabouts {
       final d = dx * dx + dy * dy;
       if (d < bestD) (best, bestD) = (q, d);
     }
-    if (best == null) return Whereabouts._(p, 'Live position', null);
+    if (best == null) return Whereabouts._(p, tr('Live position'), null);
     final m = math.sqrt(bestD) * World.mPerPx;
     final text =
         m < 20
-            ? 'At ${best.title}'
-            : '${_distance(m)} ${compassOf(p.x - best.x, p.y - best.y)} of ${best.title}';
+            ? tr('At {place}', {'place': gt(best.title)})
+            : tr('{distance} {direction} of {place}', {
+              'distance': _distance(m),
+              'direction': compassOf(p.x - best.x, p.y - best.y),
+              'place': gt(best.title),
+            });
     return Whereabouts._(p, text, best);
   }
 
@@ -252,11 +280,11 @@ class Whereabouts {
   /// "1144 m up · 30 m above it".
   String get height {
     final h = place?.height;
-    final up = '${pos.height.round()} m up';
+    final up = tr('{n} m up', {'n': pos.height.round()});
     if (h == null) return up;
     final diff = (pos.height - h).round();
-    if (diff.abs() < 3) return '$up · level with it';
-    return '$up · ${diff.abs()} m ${diff > 0 ? 'above' : 'below'} it';
+    if (diff.abs() < 3) return '$up · ${tr('level with it')}';
+    return '$up · ${diff > 0 ? tr('{n} m above it', {'n': diff.abs()}) : tr('{n} m below it', {'n': diff.abs()})}';
   }
 
   static String _distance(double m) => distanceText(m);
@@ -301,7 +329,7 @@ class WhereToGet {
               zone: r,
               poi: Poi({
                 'c': 'spot',
-                'k': 'Zone: $r',
+                'k': tr('Zone: {zone}', {'zone': gt(r)}),
                 't': title,
                 'x': x,
                 'y': y,

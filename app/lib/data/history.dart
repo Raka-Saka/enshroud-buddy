@@ -1,3 +1,4 @@
+import '../l10n.dart';
 import 'game_db.dart';
 
 /// One progress snapshot from the PC agent (tools/history.py), taken at a game save.
@@ -34,35 +35,51 @@ List<String> changes(
   String Function(String) name, [
   Balancing? balancing,
 ]) {
-  String up(String what, int from, int to) => '$what $to (+${to - from})';
   final out = <String>[
-    if (b.level > a.level) up('Level', a.level, b.level),
-    if (b.flame > a.flame) up('Flame strength', a.flame, b.flame),
+    if (b.level > a.level)
+      tr('Level {n} (+{up})', {'n': b.level, 'up': b.level - a.level}),
+    if (b.flame > a.flame)
+      tr('Flame strength {n} (+{up})', {
+        'n': b.flame,
+        'up': b.flame - a.flame,
+      }),
     if (b.roots > a.roots)
-      '+${b.roots - a.roots} Shroud Root${b.roots - a.roots > 1 ? 's' : ''} claimed',
+      trn(
+        b.roots - a.roots,
+        '+{n} Shroud Root claimed',
+        '+{n} Shroud Roots claimed',
+      ),
     if (b.wells > a.wells)
-      '+${b.wells - a.wells} Elixir Well${b.wells - a.wells > 1 ? 's' : ''} cleared',
-    if (b.ranks > a.ranks) _n(b.ranks - a.ranks, 'skill rank'),
-    if (b.recipes > a.recipes) _n(b.recipes - a.recipes, 'recipe'),
+      trn(
+        b.wells - a.wells,
+        '+{n} Elixir Well cleared',
+        '+{n} Elixir Wells cleared',
+      ),
+    if (b.ranks > a.ranks)
+      trn(b.ranks - a.ranks, '+{n} skill rank', '+{n} skill ranks'),
+    if (b.recipes > a.recipes)
+      trn(b.recipes - a.recipes, '+{n} recipe', '+{n} recipes'),
     for (final e in b.bases.entries)
       if (!a.bases.containsKey(e.key))
-        'New base: ${_baseLabel(e.key)}'
+        tr('New base: {base}', {'base': _baseLabel(e.key)})
       else if (e.value > a.bases[e.key]!)
-        '${_baseLabel(e.key)}: altar ${e.value} (${balancing?.zoneAt(e.value) ?? '?'} zone)',
+        tr('{base}: altar {n} ({zone} zone)', {
+          'base': _baseLabel(e.key),
+          'n': e.value,
+          'zone': balancing?.zoneAt(e.value) ?? '?',
+        }),
     for (final id in b.worn)
-      if (!a.worn.contains(id)) 'Wearing ${name(id)}',
+      if (!a.worn.contains(id)) tr('Wearing {item}', {'item': gt(name(id))}),
   ];
   if (out.isEmpty && b.knowledge > a.knowledge) {
     out.add(
-      b.knowledge - a.knowledge == 1
-          ? '+1 discovery'
-          : '+${b.knowledge - a.knowledge} discoveries',
+      trn(b.knowledge - a.knowledge, '+{n} discovery', '+{n} discoveries'),
     );
   }
   return out;
 }
 
-String _n(int n, String what) => '+$n $what${n == 1 ? '' : 's'}';
-
 String _baseLabel(String key) =>
-    key.startsWith('base') ? 'Unnamed base (${key.substring(4)})' : key;
+    key.startsWith('base')
+        ? tr('Unnamed base ({n})', {'n': key.substring(4)})
+        : key;
