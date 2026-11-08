@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'data/db_store.dart';
 import 'data/game_db.dart';
 import 'data/guide.dart';
+import 'data/hunt.dart';
 import 'data/item_icons.dart';
 import 'data/live_state.dart';
 import 'data/pins.dart';
@@ -77,7 +78,12 @@ class _CompanionAppState extends State<CompanionApp> {
     L10n.changed.addListener(_relang);
     live.addListener(_maybeUpdate);
     navTarget.addListener(_sendTarget);
+    navTarget.addListener(hunt.targetChanged);
     _sendTarget();
+    hunt.send = live.setHunt;
+    live.addListener(_huntOn);
+    live.pos.addListener(_huntOn);
+    live.huntPc.addListener(_huntOn);
     for (final l in [goals, live, live.pos]) {
       l.addListener(_trackSoon);
     }
@@ -107,6 +113,13 @@ class _CompanionAppState extends State<CompanionApp> {
     );
   }
 
+  /// A hunt (data/hunt.dart) moves on as you walk and as the save fills in.
+  Future<void> _huntOn() async {
+    if (!hunt.on) return;
+    final current = await db;
+    hunt.update(current, live.state, live.pos.value, pc: live.huntPc.value);
+  }
+
   /// The guide's target goes to the PC as well, which marks it over the game (tools/overlay.py).
   void _sendTarget() {
     final t = navTarget.value;
@@ -130,6 +143,10 @@ class _CompanionAppState extends State<CompanionApp> {
     L10n.changed.removeListener(_relang);
     live.removeListener(_maybeUpdate);
     navTarget.removeListener(_sendTarget);
+    navTarget.removeListener(hunt.targetChanged);
+    live.removeListener(_huntOn);
+    live.pos.removeListener(_huntOn);
+    live.huntPc.removeListener(_huntOn);
     for (final l in [goals, live, live.pos]) {
       l.removeListener(_trackSoon);
     }

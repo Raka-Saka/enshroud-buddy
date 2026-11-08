@@ -441,6 +441,11 @@
    "data/hall_check.dart"
   ]
  },
+ "Both": {
+  "files": [
+   "data/hunt.dart"
+  ]
+ },
  "Bow": {
   "files": [
    "labels.dart"
@@ -1201,6 +1206,21 @@
    "screens/item_screen.dart"
   ]
  },
+ "Hunt nearby": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "Hunt: {n} left": {
+  "files": [
+   "screens/map_screen.dart"
+  ]
+ },
+ "Hunting: {what} · {n} left": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
  "Ice": {
   "files": [
    "data/build.dart"
@@ -1460,6 +1480,7 @@
  },
  "Lore": {
   "files": [
+   "data/hunt.dart",
    "data/tracker.dart",
    "screens/codex_screen.dart",
    "screens/lore_screen.dart",
@@ -1478,6 +1499,7 @@
  },
  "Lore: {title}": {
   "files": [
+   "data/hunt.dart",
    "data/tracker.dart"
   ]
  },
@@ -1645,6 +1667,11 @@
  "Next up": {
   "files": [
    "screens/home_screen.dart"
+  ]
+ },
+ "Next: {title}": {
+  "files": [
+   "screens/plans_screen.dart"
   ]
  },
  "No Enshrouded saves on that PC yet: play once, then come back.": {
@@ -2311,7 +2338,8 @@
  },
  "Show on the map": {
   "files": [
-   "screens/character_screen.dart"
+   "screens/character_screen.dart",
+   "screens/plans_screen.dart"
   ]
  },
  "Show where to get everything on the map": {
@@ -2412,6 +2440,12 @@
    "data/build.dart"
   ]
  },
+ "Skip this one": {
+  "files": [
+   "screens/map_screen.dart",
+   "screens/plans_screen.dart"
+  ]
+ },
  "Slot {slot} · saved {time}": {
   "files": [
    "screens/setup_screen.dart"
@@ -2508,6 +2542,11 @@
    "screens/plans_screen.dart"
   ]
  },
+ "Stop": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
  "Stop guiding": {
   "files": [
    "screens/map_screen.dart"
@@ -2597,6 +2636,11 @@
  "The game data has no unlock condition for this recipe: usually an artisan or a quest.": {
   "files": [
    "data/tasks.dart"
+  ]
+ },
+ "The guide leads to the nearest one you are missing, then on to the next.": {
+  "files": [
+   "screens/plans_screen.dart"
   ]
  },
  "The save can't tell whether this is done": {
@@ -2711,6 +2755,7 @@
  },
  "Unique loot": {
   "files": [
+   "data/hunt.dart",
    "data/tracker.dart",
    "screens/item_screen.dart",
    "screens/map_screen.dart",
@@ -2807,7 +2852,8 @@
  },
  "Waiting for your position from the game": {
   "files": [
-   "screens/map_screen.dart"
+   "screens/map_screen.dart",
+   "screens/plans_screen.dart"
   ]
  },
  "Walk {distance} {direction} to the drop": {

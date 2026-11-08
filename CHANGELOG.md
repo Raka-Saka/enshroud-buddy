@@ -3,6 +3,14 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.40.0 (2026-11-08)
+
+- **Hunt:** Plan → Hunt nearby → Lore, Unique loot or Both. The guide leads to the nearest one you're missing,
+  and once you've been there and walked on, to the next nearest, by itself. The PC runs it, so the marker over
+  the game keeps moving on with the phone asleep in your pocket. Skip one from the guide card on the map.
+- Fixed: the PC program could crash after the pairing window had been opened (for example when switching to
+  another character), leaving the phone without data until it was started again.
+
 ## 0.39.0 (2026-11-06)
 
 - **iPhone, iPad and any browser:** the PC program now serves the app as a web page. Click the tray icon (Pair a

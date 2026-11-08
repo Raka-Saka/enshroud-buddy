@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../data/game_db.dart';
+import '../data/guide.dart';
+import '../data/hunt.dart';
 import '../data/item_icons.dart';
 import '../data/live_state.dart';
 import '../data/planner.dart';
@@ -126,32 +128,36 @@ class PlansScreen extends StatelessWidget {
       ),
       body:
           goals.all.isEmpty
-              ? Center(
-                child: EmptyState(
-                  icon: Icons.checklist,
-                  title: tr('Nothing planned yet'),
-                  message: tr(
-                    'Add missing gear from Character, or tap + on any item. The plan then lists unlocks, stations, where to gather and what to craft.',
+              ? ListView(
+                children: [
+                  _HuntCard(db: db),
+                  EmptyState(
+                    icon: Icons.checklist,
+                    title: tr('Nothing planned yet'),
+                    message: tr(
+                      'Add missing gear from Character, or tap + on any item. The plan then lists unlocks, stations, where to gather and what to craft.',
+                    ),
+                    actions: [
+                      FilledButton.tonal(
+                        onPressed:
+                            () => goTo(
+                              Tabs.character,
+                              character: CharacterTabs.gear,
+                            ),
+                        child: Text(tr('Missing gear')),
+                      ),
+                      OutlinedButton(
+                        onPressed: () => goTo(Tabs.codex),
+                        child: Text(tr('Browse items')),
+                      ),
+                    ],
                   ),
-                  actions: [
-                    FilledButton.tonal(
-                      onPressed:
-                          () => goTo(
-                            Tabs.character,
-                            character: CharacterTabs.gear,
-                          ),
-                      child: Text(tr('Missing gear')),
-                    ),
-                    OutlinedButton(
-                      onPressed: () => goTo(Tabs.codex),
-                      child: Text(tr('Browse items')),
-                    ),
-                  ],
-                ),
+                ],
               )
               : ListView(
                 padding: const EdgeInsets.only(bottom: 32),
                 children: [
+                  _HuntCard(db: db),
                   if (state == null)
                     Padding(
                       padding: const EdgeInsets.all(12),
@@ -256,6 +262,105 @@ class PlansScreen extends StatelessWidget {
                     ),
                 ],
               ),
+    );
+  }
+}
+
+/// Hunt everything of a kind nearby (data/hunt.dart): the guide leads to the nearest one still missing, then on
+/// to the next.
+class _HuntCard extends StatelessWidget {
+  const _HuntCard({required this.db});
+  final GameDb db;
+
+  @override
+  Widget build(BuildContext context) {
+    final live = LiveScope.of(context);
+    return ListenableBuilder(
+      listenable: hunt,
+      builder: (context, _) {
+        final k = hunt.kind;
+        final c = hunt.current;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.travel_explore,
+                    color: Palette.flame,
+                  ),
+                  title: Text(
+                    k == null
+                        ? tr('Hunt nearby')
+                        : tr('Hunting: {what} · {n} left', {
+                          'what': hunt.label(k),
+                          'n': hunt.left,
+                        }),
+                  ),
+                  subtitle: Text(
+                    k == null
+                        ? tr(
+                          'The guide leads to the nearest one you are missing, then on to the next.',
+                        )
+                        : c == null
+                        ? tr('Waiting for your position from the game')
+                        : tr('Next: {title}', {
+                          'title': navTarget.value?.title ?? gt(c.title),
+                        }),
+                    style: const TextStyle(color: Palette.ash, fontSize: 12),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children:
+                        k == null
+                            ? [
+                              for (final kind in HuntKind.values)
+                                FilledButton.tonal(
+                                  onPressed: () {
+                                    hunt.start(
+                                      kind,
+                                      db,
+                                      live.state,
+                                      live.pos.value,
+                                    );
+                                    goTo(Tabs.map);
+                                  },
+                                  child: Text(hunt.label(kind)),
+                                ),
+                            ]
+                            : [
+                              FilledButton.tonal(
+                                onPressed: () => goTo(Tabs.map),
+                                child: Text(tr('Show on the map')),
+                              ),
+                              OutlinedButton(
+                                onPressed:
+                                    () => hunt.skip(
+                                      db,
+                                      live.state,
+                                      live.pos.value,
+                                      pc: live.huntPc.value,
+                                    ),
+                                child: Text(tr('Skip this one')),
+                              ),
+                              TextButton(
+                                onPressed: hunt.stop,
+                                child: Text(tr('Stop')),
+                              ),
+                            ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -30,6 +30,8 @@ Endpoints (port 4750):
                     or {"live": false}
     POST /target, /tracker  what the overlay over the game shows (tools/overlay.py): the guide's target and
                     the plan's tracker; {} clears it
+    POST /hunt      the phone's hunt (tools/hunt.py): the places still missing, led to nearest first from here
+                    on, so it goes on with the phone asleep; GET /pos says where it is ("hunt"); {} stops it
     POST /ask       {"q", "session"?, "context"?} -> {"answer", "session", "seconds"}: headless Claude Code on this
                     PC (tools/ask.py), read-only over the live character and the game data; LAN clients only
     POST /ask/stream  the same, answered as it is written: one JSON object per line ({"status"}, {"reset"},
@@ -61,6 +63,7 @@ from paths import DATA, EXPORT, FROZEN, RES  # noqa: E402
 import ask as ask_mod  # noqa: E402
 import glide as glide_mod  # noqa: E402
 import history as history_mod  # noqa: E402
+import hunt as hunt_mod  # noqa: E402
 import livepos as livepos_mod  # noqa: E402
 import motion as motion_mod  # noqa: E402
 import overlay as overlay_mod  # noqa: E402
@@ -93,6 +96,7 @@ class Agent:
         self.overlay_on = load_config().get("overlay", True)  # the guide over the game (tools/overlay.py)
         self.target = None  # the phone guide's target, {"title", "x", "y", "h"} (POST /target)
         self.tracker = None  # the phone plan's next tasks, {"title", "open", "lines", "target"} (POST /tracker)
+        self.hunt = hunt_mod.Hunt()  # the phone's hunt, run here so it moves on while the phone sleeps (POST /hunt)
         self.lp = livepos_mod.LivePos(log=log)
         self.glider = None  # the equipped glider's item id, for the glide calibration
         self.glides = glide_mod.GlideLog(DATA / "glide.json", log=log)
@@ -184,6 +188,11 @@ class Agent:
                     pos["glide"] = glide
             with self.lock:
                 self.pos = pos
+                if pos and self.hunt.on:
+                    before = self.hunt.cur
+                    cur = self.hunt.step(pos)
+                    if cur is not before:  # only on a change: a target picked on the phone stays until then
+                        self.target = None if cur is None else dict(cur)
             stop.wait(1)
 
     def live_for_ask(self):
@@ -518,8 +527,9 @@ def make_handler(agent, key):
                     "/fog_overlay.png": (agent.fog_overlay_png, "image/png"),
                     "/history": (agent.history.json(), "application/json"),
                     "/db/version": (db_version(), "application/json"),
-                    "/pos": (json.dumps({"live": True, **agent.pos} if agent.pos else {"live": False}).encode(),
-                             "application/json"),
+                    "/pos": (json.dumps({**({"live": True, **agent.pos} if agent.pos else {"live": False}),
+                                         **({"hunt": agent.hunt.status()} if agent.hunt.on else {})},
+                                        ensure_ascii=False).encode(), "application/json; charset=utf-8"),
                 }
                 current = {"folder": str(agent.saves), "world": agent.world, "character": agent.character,
                            "guest_flame": agent.guest_flame}
@@ -641,12 +651,12 @@ def make_handler(agent, key):
 
         def do_POST(self):
             path = self.path.split("?")[0]
-            if path not in ("/ask", "/ask/stream", "/select", "/target", "/tracker"):
+            if path not in ("/ask", "/ask/stream", "/select", "/target", "/tracker", "/hunt"):
                 self.send_error(404)
                 return
             if not self.allowed():
                 return
-            if path in ("/target", "/tracker"):
+            if path in ("/target", "/tracker", "/hunt"):
                 self.set_overlay(path)
                 return
             if path == "/select":
@@ -697,13 +707,16 @@ def make_handler(agent, key):
             import hmac
 
             try:
-                body = self.read_body(8000)
+                body = self.read_body(400000 if path == "/hunt" else 8000)
                 want = sign(key, self.headers.get("X-Buddy-Nonce") or "", hashlib.sha256(body).hexdigest())
                 if not hmac.compare_digest((self.headers.get("X-Buddy-Body") or "").encode(), want.encode()):
                     raise ValueError("unsigned body")
                 req = json.loads(body or b"{}")
                 if path == "/target":
                     agent.target = overlay_target(req)
+                elif path == "/hunt":
+                    with agent.lock:
+                        agent.hunt.set(req)
                 else:
                     agent.tracker = overlay_tracker(req)
                     set_lang((agent.tracker or {}).get("lang"))
@@ -926,6 +939,29 @@ def web_link(host=None):
     return f"http://{host or web_ips()[0]}:{PORT}/app/#k={pairing_key()}"
 
 
+PAIR_PROC = [None]  # the pairing window's process, while it runs
+
+
+def open_pairing():
+    """The pairing window (show_pairing), in a process of its own. Tk inside the agent ended it twice: what a
+    closed window leaves behind is freed by whichever thread collects garbage next, and Tk touched from a
+    thread other than its own aborts the whole program. Asked again while open, the open one comes forward."""
+    import ctypes
+
+    p = PAIR_PROC[0]
+    if p is not None and p.poll() is None:
+        u32 = ctypes.windll.user32
+        hwnd = u32.FindWindowW(None, t("Enshroud Buddy: pair your phone"))
+        if hwnd:
+            u32.ShowWindow(hwnd, 9)  # SW_RESTORE
+            u32.SetForegroundWindow(hwnd)
+        return
+    args = [sys.executable] + ([] if FROZEN else [str(pathlib.Path(__file__).resolve())]) + ["--pair-window"]
+    if REACHED[0]:
+        args += ["--reached", REACHED[0]]
+    PAIR_PROC[0] = subprocess.Popen(args, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+
+
 def show_pairing():
     """A small window with the QR code to scan in the app's Setup, and the same details to type instead."""
     import tkinter as tk
@@ -1086,8 +1122,7 @@ def run_tray(agent, stop, quit_now=None):
         pystray.MenuItem(lambda _i: code(), None, enabled=False),
         pystray.MenuItem(lambda _i: reading(), None, enabled=False),
         pystray.MenuItem(lambda _i: status(), None, enabled=False),
-        pystray.MenuItem(lambda _i: t("Pair a phone (QR code)"), lambda i, it: threading.Thread(target=show_pairing,
-                                                                                    daemon=True).start(),
+        pystray.MenuItem(lambda _i: t("Pair a phone (QR code)"), lambda i, it: open_pairing(),
                          default=True),
         pystray.MenuItem(lambda _i: t("Live position (reads the game's memory)"), lambda i, it: set_live(agent, not agent.live_on),
                          checked=lambda _i: agent.live_on),
@@ -1120,8 +1155,21 @@ def main():
     ap.add_argument("--install-autostart", action="store_true")
     ap.add_argument("--uninstall-autostart", action="store_true")
     ap.add_argument("--pair", action="store_true", help="show the pairing QR code once started")
+    ap.add_argument("--pair-window", action="store_true", help=argparse.SUPPRESS)  # open_pairing's process
+    ap.add_argument("--reached", help=argparse.SUPPRESS)
     a = ap.parse_args()
+    try:  # a crash in native code (Tk, a DLL) leaves no Python error behind: this writes where it happened
+        import faulthandler
+
+        main.crash_log = open(DATA / "crash.log", "a", encoding="utf-8")  # kept open for faulthandler
+        faulthandler.enable(main.crash_log)
+    except (OSError, RuntimeError):
+        pass
     pc_text.load(load_config().get("lang"))
+    if a.pair_window:
+        REACHED[0] = a.reached
+        show_pairing()
+        return 0
     if self_install():
         return 0
     if a.install_autostart:
@@ -1158,7 +1206,7 @@ def main():
     if FROZEN:  # Ask reads wiki pages as needed now; drop a bulk copy an older version kept
         shutil.rmtree(DATA / "ask" / "wiki", ignore_errors=True)
     if a.pair:
-        threading.Thread(target=show_pairing, daemon=True).start()
+        open_pairing()
     if a.no_live:
         agent.live_on = False  # for this run; the tray's switch can still turn it on
         log("live position off (--no-live): the game's memory isn't read")

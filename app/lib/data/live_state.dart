@@ -490,6 +490,7 @@ class Live extends ChangeNotifier {
     _posBusy = true;
     try {
       final j = jsonDecode(await _get('/pos')) as Map<String, dynamic>;
+      huntPc.value = j['hunt'] as Map<String, dynamic>?;
       if (j['live'] == true) {
         _posSeen = DateTime.now();
         _setPos(PlayerPos(j));
@@ -738,6 +739,12 @@ class Live extends ChangeNotifier {
 
   void setTarget(Map<String, Object?>? t) => _overlaySet('/target', t);
   void setTracker(Map<String, Object?>? t) => _overlaySet('/tracker', t);
+
+  /// The hunt's places left, run on the PC (data/hunt.dart, tools/hunt.py); null stops it.
+  void setHunt(Map<String, Object?>? h) => _overlaySet('/hunt', h);
+
+  /// Where the PC's hunt is (GET /pos "hunt": {"cur", "left", "passed"}), null without one (or an older agent).
+  final huntPc = ValueNotifier<Map<String, dynamic>?>(null);
 
   void _overlaySet(String path, Map<String, Object?>? payload) {
     final body = jsonEncode(payload ?? const {});

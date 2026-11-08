@@ -11,6 +11,7 @@ import 'package:latlong2/latlong.dart';
 import '../data/game_db.dart';
 import '../data/clusters.dart';
 import '../data/guide.dart';
+import '../data/hunt.dart';
 import '../data/hall_check.dart';
 import '../data/hall_plan.dart';
 import '../data/item_icons.dart';
@@ -2324,6 +2325,17 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                     onTap: _followMe,
                     onClose: () => navTarget.value = null,
+                    onSkip:
+                        hunt.on
+                            ? () => hunt.skip(
+                              widget.db,
+                              s,
+                              _live?.pos.value,
+                              pc: _live?.huntPc.value,
+                            )
+                            : null,
+                    note:
+                        hunt.on ? tr('Hunt: {n} left', {'n': hunt.left}) : null,
                   ),
                 );
               }
@@ -2758,8 +2770,14 @@ class _GuideCard extends StatelessWidget {
     required this.guide,
     required this.onTap,
     required this.onClose,
+    this.onSkip,
+    this.note,
   });
   final NavTarget target;
+
+  /// A hunt's skip and how many are left (data/hunt.dart).
+  final VoidCallback? onSkip;
+  final String? note;
   final PlayerPos? pos;
   final LaunchPlan? plan;
   final Guide? guide;
@@ -2836,6 +2854,13 @@ class _GuideCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                  if (onSkip != null)
+                    IconButton(
+                      tooltip: tr('Skip this one'),
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.skip_next, size: 20),
+                      onPressed: onSkip,
+                    ),
                   IconButton(
                     tooltip: tr('Stop guiding'),
                     visualDensity: VisualDensity.compact,
@@ -2844,6 +2869,11 @@ class _GuideCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (note != null)
+                Text(
+                  note!,
+                  style: const TextStyle(color: Palette.ash, fontSize: 11),
+                ),
               if (g == null)
                 Text(
                   tr('Waiting for your position from the game'),
