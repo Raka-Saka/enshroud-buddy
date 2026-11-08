@@ -3,6 +3,12 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.41.0 (2026-11-08)
+
+- **More hunts:** Shroud Roots, Elixir Wells, Ancient Obelisks, Flame Shrines and Sanctums, each with how many
+  are left, anywhere or in one region (handy for achievements). The save doesn't say which shrines and sanctums
+  are done, so those count once you've been there, remembered per world.
+
 ## 0.40.0 (2026-11-08)
 
 - **Hunt:** Plan → Hunt nearby → Lore, Unique loot or Both. The guide leads to the nearest one you're missing,

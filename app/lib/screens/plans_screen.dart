@@ -268,18 +268,33 @@ class PlansScreen extends StatelessWidget {
 
 /// Hunt everything of a kind nearby (data/hunt.dart): the guide leads to the nearest one still missing, then on
 /// to the next.
-class _HuntCard extends StatelessWidget {
+class _HuntCard extends StatefulWidget {
   const _HuntCard({required this.db});
   final GameDb db;
 
   @override
+  State<_HuntCard> createState() => _HuntCardState();
+}
+
+class _HuntCardState extends State<_HuntCard> {
+  /// The region to hunt in, or anywhere.
+  String? region;
+
+  @override
   Widget build(BuildContext context) {
+    final db = widget.db;
     final live = LiveScope.of(context);
     return ListenableBuilder(
       listenable: hunt,
       builder: (context, _) {
         final k = hunt.kind;
         final c = hunt.current;
+        final here = switch (live.pos.value) {
+          final p? => db.regionAt(p.x, p.y),
+          null => null,
+        };
+        final regions = [...db.regionNames]
+          ..sort((a, b) => gt(a).compareTo(gt(b)));
         return Card(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 10),
@@ -295,7 +310,10 @@ class _HuntCard extends StatelessWidget {
                     k == null
                         ? tr('Hunt nearby')
                         : tr('Hunting: {what} · {n} left', {
-                          'what': hunt.label(k),
+                          'what':
+                              hunt.region == null
+                                  ? hunt.label(k)
+                                  : '${hunt.label(k)}, ${gt(hunt.region!)}',
                           'n': hunt.left,
                         }),
                   ),
@@ -312,6 +330,32 @@ class _HuntCard extends StatelessWidget {
                     style: const TextStyle(color: Palette.ash, fontSize: 12),
                   ),
                 ),
+                if (k == null && regions.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 12, 6),
+                    child: DropdownButton<String?>(
+                      value: region,
+                      isExpanded: true,
+                      onChanged: (r) => setState(() => region = r),
+                      items: [
+                        DropdownMenuItem(
+                          value: null,
+                          child: Text(tr('Anywhere')),
+                        ),
+                        for (final r in regions)
+                          DropdownMenuItem(
+                            value: r,
+                            child: Text(
+                              r == here
+                                  ? tr('{region} (you are here)', {
+                                    'region': gt(r),
+                                  })
+                                  : gt(r),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Wrap(
@@ -321,18 +365,24 @@ class _HuntCard extends StatelessWidget {
                         k == null
                             ? [
                               for (final kind in HuntKind.values)
-                                FilledButton.tonal(
-                                  onPressed: () {
-                                    hunt.start(
-                                      kind,
-                                      db,
-                                      live.state,
-                                      live.pos.value,
-                                    );
-                                    goTo(Tabs.map);
-                                  },
-                                  child: Text(hunt.label(kind)),
-                                ),
+                                if (hunt.count(db, live.state, kind, region)
+                                    case final n)
+                                  FilledButton.tonal(
+                                    onPressed:
+                                        n == 0
+                                            ? null
+                                            : () {
+                                              hunt.start(
+                                                kind,
+                                                db,
+                                                live.state,
+                                                live.pos.value,
+                                                region: region,
+                                              );
+                                              goTo(Tabs.map);
+                                            },
+                                    child: Text('${hunt.label(kind)} · $n'),
+                                  ),
                             ]
                             : [
                               FilledButton.tonal(
@@ -356,6 +406,28 @@ class _HuntCard extends StatelessWidget {
                             ],
                   ),
                 ),
+                if (k == null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 12, 0),
+                    child: Text(
+                      tr(
+                        'The save does not say which Flame Shrines and Sanctums are done: they count once you have been there.',
+                      ),
+                      style: const TextStyle(color: Palette.ash, fontSize: 11),
+                    ),
+                  ),
+                if (k == null && hunt.visitedCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: TextButton(
+                      onPressed: hunt.forgetVisited,
+                      child: Text(
+                        tr('Forget visited shrines and sanctums ({n})', {
+                          'n': hunt.visitedCount,
+                        }),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

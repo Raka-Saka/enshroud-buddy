@@ -17,8 +17,9 @@ files and shows your game on the phone, while you play or away from the PC:
   skill tree with gear advice for your level, survival numbers (Shroud time, cold, breath), and your progress
   over time.
 - **Plan**: pick what you want to make; it lists what to gather, craft and fetch, and where, nearest first,
-  with a farming route. **Hunt nearby** leads you to every lore page or unique piece you're missing, nearest
-  first, moving on to the next by itself (the PC runs it, so it carries on with the phone in your pocket).
+  with a farming route. **Hunt nearby** leads you to every lore page, unique piece, Shroud Root, Elixir Well,
+  obelisk, shrine or sanctum you're missing, anywhere or in one region, nearest first, moving on
+  to the next by itself (the PC runs it, so it carries on with the phone in your pocket).
 - **Codex**: every item, recipe, set, lore page and quest from the game's own data; find gear by the skill or
   stat it gives.
 - **Ask** (optional): questions about your game answered by Claude, from your save and the game data.

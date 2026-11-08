@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n.dart';
 import 'game_db.dart';
@@ -8,11 +9,12 @@ import 'guide.dart';
 import 'hall_check.dart';
 import 'live_state.dart';
 
-/// What a hunt is after.
-enum HuntKind { lore, uniques, both }
+/// What a hunt is after: what the save tracks (lore, unique loot, Shroud Roots, Elixir Wells, Ancient Obelisks),
+/// and places it doesn't (Flame Shrines, Sanctums), which count as done once visited, remembered per world.
+enum HuntKind { lore, uniques, both, roots, wells, obelisks, shrines, sanctums }
 
-/// A hunt: the guide leads to the nearest place still holding what's hunted (a lore page, unique loot), and
-/// on to the next nearest once it's had. "Had" is the save saying so, or, as the game saves only now and
+/// A hunt: the guide leads to the nearest place still holding what's hunted (a lore page, unique loot, a
+/// Shroud Root to clear...), anywhere or in one region, and on to the next nearest once it's had. "Had" is the save saying so, or, as the game saves only now and
 /// then, having been there (closer than [Guide.arrived]) and walked on ([leftM] away): that place is then
 /// left out of this hunt. Places inside the Hollow Halls are left out (their maps are separate).
 ///
@@ -20,6 +22,13 @@ enum HuntKind { lore, uniques, both }
 /// with the phone asleep in a pocket; while it does, the phone follows what it says (GET /pos, "hunt").
 class Hunt extends ChangeNotifier {
   HuntKind? kind;
+
+  /// Only places in this region (GameDb.regionAt), or anywhere.
+  String? region;
+
+  /// Places the save can't tell about (Flame Shrines, Sanctums) visited in earlier hunts, per world: "x,y".
+  final _visited = <String>{};
+  String? _visitedWorld;
 
   /// Sends the places left to the PC (LiveState.setHunt); null stops its hunt.
   void Function(Map<String, Object?>? places)? send;
@@ -43,8 +52,15 @@ class Hunt extends ChangeNotifier {
 
   bool get on => kind != null;
 
-  void start(HuntKind k, GameDb db, LiveState? s, PlayerPos? p) {
+  void start(
+    HuntKind k,
+    GameDb db,
+    LiveState? s,
+    PlayerPos? p, {
+    String? region,
+  }) {
     kind = k;
+    this.region = region;
     _passed.clear();
     current = null;
     _sent = null;
@@ -78,11 +94,81 @@ class Hunt extends ChangeNotifier {
     }
   }
 
-  bool _wanted(Poi p) => switch (kind) {
-    HuntKind.lore => p.cat == 'lore',
-    HuntKind.uniques => p.cat != 'lore',
-    _ => true,
+  static bool wanted(HuntKind k, Poi p) => switch (k) {
+    HuntKind.lore => p.cat == 'lore' && p.lore != null,
+    HuntKind.uniques => p.cat != 'lore' && p.loot.isNotEmpty,
+    HuntKind.both => HallFinds.collectible(p),
+    HuntKind.roots => p.cat == 'label' && p.kind == 'Shroud Root',
+    HuntKind.wells => p.cat == 'label' && p.title == 'Elixir Well',
+    HuntKind.obelisks => p.cat == 'label' && p.title == 'Ancient Obelisk',
+    HuntKind.shrines => p.cat == 'label' && p.kind == 'Flame Shrine',
+    HuntKind.sanctums =>
+      p.cat == 'label' &&
+          (p.title == 'Night Sanctum' || p.title == 'Flame Sanctum'),
   };
+
+  /// Whether the save can say a place of this hunt is done (else: visited counts).
+  static bool tracked(Poi p) => p.cat != 'label' || p.done != null;
+
+  /// Done by the save, or visited before when the save can't tell; null without a save.
+  bool? _done(GameDb db, LiveState? s, HallFinds finds, Poi p) {
+    if (!tracked(p)) return _visited.contains(_key(p.x, p.y));
+    if (s == null) return null;
+    return p.cat == 'label' ? db.poiDone(p, s.knowledge) : finds.had(p);
+  }
+
+  /// How many places of a kind are left, here or anywhere (the Plan tab's choices).
+  int count(GameDb db, LiveState? s, HuntKind k, String? region) {
+    _loadVisited(s);
+    final finds = HallFinds(db, s);
+    return db.poi
+        .where(
+          (p) =>
+              !p.inside &&
+              wanted(k, p) &&
+              (region == null || db.regionAt(p.x, p.y) == region) &&
+              _done(db, s, finds, p) != true,
+        )
+        .length;
+  }
+
+  /// Visited places (shrines, sanctums) for this world; earlier worlds' are kept under their own name.
+  void _loadVisited(LiveState? s) {
+    final w = s?.world;
+    if (w == null || w == _visitedWorld) return;
+    _visitedWorld = w;
+    _visited.clear();
+    SharedPreferences.getInstance().then((prefs) {
+      if (_visitedWorld != w) return;
+      _visited.addAll(prefs.getStringList('hunt_visited:$w') ?? const []);
+      notifyListeners();
+    });
+  }
+
+  void _visit(Poi p) {
+    final key = _key(p.x, p.y);
+    if (tracked(p) || !_visited.add(key)) return;
+    final w = _visitedWorld;
+    if (w == null) return;
+    // added to what's stored, in case the stored list hasn't been read yet
+    SharedPreferences.getInstance().then((prefs) {
+      final had = prefs.getStringList('hunt_visited:$w') ?? const [];
+      prefs.setStringList('hunt_visited:$w', {...had, key}.toList());
+    });
+  }
+
+  /// Visited shrines and sanctums of this world, forgotten (to hunt them again).
+  int get visitedCount => _visited.length;
+  void forgetVisited() {
+    _visited.clear();
+    final w = _visitedWorld;
+    if (w != null) {
+      SharedPreferences.getInstance().then(
+        (prefs) => prefs.remove('hunt_visited:$w'),
+      );
+    }
+    notifyListeners();
+  }
 
   static double _metres(Poi a, PlayerPos p) =>
       math.sqrt(math.pow(a.x - p.x, 2) + math.pow(a.y - p.y, 2)) * World.mPerPx;
@@ -99,13 +185,16 @@ class Hunt extends ChangeNotifier {
     PlayerPos? p, {
     Map<String, dynamic>? pc,
   }) {
-    if (kind == null) return;
+    final k = kind;
+    if (k == null) return;
+    _loadVisited(s);
     final finds = HallFinds(db, s);
     if (pc != null) {
       final byKey = {for (final poi in db.poi) _key(poi.x, poi.y): poi};
       for (final k in (pc['passed'] as List? ?? const [])) {
         if (byKey[_key(k[0] as num, k[1] as num)] case final poi?) {
           _passed.add(poi);
+          _visit(poi);
         }
       }
       current = switch (pc['cur']) {
@@ -118,21 +207,24 @@ class Hunt extends ChangeNotifier {
       if (d < 15) _reached = true;
       if (_reached && d > leftM) {
         _passed.add(c);
+        _visit(c);
         current = null;
       }
     }
-    if (current case final c? when finds.had(c) == true) current = null;
+    if (current case final c? when _done(db, s, finds, c) == true) {
+      current = null;
+    }
     final open = [
       for (final poi in db.poi)
         if (!poi.inside &&
-            HallFinds.collectible(poi) &&
-            _wanted(poi) &&
+            wanted(k, poi) &&
+            (region == null || db.regionAt(poi.x, poi.y) == region) &&
             !_passed.contains(poi) &&
-            finds.had(poi) != true)
+            _done(db, s, finds, poi) != true)
           poi,
     ];
     left = open.length;
-    final sig = '$kind ${open.length}';
+    final sig = '$kind $region ${open.length}';
     if (sig != _sent && send != null) {
       send!({
         if (_sent == null) 'new': true,
@@ -176,6 +268,7 @@ class Hunt extends ChangeNotifier {
 
   String _title(GameDb db, Poi p, HallFinds finds) {
     if (p.cat == 'lore') return tr('Lore: {title}', {'title': gt(p.title)});
+    if (p.cat == 'label') return gt(p.title);
     final missing = [
       for (final id in p.loot)
         if (finds.hasItem(id) != true) gt(db.items[id]?.name ?? id),
@@ -186,7 +279,12 @@ class Hunt extends ChangeNotifier {
   String label(HuntKind k) => switch (k) {
     HuntKind.lore => tr('Lore'),
     HuntKind.uniques => tr('Unique loot'),
-    HuntKind.both => tr('Both'),
+    HuntKind.both => tr('Lore and unique loot'),
+    HuntKind.roots => tr('Shroud Roots'),
+    HuntKind.wells => tr('Elixir Wells'),
+    HuntKind.obelisks => tr('Ancient Obelisks'),
+    HuntKind.shrines => tr('Flame Shrines'),
+    HuntKind.sanctums => tr('Sanctums'),
   };
 }
 

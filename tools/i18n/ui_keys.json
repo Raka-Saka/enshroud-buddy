@@ -205,6 +205,11 @@
    "data/tasks.dart"
   ]
  },
+ "Ancient Obelisks": {
+  "files": [
+   "data/hunt.dart"
+  ]
+ },
  "Animal food": {
   "files": [
    "screens/items_screen.dart"
@@ -238,6 +243,11 @@
  "Any of:": {
   "files": [
    "screens/item_screen.dart"
+  ]
+ },
+ "Anywhere": {
+  "files": [
+   "screens/plans_screen.dart"
   ]
  },
  "Apr": {
@@ -439,11 +449,6 @@
  "Bone piles": {
   "files": [
    "data/hall_check.dart"
-  ]
- },
- "Both": {
-  "files": [
-   "data/hunt.dart"
   ]
  },
  "Bow": {
@@ -778,6 +783,11 @@
    "screens/build_screen.dart"
   ]
  },
+ "Elixir Wells": {
+  "files": [
+   "data/hunt.dart"
+  ]
+ },
  "Empty": {
   "files": [
    "screens/farm_screen.dart"
@@ -916,6 +926,11 @@
    "screens/character_screen.dart"
   ]
  },
+ "Flame Shrines": {
+  "files": [
+   "data/hunt.dart"
+  ]
+ },
  "Flame strength": {
   "files": [
    "screens/home_screen.dart"
@@ -969,6 +984,11 @@
  "For {items}. {food}. Shroud Roots and Return Beacons on the map; Flame strength {n} lets you in.": {
   "files": [
    "data/tasks.dart"
+  ]
+ },
+ "Forget visited shrines and sanctums ({n})": {
+  "files": [
+   "screens/plans_screen.dart"
   ]
  },
  "Found almost everywhere": {
@@ -1485,6 +1505,11 @@
    "screens/codex_screen.dart",
    "screens/lore_screen.dart",
    "screens/map_screen.dart"
+  ]
+ },
+ "Lore and unique loot": {
+  "files": [
+   "data/hunt.dart"
   ]
  },
  "Lore note": {
@@ -2199,6 +2224,11 @@
    "screens/build_screen.dart"
   ]
  },
+ "Sanctums": {
+  "files": [
+   "data/hunt.dart"
+  ]
+ },
  "Save": {
   "files": [
    "screens/map_screen.dart"
@@ -2356,6 +2386,11 @@
   "files": [
    "data/hall_check.dart",
    "screens/map_screen.dart"
+  ]
+ },
+ "Shroud Roots": {
+  "files": [
+   "data/hunt.dart"
   ]
  },
  "Shroud level {level} (estimated): above your passage level {passage}": {
@@ -2644,6 +2679,11 @@
   ]
  },
  "The save can't tell whether this is done": {
+  "files": [
+   "screens/plans_screen.dart"
+  ]
+ },
+ "The save does not say which Flame Shrines and Sanctums are done: they count once you have been there.": {
   "files": [
    "screens/plans_screen.dart"
   ]
@@ -3962,6 +4002,11 @@
  "{rarity} {odds}%": {
   "files": [
    "data/where.dart"
+  ]
+ },
+ "{region} (you are here)": {
+  "files": [
+   "screens/plans_screen.dart"
   ]
  },
  "{region} Hollow Halls": {

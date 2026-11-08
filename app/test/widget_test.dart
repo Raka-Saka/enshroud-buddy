@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ensh_companion/data/hunt.dart';
 import 'package:ensh_companion/data/buddy_auth.dart';
 import 'package:ensh_companion/data/build.dart';
@@ -1205,6 +1206,7 @@ void main() {
   });
 
   test('hunt: leads to the nearest missing, moves on after a visit', () {
+    SharedPreferences.setMockInitialValues({});
     final s = LiveState({
       'character': {
         'name': 'Test',
@@ -1250,6 +1252,7 @@ void main() {
   });
 
   test('hunt: hands the places to the PC and follows what it picked', () {
+    SharedPreferences.setMockInitialValues({});
     final s = LiveState({
       'character': {
         'name': 'Test',
@@ -1289,6 +1292,64 @@ void main() {
     expect(sent.last, isNull);
     navTarget.value = null;
   });
+
+  test(
+    'hunt: Shroud Roots in a region, shrines remembered once visited',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final s = LiveState({
+        'character': {
+          'name': 'Test',
+          'level': 30,
+          'skills': [],
+          'recipes_unlocked': [],
+          'knowledge': [],
+          'equipment': [],
+          'bag': [],
+        },
+        'world': {'name': 'Hunt test', 'bases': [], 'containers': []},
+      });
+      PlayerPos at(double x, double y) => PlayerPos({
+        'map': [x, y],
+        'heading': 0,
+        'y': 100,
+      });
+      final root = db.poi.firstWhere(
+        (p) => Hunt.wanted(HuntKind.roots, p) && db.regionAt(p.x, p.y) != null,
+      );
+      final region = db.regionAt(root.x, root.y)!;
+      final h = Hunt();
+      final all = h.count(db, s, HuntKind.roots, null);
+      final there = h.count(db, s, HuntKind.roots, region);
+      expect(all, greaterThan(40));
+      expect(there, inInclusiveRange(1, all - 1));
+      h.start(HuntKind.roots, db, s, at(root.x, root.y), region: region);
+      expect(h.left, there);
+      expect(db.regionAt(h.current!.x, h.current!.y), region);
+      h.stop();
+      // a shrine: the save can't tell, so having been there is what counts, and it's kept for the next hunt
+      final shrine = db.poi.firstWhere(
+        (p) => !p.inside && Hunt.wanted(HuntKind.shrines, p),
+      );
+      expect(Hunt.tracked(shrine), isFalse);
+      final shrines = h.count(db, s, HuntKind.shrines, null);
+      h.start(HuntKind.shrines, db, s, at(shrine.x + 0.5, shrine.y));
+      expect(h.current, same(shrine));
+      h.update(db, s, at(shrine.x + 0.5, shrine.y));
+      h.update(db, s, at(shrine.x + 10, shrine.y));
+      h.stop();
+      expect(h.count(db, s, HuntKind.shrines, null), shrines - 1);
+      expect(h.visitedCount, 1);
+      await Future<void>.delayed(Duration.zero);
+      final kept = (await SharedPreferences.getInstance()).getStringList(
+        'hunt_visited:Hunt test',
+      );
+      expect(kept, hasLength(1));
+      h.forgetVisited();
+      expect(h.count(db, s, HuntKind.shrines, null), shrines);
+      navTarget.value = null;
+    },
+  );
 
   test(
     'languages: every file has every text, placeholders and plural forms',
