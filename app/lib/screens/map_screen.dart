@@ -804,13 +804,34 @@ class _MapScreenState extends State<MapScreen> {
                           tr('inside the Hollow Halls, {height} m up', {
                             'height': p.height!.round(),
                           }),
+                        if (p.head != null && p.areaLevel > 0)
+                          tr('Level {n}', {'n': p.areaLevel}),
                         if (done)
-                          p.cat == 'lore' ? tr('found') : tr('completed'),
+                          p.cat == 'lore'
+                              ? tr('found')
+                              : p.head != null
+                              ? tr('head found')
+                              : tr('completed'),
                       ].join(' · '),
                       style: TextStyle(
                         color: done ? Palette.spring : Palette.ash,
                       ),
                     ),
+                    if (p.head case final h?)
+                      ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.emoji_events_outlined,
+                          color: Palette.gold,
+                        ),
+                        title: Text(
+                          tr('Drops {item}, for its trophies', {
+                            'item': gt(db.items[h]?.name ?? h),
+                          }),
+                        ),
+                        onTap: () => openItem(h),
+                      ),
                     if (!p.inside && p.height != null)
                       _live == null
                           ? heightLine(null)

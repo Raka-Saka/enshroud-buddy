@@ -415,6 +415,40 @@ def own_level(more, levels):
 UPDRAFT_SIZES = ("Small", "Medium", "Big")
 
 
+def trophy_bosses(export):
+    """{spawn template: (boss name, head item id)} for the bosses whose trophy head is sure: the boss's health-bar
+    name (links.tsv bossname, tools/eml-poi) is the head's name without its last word ("Fell Monstrosity Head").
+    The game data says nowhere which enemy drops a head, so heads without such a boss are left out. A spawn
+    template counts when its spawn chain (spawns=, sub-entities aside) reaches the boss."""
+    path = export / "links.tsv"
+    if not path.exists():
+        return {}
+    heads = {}
+    for i in read(export, "items.jsonl"):
+        if re.fullmatch(r"_?Material_TX_Trophy_\w+_head", i["debug_name"] or "") and clean(i["name"]):
+            heads[clean(i["name"]).rsplit(" ", 1)[0]] = i["item_id"]
+    kids, boss = {}, {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        name, _, more = (line.split("\t") + ["", ""])[:3]
+        kv = more_of(more)
+        kids[name] = [s.rsplit(":", 1)[0] for s in kv.get("spawns", "").split(",") if s and not s.endswith(":sub")]
+        if kv.get("bossname") in heads:
+            boss[name] = kv["bossname"]
+
+    def reach(name, seen):
+        if name in boss:
+            return boss[name]
+        seen.add(name)
+        return next((b for k in kids.get(name, ()) if k not in seen for b in [reach(k, seen)] if b), None)
+
+    out = {}
+    for name in kids:
+        b = reach(name, set())
+        if b:
+            out[name] = (b, heads[b])
+    return out
+
+
 def points(export, unlocks, lore_pages, loot=None, halls=None):
     """Map points from data/export/poi.tsv on the 1280 px fog-map grid. Points inside the Hollow Halls (the
     box [x0, y0, x1, y1] from hall_layout) get "in": 1 and their height "h" in metres."""
@@ -422,6 +456,7 @@ def points(export, unlocks, lore_pages, loot=None, halls=None):
     out, plants = [], []
     if not path.exists():
         return out
+    bosses, boss_at = trophy_bosses(export), {}
     for line in path.read_text(encoding="utf-8").splitlines():
         cat, name, label, extra, x, y, z, visible, completed, levels, more = (line.split("\t") + [""] * 11)[:11]
         x, y, z = float(x), float(y), float(z)
@@ -435,6 +470,16 @@ def points(export, unlocks, lore_pages, loot=None, halls=None):
         p = {"x": mx, "y": my, "h": round(y / 2), "_hx": x, "_hz": z, "_off": off}
         if halls and halls[0] <= mx <= halls[2] and halls[1] <= my <= halls[3]:
             p["in"] = 1
+        if name in bosses:
+            # a trophy boss's spawn point (its trigger, spawner and label rows share it): done once its head is
+            # known; the level only from the spawner's own (a trigger's chunk levels can be anyone's)
+            title, head = bosses[name]
+            key = (title, round(x / 20), round(z / 20))
+            if key not in boss_at:
+                boss_at[key] = dict(p, c="label", k="Boss", t=title, hd=head, d={"t": "", "k": head})
+                out.append(boss_at[key])
+            if "lv" in more_of(more) and base + off:
+                boss_at[key]["lv"] = base + off
         if cat == "fishing":
             p.update(c="fish", k=fishing_kind(name), t="Fishing spot", ft=more_of(more).get("fish", "")[:8])
             if base + off:
@@ -451,6 +496,8 @@ def points(export, unlocks, lore_pages, loot=None, halls=None):
                 plants.append((x, z, extra.split(",")[0]))
             continue
         if cat == "label":
+            if name in bosses:
+                continue  # the boss's own point, named, above
             kind = poi_category(name, label)
             title = clean(label) or (kind if kind in POI_UNNAMED_OK else None)
             if kind is None or not title:
@@ -528,7 +575,14 @@ def hall_layout(export):
     if not path.exists():
         return None
     seen, pts, rows = set(), [], []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    lines = path.read_text(encoding="utf-8").splitlines()
+    # random spawn points (rs=1) are only poi.tsv rows in exports from before eml-poi wrote them to both
+    if not any(line.startswith("Spawnpoint") for line in lines) and (export / "poi.tsv").exists():
+        for line in (export / "poi.tsv").read_text(encoding="utf-8").splitlines():
+            f = (line.split("\t") + [""] * 11)[:11]
+            if f[0] == "spawner" and "rs=1" in f[10].split(";") and float(f[4]) < 4200 and float(f[6]) > 16000:
+                lines.append("\t".join((f[1], f[4], f[5], f[6])))
+    for line in lines:
         name, x, y, z = (line.split("\t") + [""] * 4)[:4]
         if "Scatter" in name or not z:
             continue
@@ -776,7 +830,10 @@ def regions(export, points):
             if len(parts) == 6:
                 vote(parts[0], int(parts[2]), int(parts[3]), int(parts[4]))
     for line in (export / "poi.tsv").read_text(encoding="utf-8").splitlines():
-        parts = (line.split("\t") + [""] * 10)[:10]
+        parts = (line.split("\t") + [""] * 11)[:11]
+        # loot nodes and random spawn points are thousands of rows that would outvote the places
+        if parts[0] == "lootnode" or (parts[0] == "spawner" and "rs=1" in parts[10].split(";")):
+            continue
         try:
             x, z = float(parts[4]), float(parts[6])
         except ValueError:

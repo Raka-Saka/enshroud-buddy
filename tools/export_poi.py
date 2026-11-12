@@ -81,7 +81,7 @@ def main():
                     lines = [f"{k}\t{n}" for k, n in sorted(merged.items())]
                 (a.export / f"{part}.tsv").write_text("\n".join(lines) + "\n", encoding="utf-8")
                 print(f"{a.export / (part + '.tsv')}: {len(lines)} rows")
-            for name in ("templates.tsv", "fish_tables.tsv", "marker_types.tsv"):
+            for name in ("templates.tsv", "fish_tables.tsv", "marker_types.tsv", "links.tsv", "scene.tsv"):
                 if (out / name).exists():
                     shutil.copyfile(out / name, a.export / name)
     finally:

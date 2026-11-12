@@ -9,9 +9,20 @@ import 'guide.dart';
 import 'hall_check.dart';
 import 'live_state.dart';
 
-/// What a hunt is after: what the save tracks (lore, unique loot, Shroud Roots, Elixir Wells, Ancient Obelisks),
+/// What a hunt is after: what the save tracks (lore, unique loot, Shroud Roots, Elixir Wells, Ancient Obelisks,
+/// trophy bosses whose head you've never had),
 /// and places it doesn't (Flame Shrines, Sanctums), which count as done once visited, remembered per world.
-enum HuntKind { lore, uniques, both, roots, wells, obelisks, shrines, sanctums }
+enum HuntKind {
+  lore,
+  uniques,
+  both,
+  roots,
+  wells,
+  obelisks,
+  shrines,
+  sanctums,
+  trophies,
+}
 
 /// A hunt: the guide leads to the nearest place still holding what's hunted (a lore page, unique loot, a
 /// Shroud Root to clear...), anywhere or in one region, and on to the next nearest once it's had. "Had" is the save saying so, or, as the game saves only now and
@@ -105,6 +116,7 @@ class Hunt extends ChangeNotifier {
     HuntKind.sanctums =>
       p.cat == 'label' &&
           (p.title == 'Night Sanctum' || p.title == 'Flame Sanctum'),
+    HuntKind.trophies => p.head != null,
   };
 
   /// Whether the save can say a place of this hunt is done (else: visited counts).
@@ -268,6 +280,9 @@ class Hunt extends ChangeNotifier {
 
   String _title(GameDb db, Poi p, HallFinds finds) {
     if (p.cat == 'lore') return tr('Lore: {title}', {'title': gt(p.title)});
+    if (p.head case final h?) {
+      return '${gt(p.title)}: ${gt(db.items[h]?.name ?? h)}';
+    }
     if (p.cat == 'label') return gt(p.title);
     final missing = [
       for (final id in p.loot)
@@ -285,6 +300,7 @@ class Hunt extends ChangeNotifier {
     HuntKind.obelisks => tr('Ancient Obelisks'),
     HuntKind.shrines => tr('Flame Shrines'),
     HuntKind.sanctums => tr('Sanctums'),
+    HuntKind.trophies => tr('Trophy bosses'),
   };
 }
 

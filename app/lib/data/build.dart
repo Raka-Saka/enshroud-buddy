@@ -785,6 +785,9 @@ class GearAdvisor {
         'Unique loot: {n} spot on the map',
         'Unique loot: {n} spots on the map',
       ),
+    if (db.bossSpots(it.id).map((p) => p.title).toSet() case final b
+        when b.isNotEmpty)
+      tr('Drops from: {bosses}', {'bosses': b.map(gt).join(', ')}),
     if (it.chestKinds.isNotEmpty)
       tr('Random loot: {kinds}', {
         'kinds': it.chestKinds.take(3).map(gt).join(', '),

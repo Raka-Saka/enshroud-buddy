@@ -1293,6 +1293,21 @@ void main() {
     navTarget.value = null;
   });
 
+  test('trophy bosses: named as their head, done once it is had', () {
+    final bosses = db.poi.where((p) => p.head != null).toList();
+    expect(bosses.map((p) => p.title).toSet().length, greaterThan(10));
+    for (final p in bosses) {
+      expect(p.kind, 'Boss');
+      expect(db.items[p.head]!.name, startsWith('${p.title} '));
+      expect(db.poiDone(p, {}), isFalse);
+      expect(db.poiDone(p, {p.head!}), isTrue);
+    }
+    final head = bosses.first.head!;
+    final spots = WhereToGet(db, null, null).spots(head);
+    expect(spots.where((s) => s.kind == 'boss'), isNotEmpty);
+    expect(Hunt.wanted(HuntKind.trophies, bosses.first), isTrue);
+  });
+
   test(
     'hunt: Shroud Roots in a region, shrines remembered once visited',
     () async {

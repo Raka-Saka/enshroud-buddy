@@ -3,6 +3,14 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.42.0 (2026-11-12)
+
+- **Trophy bosses:** the bosses whose head makes a trophy are on the map, each saying which head it drops; a
+  head's page lists where its boss is, and Plan → Hunt nearby → Trophy bosses leads to those whose head you've
+  never had. Only bosses the game's own names tie to a head: Cyclops, Fell Cyclops, Hollow Titan, the Scavenger
+  Matron, Scattershot and Artificer, the Fell Crimson Critter Queen and Vorgoth aren't listed.
+- Fixed: the Hollow Halls' "before you go" check lost its enemy counts with the newest game data.
+
 ## 0.41.0 (2026-11-08)
 
 - **More hunts:** Shroud Roots, Elixir Wells, Ancient Obelisks, Flame Shrines and Sanctums, each with how many

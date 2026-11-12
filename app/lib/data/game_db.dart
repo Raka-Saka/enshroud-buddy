@@ -401,6 +401,7 @@ class Poi {
       areaLevel = j['lv'] ?? 0,
       inside = j['in'] == 1,
       fishTable = j['ft'],
+      head = j['hd'],
       hall = j['hl'];
 
   /// label, lore, chest, fish (a fishing spot)...
@@ -439,6 +440,9 @@ class Poi {
 
   /// Inside the Hollow Halls: which hall (HallLayout.halls).
   final int? hall;
+
+  /// A trophy boss's spawn point (kind 'Boss'): the head item it drops; [done] is having had one.
+  final String? head;
 
   bool get isUnique => fixed.isNotEmpty || cat == 'special';
 
@@ -866,6 +870,9 @@ class GameDb {
   /// Map points holding this item as fixed loot.
   Iterable<Poi> uniqueSpots(String itemId) =>
       poi.where((p) => p.fixed.contains(itemId) || p.itemId == itemId);
+
+  /// Trophy bosses' spawn points dropping this head.
+  Iterable<Poi> bossSpots(String itemId) => poi.where((p) => p.head == itemId);
 
   /// Found (lore) or completed (labels), when the save can tell.
   bool poiDone(Poi p, Set<String> known) {

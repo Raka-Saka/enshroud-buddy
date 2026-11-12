@@ -304,7 +304,8 @@ class WhereToGet {
   int get level => state?.level ?? 0;
   bool get coldProtected => flame >= (db.balancing?.noFreezeFlameLevel ?? 99);
 
-  /// Every candidate place: gather cells, fixed loot spots, chests whose pool holds the item.
+  /// Every candidate place: gather cells, fixed loot spots, chests whose pool holds the item, the bosses
+  /// dropping a trophy head.
   List<Spot> spots(String itemId) {
     final item = db.items[itemId];
     final regions = item?.regions ?? const <String>[];
@@ -355,6 +356,8 @@ class WhereToGet {
       ),
     for (final p in db.uniqueSpots(itemId))
       Spot(x: p.x, y: p.y, kind: 'unique', areaLevel: p.areaLevel, poi: p),
+    for (final p in db.bossSpots(itemId))
+      Spot(x: p.x, y: p.y, kind: 'boss', areaLevel: p.areaLevel, poi: p),
     for (final p in db.poi)
       if (p.lootSetting != null &&
           (db.loot[p.lootSetting]?.pool.contains(itemId) ?? false))

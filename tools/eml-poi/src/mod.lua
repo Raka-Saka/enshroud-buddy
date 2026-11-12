@@ -111,6 +111,8 @@ for _, t in ipairs(game.assets.get_resources_by_type("keen::ecs::TemplateResourc
 			or ty == "keen::ecs::TriggerBoxMultiSpawner" then
 			local et = names[tostring(v.entityTemplate)]
 			if et then add("spawner", "spawns=" .. clean(et)) end
+		elseif ty == "keen::ecs::RandomSpawner" then
+			add("spawner", "rs=1")  -- what it spawns: links.tsv
 		end
 		if ty == "keen::ecs::DefaultInventory" then
 			local inv = inventories[tostring(comp.value.defaultInventory)]
@@ -163,8 +165,106 @@ for _, t in ipairs(game.assets.get_resources_by_type("keen::ecs::TemplateResourc
 	comps[#comps + 1] = clean(name) .. "\t" .. tostring(t.guid) .. "\t" .. table.concat(types, ",")
 end
 
--- once, with the first batch: every template's components, the fish tables and the game's map marker types
+-- once, with the first batch: links.tsv, how templates lead to each other and what an enemy leaves:
+-- name, guid, then key=value;... spawns=<template>:<weight>,... (RandomSpawner entries, basic/trigger spawners,
+-- spawn on destroy, loot entity, sub-entities), drops=<item>:<weight>,... (ResourceNodePickupDrops),
+-- dropn=<number of drops>, dropent=<templates dropped>, kill=<knowledge ids set on kill>, killitem=<item>,
+-- boss=1, bossname=<English name>. Only templates with any of these.
 if first == 1 then
+	local links = {}
+	local function ref(r)
+		local n = names[tostring(r)]
+		return n and clean(n):gsub("[,:;=]", "_") or nil
+	end
+	for _, t in ipairs(game.assets.get_resources_by_type("keen::ecs::TemplateResource")) do
+		local kv, spawns, drops, dropent, kill = {}, {}, {}, {}, {}
+		for _, comp in ipairs(t.data.components) do
+			local ty, v = comp.type, comp.value
+			local ok = pcall(function()
+				if ty == "keen::ecs::RandomSpawner" then
+					for _, e in ipairs(v.spawnEntries) do
+						for _, et in ipairs(e.entityTemplates) do
+							local n = ref(et)
+							if n then spawns[#spawns + 1] = n .. ":" .. string.format("%.2f", e.weight) end
+						end
+					end
+				elseif ty == "keen::ecs::BasicSpawnerComponent" or ty == "keen::ecs::TriggerSpawner"
+					or ty == "keen::ecs::TriggerBoxMultiSpawner" then
+					local n = ref(v.entityTemplate)
+					if n then spawns[#spawns + 1] = n .. ":1" end
+				elseif ty == "keen::ecs::SpawnEntityOnDestroy" then
+					local n = ref(v.spawnEntity)
+					if n then spawns[#spawns + 1] = n .. ":destroy" end
+				elseif ty == "keen::ecs::RandomLootEntitySpawner" then
+					local n = ref(v.lootEntity)
+					if n then spawns[#spawns + 1] = n .. ":loot" end
+				elseif ty == "keen::ecs::SubEntities" then
+					for _, se in ipairs(v.subEntities) do
+						local n = ref(se.templateRef)
+						if n then spawns[#spawns + 1] = n .. ":sub" end
+					end
+				elseif ty == "keen::ecs::ResourceNodePickupDrops" then
+					for _, dr in ipairs(v.drops) do
+						local id = itemOf[tostring(dr.item)]
+						if id then drops[#drops + 1] = id .. ":" .. string.format("%.2f", dr.weight) end
+						local n = ref(dr.entity)
+						if n then dropent[#dropent + 1] = n end
+					end
+					local n = ref(v.pickupItemReference)
+					if n then dropent[#dropent + 1] = n end
+					kv[#kv + 1] = "dropn=" .. tostring(v.numberOfDrops)
+				elseif ty == "keen::ecs::KnowledgeTriggerOnKill" then
+					local k = v.knowledgeUnlockOperation.knowledgeId.id.value
+					if k ~= 0 then kill[#kill + 1] = string.format("%08x", k) end
+					local id = itemOf[tostring(v.triggerKnowledge.item)]
+					if id then kv[#kv + 1] = "killitem=" .. id end
+				elseif ty == "keen::ecs::Boss" then
+					kv[#kv + 1] = "boss=1"
+				elseif ty == "keen::ecs::BossHealthBar" then
+					local n = text(v.displayName)
+					if n then kv[#kv + 1] = "bossname=" .. clean(n):gsub("[;=]", " ") end
+				end
+			end)
+			if not ok then kv[#kv + 1] = "err_" .. tostring(ty):gsub("keen::ecs::", "") .. "=1" end
+		end
+		if #spawns > 0 then table.insert(kv, 1, "spawns=" .. table.concat(spawns, ",")) end
+		if #drops > 0 then kv[#kv + 1] = "drops=" .. table.concat(drops, ",") end
+		if #dropent > 0 then kv[#kv + 1] = "dropent=" .. table.concat(dropent, ",") end
+		if #kill > 0 then kv[#kv + 1] = "kill=" .. table.concat(kill, ",") end
+		if #kv > 0 then
+			links[#links + 1] = clean(t.data.name) .. "\t" .. tostring(t.guid) .. "\t" .. table.concat(kv, ";")
+		end
+	end
+	table.sort(links)
+	-- scene.tsv: the scene's quest items (kind, item id, raw world position x y z, loot container id) and quest
+	-- entities (kind, template, x y z, knowledge ids they unlock). WorldPosition is fixed point: raw i64 values.
+	local scene = {}
+	for _, sr in ipairs(game.assets.get_resources_by_type("keen::SceneResource")) do
+		local okq = pcall(function()
+			for _, qi in ipairs(sr.data.questItems) do
+				local p = qi.transform.position
+				scene[#scene + 1] = table.concat({ "item", string.format("%08x", qi.itemId.value), tostring(p.x),
+					tostring(p.y), tostring(p.z), string.format("%08x", qi.lootContainerId.value) }, "\t")
+			end
+		end)
+		if not okq then scene[#scene + 1] = "error\tquestItems" end
+		local oke = pcall(function()
+			for _, qe in ipairs(sr.data.questEntities) do
+				local p = qe.transform.position
+				local ids = {}
+				for _, op in ipairs(qe.unlockOperations) do
+					local ok, v = pcall(function() return op.unlockOperation.knowledgeId.id.value end)
+					if ok and v ~= 0 then ids[#ids + 1] = string.format("%08x", v) end
+				end
+				scene[#scene + 1] = table.concat({ "entity", clean(names[tostring(qe.templateGuid)] or tostring(qe.templateGuid)),
+					tostring(p.x), tostring(p.y), tostring(p.z), table.concat(ids, ",") }, "\t")
+			end
+		end)
+		if not oke then scene[#scene + 1] = "error\tquestEntities" end
+	end
+	io.export("scene.tsv", table.concat(scene, "\n"))
+	io.export("links.tsv", table.concat(links, "\n"))
+
 	table.sort(comps)
 	io.export("templates.tsv", table.concat(comps, "\n"))
 	local fish = {}
@@ -259,11 +359,13 @@ for ci = first, math.min(last, #chunks) do
 	-- per-entity spawn data: entry i belongs to entity i. At indices[start]: component count n, and when n > 0
 	-- the first component index (components first .. first + n - 1), then one value per spawnMask flag
 	local sd = d.spawnData
-	local trig = {}
+	local trig, lnode = {}, {}
 	local comps = sd.components
 	for k = 1, #comps do
 		local c = comps[k]
-		if c.type == "keen::ecs::SceneKnowledgeTrigger" then
+		if c.type == "keen::ecs::SceneLootNodeId" then
+			lnode[k - 1] = string.format("%08x", c.value.id.value)
+		elseif c.type == "keen::ecs::SceneKnowledgeTrigger" then
 			local ids = {}
 			for _, op in ipairs(c.value.knowledgeUnlockOperations) do
 				local v = op.unlockOperation.knowledgeId.id.value
@@ -293,6 +395,17 @@ for ci = first, math.min(last, #chunks) do
 			end
 		end
 	end
+	-- the loot node an entity is (SceneLootNodeId: what special and quest items name as their container)
+	local function loot_node(i)
+		local e = sd.entries[i]
+		if not e or not next(lnode) then return nil end
+		local s = e.spawnIndexStart
+		local n = sd.indices[s + 1]
+		for j = 0, n - 1 do
+			local k = lnode[sd.indices[s + 2] + j]
+			if k then return k end
+		end
+	end
 	-- every entity: the census (template, 128 m cell, count), gather cells, wanted points, and anything in the
 	-- far north-west corner where the game keeps the Hollow Halls' insides (drawn as the halls' layout)
 	local ents = d.entities
@@ -311,12 +424,28 @@ for ci = first, math.min(last, #chunks) do
 			if top > (cellLevel[key] or 0) then cellLevel[key] = top end
 		end
 		local w = idx[ti]
+		if not w and next(lnode) then
+			local okn, ln = pcall(loot_node, i)
+			if okn and ln then
+				rows[#rows + 1] = table.concat({ "lootnode", clean(tname[ti]), "", "",
+					string.format("%.1f", x), string.format("%.1f", pos(t.positionY0, t.positionY1)), string.format("%.1f", z),
+					"", "", levels, "ln=" .. ln }, "\t")
+			end
+		end
 		if w or (x < 4200 and z > 16000) then
 			local y = string.format("%.1f", pos(t.positionY0, t.positionY1))
+			-- random spawn points are wanted for their positions, and still part of a hall's layout
+			if w and w.cat == "spawner" and (";" .. (w.more or "") .. ";"):find(";rs=1;", 1, true)
+				and x < 4200 and z > 16000 then
+				inside[#inside + 1] = table.concat({ clean(tname[ti]), string.format("%.1f", x), y,
+					string.format("%.1f", z) }, "\t")
+			end
 			if w then
 				local ok, own = pcall(spawn_info, sd, i)
 				local more = w.more or ""
 				if ok and own ~= "" then more = more == "" and own or (more .. ";" .. own) end
+				local okn, ln = pcall(loot_node, i)
+				if okn and ln then more = more == "" and ("ln=" .. ln) or (more .. ";ln=" .. ln) end
 				rows[#rows + 1] = table.concat({
 					w.cat, clean(w.name), clean(w.label), clean(w.extra),
 					string.format("%.1f", x), y, string.format("%.1f", z),

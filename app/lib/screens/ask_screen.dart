@@ -917,7 +917,8 @@ class _MentionSheet extends StatelessWidget {
     final findable =
         db.gather.containsKey(it.id) ||
         it.fixedPlacements > 0 ||
-        it.chestKinds.isNotEmpty;
+        it.chestKinds.isNotEmpty ||
+        db.bossSpots(it.id).isNotEmpty;
     return (
       [
         categoryLabel(it.category),

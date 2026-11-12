@@ -228,7 +228,8 @@ class ItemScreen extends StatelessWidget {
           ],
           if (db.gather.containsKey(item.id) ||
               item.fixedPlacements > 0 ||
-              item.chestKinds.isNotEmpty)
+              item.chestKinds.isNotEmpty ||
+              db.bossSpots(item.id).isNotEmpty)
             FutureBuilder<Terrain>(
               future: Terrain.instance,
               builder: (context, snap) {
@@ -253,12 +254,11 @@ class ItemScreen extends StatelessWidget {
                     for (final r in best)
                       ListTile(
                         dense: true,
-                        leading: Icon(
-                          r.spot.kind == 'gather'
-                              ? Icons.grass
-                              : Icons.inventory_2_outlined,
-                          color: Palette.risk(r.risk),
-                        ),
+                        leading: Icon(switch (r.spot.kind) {
+                          'gather' => Icons.grass,
+                          'boss' => Icons.whatshot,
+                          _ => Icons.inventory_2_outlined,
+                        }, color: Palette.risk(r.risk)),
                         title: Text(switch (r.spot.kind) {
                           'gather' => tr('Gather'),
                           'unique' => tr('Unique loot'),

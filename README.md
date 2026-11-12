@@ -3,26 +3,32 @@
 A companion for **Enshrouded** on your Android phone, fed by a small agent on your gaming PC. It reads your save
 files and shows your game on the phone, while you play or away from the PC:
 
-- **Map** with every place, chest, lore note, fishing spot and Shroud Root, your explored area, Shroud levels
+- **Map** with every place, chest, lore note, fishing spot, Shroud Root and trophy boss, your explored area, Shroud levels
   and cold zones, your bases, and your own pins. With the game running it shows where you are, and the
   **guide** leads you to a place. It tells on foot from gliding, checks whether a glide reaches against the
   terrain, and suggests higher ground to launch from.
 - **Unique loot**: search any piece that lies in a chest, or a whole set ("Farmer Set", cosmetics too), and
   the map shows only where it is. "Unique loot only" shows what you're still missing, by kind. Each chest
   says how high it is: under the surface (caves, cellars, the sea floor), on an island, or above or below you.
+- **Trophy bosses**: where each boss whose head makes a trophy spawns, which head it drops, and whose head
+  you've never had.
 - **Hollow Halls**: each hall's floor plan (your floor bright when you're inside), what's left to find there
   against what you already have, its quests, and a check before you go: level, gear, damage the Hollow
   resist or fear, grappling hook, healing.
 - **Character**: your gear, bag and every chest (search across all of them), bases and stations, build and
   skill tree with gear advice for your level, survival numbers (Shroud time, cold, breath), and your progress
-  over time.
+  over time: lore pages and unique loot found so far. **Share build** makes a picture of your build for a chat.
+  Playing in a friend's world works too: it reads just your character.
 - **Plan**: pick what you want to make; it lists what to gather, craft and fetch, and where, nearest first,
   with a farming route. **Hunt nearby** leads you to every lore page, unique piece, Shroud Root, Elixir Well,
-  obelisk, shrine or sanctum you're missing, anywhere or in one region, nearest first, moving on
+  obelisk, shrine, sanctum or trophy boss you're missing, anywhere or in one region, nearest first, moving on
   to the next by itself (the PC runs it, so it carries on with the phone in your pocket).
 - **Codex**: every item, recipe, set, lore page and quest from the game's own data; find gear by the skill or
   stat it gives.
+- **Over the game** (PC): the guide's marker and the Plan's next tasks show on the game screen, small and in
+  the game's style.
 - **Ask** (optional): questions about your game answered by Claude, from your save and the game data.
+- In **15 languages** (the game's own), on Android or as a web page on any phone, tablet or browser.
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="160" alt="Home">
