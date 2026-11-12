@@ -40,6 +40,7 @@ request.
 | [NumPy](https://numpy.org), [SciPy](https://scipy.org) | map building tools only (not included) | BSD-3-Clause |
 | [kfc-parser / EML](https://github.com/Brabb3l/kfc-parser) | runs `tools/eml-export` to export the game data (not included) | GPL-3.0 |
 | [Enshrouded Wiki](https://enshrouded.wiki.gg) | pages Ask reads when a question needs them (not included); the item icons' source | the wiki's own terms (its Copyrights page); the icons are Keen Games' art |
+| [Steam news feed](https://partner.steamgames.com/doc/webapi/ISteamNews) | Keen's posts about the game, read for News (not included); the posts are Keen Games' | Steam Web API terms |
 | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) by Anthropic | answers Ask questions on your own plan (not included) | Anthropic's terms |
 
 The packages above go into the release files as follows. `EnshroudBuddy.exe` bundles Python, Tcl/Tk and the

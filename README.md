@@ -25,6 +25,8 @@ files and shows your game on the phone, while you play or away from the PC:
   to the next by itself (the PC runs it, so it carries on with the phone in your pocket).
 - **Codex**: every item, recipe, set, lore page and quest from the game's own data; find gear by the skill or
   stat it gives.
+- **News from Keen**: Keen's patch notes, test-branch notes for the patch to come and their plans for later,
+  from Steam, each with the items and skills it names that you have.
 - **Over the game** (PC): the guide's marker and the Plan's next tasks show on the game screen, small and in
   the game's style.
 - **Ask** (optional): questions about your game answered by Claude, from your save and the game data.
@@ -124,6 +126,8 @@ lost. For the PC, download the new `EnshroudBuddy.exe` and open it: it replaces 
     metrics for it ([Google's privacy policy](https://policies.google.com/privacy)). Nothing about you or the
     code is sent.
   - **Updates:** once a day the app asks GitHub for the latest release, sending nothing about you.
+  - **News from Keen:** every few hours the PC program asks Steam's public news feed for Enshrouded's posts,
+    sending only the game's id.
   - **Web app fonts:** in a browser, the page loads its fonts (Roboto, and Noto for Japanese, Chinese, Korean and
     Thai) from Google Fonts (fonts.gstatic.com), as any web page using them does. The Android app doesn't.
   Nobody else, us included, gets anything: there are no accounts, ads or analytics.

@@ -11,6 +11,7 @@ import '../l10n.dart';
 import 'buddy_auth.dart';
 import 'game_db.dart';
 import 'history.dart';
+import 'news.dart';
 import 'net.dart';
 
 /// One item stack from the save.
@@ -879,6 +880,10 @@ class Live extends ChangeNotifier {
   Future<String> _get(String path) async =>
       utf8.decode(await _getBytes(path, explain: true));
 
+  /// Keen's posts from the agent ([keenNews]), at most every 30 minutes unless [force].
+  Future<void> updateNews({bool force = false}) =>
+      keenNews.update(_get, force: force);
+
   int _failures = 0;
 
   Future<void> refresh({bool onlyIfNew = false}) async {
@@ -907,6 +912,7 @@ class Live extends ChangeNotifier {
       }
       error = null;
       _failures = 0;
+      updateNews();
       _fetchFog();
       _overlayPushAll();
       if (_posTimer == null) _pollPos();

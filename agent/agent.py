@@ -18,6 +18,8 @@ Endpoints (port 4750):
     GET /history    progress snapshots, oldest first (agent/history.jsonl, seeded from the game's backups)
     GET /db/version {"built"} of the game data the phone should use (app/assets/game.json, from tools/build_db.py)
     GET /db         that game data, so data fixes reach the phone without reinstalling the app
+    GET /news       Keen's posts about the game from Steam's news feed (tools/news.py): {"at", "fetching",
+                    "posts": [{"id", "date", "title", "kind" (patch, test, plan, news), "url", "text"}]}
     GET /app/       the app as a web page (tools/build_web.py, tools/webapp.py) for an iPhone, a tablet or a
                     browser on the PC; not signed, as it holds nothing of the player's, and its own requests
                     are signed like the phone's
@@ -66,6 +68,7 @@ import history as history_mod  # noqa: E402
 import hunt as hunt_mod  # noqa: E402
 import livepos as livepos_mod  # noqa: E402
 import motion as motion_mod  # noqa: E402
+import news as news_mod  # noqa: E402
 import overlay as overlay_mod  # noqa: E402
 import pc_text  # noqa: E402
 from pc_text import t  # noqa: E402
@@ -456,6 +459,7 @@ def make_handler(agent, key):
 
     saves_cache = {"at": 0.0, "body": None}
     guard = Guard(key)
+    news = news_mod.News()
 
     class Handler(BaseHTTPRequestHandler):
         timeout = 30  # seconds a connection may sit idle or trickle (a slow client can't hold threads forever)
@@ -540,6 +544,8 @@ def make_handler(agent, key):
                     saves_cache["at"] = time.time()
                 routes["/saves"] = (json.dumps({"folders": saves_cache["body"], "current": current},
                                                ensure_ascii=False).encode(), "application/json; charset=utf-8")
+            if path == "/news":
+                routes["/news"] = (news.json(), "application/json; charset=utf-8")
             if path == "/db":
                 routes["/db"] = (DB.read_bytes() if DB.exists() else b"{}", "application/json; charset=utf-8")
             if path not in routes:

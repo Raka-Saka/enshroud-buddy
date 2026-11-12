@@ -17,6 +17,7 @@ import 'package:ensh_companion/data/live_state.dart';
 import 'package:ensh_companion/data/tracker.dart';
 import 'package:ensh_companion/data/updates.dart';
 import 'package:ensh_companion/data/mentions.dart';
+import 'package:ensh_companion/data/news.dart';
 import 'package:ensh_companion/data/planner.dart';
 import 'package:ensh_companion/data/projection.dart';
 import 'package:ensh_companion/data/route.dart';
@@ -1291,6 +1292,30 @@ void main() {
     h.stop();
     expect(sent.last, isNull);
     navTarget.value = null;
+  });
+
+  test('news: newest first, only the newest three unread the first time', () async {
+    SharedPreferences.setMockInitialValues({});
+    final n = KeenNews();
+    final posts = [
+      for (var i = 0; i < 6; i++)
+        {
+          'id': 'p$i',
+          'date': 1700000000 + i * 86400,
+          'title': 'Changelog for Hotfix #$i',
+          'kind': i == 5 ? 'test' : 'patch',
+          'url': '',
+          'text': '# Changelog\n- Fixed the Iron Bars recipe.',
+        },
+    ];
+    await n.update((_) async => jsonEncode({'at': 1, 'posts': posts}));
+    expect(n.posts.first.id, 'p5');
+    expect(n.posts.first.ahead, isTrue);
+    expect(n.unread, 3);
+    n.read(n.posts.first);
+    expect(n.unread, 2);
+    final m = Mentions.of(db).find(n.posts.first.text);
+    expect(m.map((x) => x.name), contains('Iron Bars'));
   });
 
   test('trophy bosses: named as their head, done once it is had', () {

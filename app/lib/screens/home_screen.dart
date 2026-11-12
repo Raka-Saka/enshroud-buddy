@@ -14,6 +14,7 @@ import '../theme.dart';
 import 'ask_screen.dart';
 import 'items_screen.dart';
 import 'journey_screen.dart';
+import 'news_screen.dart';
 import 'setup_screen.dart';
 import 'map_screen.dart';
 import 'plans_screen.dart';
@@ -302,6 +303,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       _NextUp(db: db, state: s),
+      NewsCard(db: db),
       _BuildCard(db: db, state: s, points: points),
       _ProgressCard(db: db, state: s),
       if (s.bases.isNotEmpty)

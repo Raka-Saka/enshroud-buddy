@@ -1068,3 +1068,13 @@ class _Thinking extends StatelessWidget {
     ),
   );
 }
+
+/// A game name's sheet (open, plan, show on the map), for text found elsewhere (the News).
+void showMention(BuildContext context, GameDb db, Mention m) {
+  HapticFeedback.selectionClick();
+  showModalBottomSheet(
+    context: context,
+    showDragHandle: true,
+    builder: (_) => _MentionSheet(db: db, m: m, outer: context),
+  );
+}

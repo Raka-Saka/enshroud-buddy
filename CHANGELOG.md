@@ -3,6 +3,13 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.43.0 (2026-11-13)
+
+- **News from Keen:** Keen's posts about Enshrouded, from Steam, on Home and in their own screen: patch notes,
+  notes for the test branch (what the next patch will change), and plans and previews for later. Each post
+  lists the items and skills it names, the ones you have first. In English, as Keen writes them; the PC
+  program checks every few hours, so it works with the PC offline too, showing the last ones it got.
+
 ## 0.42.0 (2026-11-12)
 
 - **Trophy bosses:** the bosses whose head makes a trophy are on the map, each saying which head it drops; a
