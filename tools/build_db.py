@@ -534,7 +534,7 @@ def points(export, unlocks, lore_pages, loot=None, halls=None):
         out.append(p)
     attach_roots(out, plants)
     if loot and loot.ok:
-        attach_special(out, loot)
+        attach_special(out, loot, halls)
     for p in out:
         p.pop("_hx", None)
         p.pop("_hz", None)
@@ -910,8 +910,9 @@ def attach_roots(points, plants):
                            "c": "label", "k": "Shroud Root", "t": "Shroud Root", "d": {"t": "", "k": kid}})
 
 
-def attach_special(points, loot):
-    """Fixed loot: a single-candidate item goes on its exact chest; others become an area point."""
+def attach_special(points, loot, halls=None):
+    """Fixed loot: a single-candidate item goes on its exact chest; others become an area point ("in": 1 in
+    the Hollow Halls' box, as points() marks)."""
     chests = [p for p in points if p["c"] == "chest"]
     for sp in loot.special:
         iid = sp["item_id"]
@@ -928,6 +929,9 @@ def attach_special(points, loot):
         p = {"x": mx, "y": my, "c": "special", "t": loot.items[iid]["n"], "i": iid, "n": sp["candidates"]}
         if sp["candidates"] == 1:
             p["h"] = round(y0 / 2)  # one spot: its height; an area's box spans too much to give one
+        if halls and halls[0] <= mx <= halls[2] and halls[1] <= my <= halls[3]:
+            p["in"] = 1
+            p.setdefault("h", round((y0 + y1) / 4))
         points.append(p)
 
 

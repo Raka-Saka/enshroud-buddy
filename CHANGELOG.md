@@ -3,6 +3,13 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.43.1 (2026-11-16)
+
+- Fixed: hunts and the overlay's tracker could stay stuck on the Venerable Hollow Chestplate, Dimweald Hammer
+  or Dimweald Axe, which lie inside the Hollow Halls but were taken for places outside.
+- Fixed: after the app restarted during a hunt, the PC went on with it and took back a destination picked on
+  the map; picking one now ends that hunt too.
+
 ## 0.43.0 (2026-11-13)
 
 - **News from Keen:** Keen's posts about Enshrouded, from Steam, on Home and in their own screen: patch notes,

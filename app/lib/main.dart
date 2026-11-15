@@ -77,6 +77,7 @@ class _CompanionAppState extends State<CompanionApp> {
     super.initState();
     L10n.changed.addListener(_relang);
     live.addListener(_maybeUpdate);
+    navTarget.addListener(_targetPicked);
     navTarget.addListener(_sendTarget);
     navTarget.addListener(hunt.targetChanged);
     _sendTarget();
@@ -120,6 +121,14 @@ class _CompanionAppState extends State<CompanionApp> {
     hunt.update(current, live.state, live.pos.value, pc: live.huntPc.value);
   }
 
+  /// A target picked by hand while the PC still runs a hunt the app no longer has (it was restarted): that
+  /// hunt stops too, or it would lead elsewhere again as soon as it moved on.
+  void _targetPicked() {
+    if (navTarget.value != null && !hunt.on && live.huntPc.value != null) {
+      live.stopPcHunt();
+    }
+  }
+
   /// The guide's target goes to the PC as well, which marks it over the game (tools/overlay.py).
   void _sendTarget() {
     final t = navTarget.value;
@@ -144,6 +153,7 @@ class _CompanionAppState extends State<CompanionApp> {
     live.removeListener(_maybeUpdate);
     navTarget.removeListener(_sendTarget);
     navTarget.removeListener(hunt.targetChanged);
+    navTarget.removeListener(_targetPicked);
     live.removeListener(_huntOn);
     live.pos.removeListener(_huntOn);
     live.huntPc.removeListener(_huntOn);

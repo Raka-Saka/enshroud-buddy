@@ -744,6 +744,13 @@ class Live extends ChangeNotifier {
   /// The hunt's places left, run on the PC (data/hunt.dart, tools/hunt.py); null stops it.
   void setHunt(Map<String, Object?>? h) => _overlaySet('/hunt', h);
 
+  /// Stops the PC's hunt even when the app has none (the app was restarted while the PC went on): else it
+  /// takes the guide's target back whenever it moves on.
+  void stopPcHunt() {
+    _overlay.remove('/hunt');
+    setHunt(null);
+  }
+
   /// Where the PC's hunt is (GET /pos "hunt": {"cur", "left", "passed"}), null without one (or an older agent).
   final huntPc = ValueNotifier<Map<String, dynamic>?>(null);
 
