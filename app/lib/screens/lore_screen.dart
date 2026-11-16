@@ -40,7 +40,11 @@ class _DocsScreenState extends State<DocsScreen> {
   @override
   Widget build(BuildContext context) {
     final st = LiveScope.of(context).state;
-    final k = st?.knowledge;
+    // lore pages are the character's own reads; quests partly the world's progress
+    final k =
+        identical(widget.docs, widget.db.lore)
+            ? st?.ownKnowledge
+            : st?.knowledge;
     bool done(Doc d) =>
         k != null &&
         d.pages.isNotEmpty &&

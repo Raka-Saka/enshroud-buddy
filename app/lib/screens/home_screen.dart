@@ -615,14 +615,20 @@ class _ProgressCard extends StatelessWidget {
           ProgressLine(
             label: tr('Set pieces collected'),
             icon: Icons.collections_bookmark_outlined,
-            done: setEntries.where((e) => e.done?.likely(k) ?? false).length,
+            done:
+                setEntries
+                    .where((e) => e.done?.likely(state.ownKnowledge) ?? false)
+                    .length,
             total: setEntries.length,
             onTap: () => goTo(Tabs.codex, codex: CodexTabs.sets),
           ),
           ProgressLine(
             label: tr('Lore pages found'),
             icon: Icons.auto_stories_outlined,
-            done: lorePages.where((p) => p.done?.likely(k) ?? false).length,
+            done:
+                lorePages
+                    .where((p) => p.done?.likely(state.ownKnowledge) ?? false)
+                    .length,
             total: lorePages.length,
             onTap: () => goTo(Tabs.codex, codex: CodexTabs.lore),
           ),

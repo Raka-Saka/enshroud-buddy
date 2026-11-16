@@ -175,8 +175,9 @@ class LiveState {
     };
     flameLevel = w['flame_level'] ?? 0;
     warnings = List<String>.from(j['warnings'] ?? const []);
+    ownKnowledge = Set<String>.from(c['knowledge'] ?? const []);
     knowledge = {
-      ...List<String>.from(c['knowledge'] ?? const []),
+      ...ownKnowledge,
       ...List<String>.from(w['knowledge'] ?? const []),
     };
     itemsKnown = Set<String>.from(c['items_known'] ?? const []);
@@ -184,6 +185,10 @@ class LiveState {
 
   /// Knowledge flags of the character and the world, for unlock checks.
   late final Set<String> knowledge;
+
+  /// The character's own knowledge flags: what it read and collected (lore pages, set entries). The world's
+  /// hold what any character on it found, so another character's finds would count too.
+  late final Set<String> ownKnowledge;
 
   /// Every item the character has ever had: the game's own collection (sets, blocks).
   late final Set<String> itemsKnown;

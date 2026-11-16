@@ -16,7 +16,7 @@ class SetsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final k = LiveScope.of(context).state?.knowledge;
+    final k = LiveScope.of(context).state?.ownKnowledge;
     String progress(ItemSet s) =>
         k == null
             ? '${s.entries.length}'
@@ -88,7 +88,7 @@ class SetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final k = LiveScope.of(context).state?.knowledge;
+    final k = LiveScope.of(context).state?.ownKnowledge;
     return Scaffold(
       appBar: AppBar(title: Text(gt(set.name))),
       body: ListView(

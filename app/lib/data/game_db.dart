@@ -875,9 +875,11 @@ class GameDb {
   Iterable<Poi> bossSpots(String itemId) => poi.where((p) => p.head == itemId);
 
   /// Found (lore) or completed (labels), when the save can tell.
-  bool poiDone(Poi p, Set<String> known) {
+  /// [own]: the character's own knowledge (LiveState.ownKnowledge), which lore pages are read from.
+  bool poiDone(Poi p, Set<String> known, [Set<String>? own]) {
     if (p.lore != null)
-      return lore[p.lore![0]].pages[p.lore![1]].done?.likely(known) ?? false;
+      return lore[p.lore![0]].pages[p.lore![1]].done?.likely(own ?? known) ??
+          false;
     return p.done?.likely(known) ?? false;
   }
 

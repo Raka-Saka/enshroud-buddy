@@ -360,19 +360,19 @@ class HallFinds {
   static final _names = Expando<Set<String>>();
 
   /// Names of every item the character has: in the game's collection (every item ever had), a set entry
-  /// collected, owned anywhere, or with a known recipe. An item counts by name, whatever its level.
+  /// collected, worn or carried, or with a known recipe. Not what lies in the world's chests: those are
+  /// shared by every character on the world (and what it put there itself is in its collection). An item counts by name, whatever its level.
   Set<String> get _have =>
       _names[state!] ??= {
         for (final id in state!.itemsKnown) db.items[id]?.name ?? '',
         for (final set in db.sets)
           for (final e in set.entries)
-            if (e.done?.likely(state!.knowledge) ?? false)
+            if (e.done?.likely(state!.ownKnowledge) ?? false)
               db.items[e.itemId]?.name ?? '',
         for (final o in [
           ...state!.equipment,
           ...state!.cosmetics,
           ...state!.carried,
-          for (final c in state!.containers) ...c.items,
         ])
           db.items[o.itemId]?.name ?? '',
         for (final it in db.items.values)
@@ -390,7 +390,7 @@ class HallFinds {
   /// For a collectible place: whether all it holds is had (null without a save, or for other places).
   bool? had(Poi p) {
     if (state == null || !collectible(p)) return null;
-    if (p.cat == 'lore') return db.poiDone(p, state!.knowledge);
+    if (p.cat == 'lore') return db.poiDone(p, state!.ownKnowledge);
     return p.loot.every((id) => _have.contains(db.items[id]?.name));
   }
 

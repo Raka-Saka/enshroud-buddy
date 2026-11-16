@@ -3,6 +3,13 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.43.2 (2026-11-17)
+
+- Fixed: on a world shared by several characters, one character's finds counted for all of them, so hunts
+  and the tracker skipped unique loot and lore pages a new character still lacked. Unique loot now counts
+  what the character itself has had, wears, carries or can craft (not what lies in the world's chests);
+  lore pages and set pieces what it read and collected. Camps, shrines and quests stay the world's.
+
 ## 0.43.1 (2026-11-16)
 
 - Fixed: hunts and the overlay's tracker could stay stuck on the Venerable Hollow Chestplate, Dimweald Hammer

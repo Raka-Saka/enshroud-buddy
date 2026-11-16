@@ -79,7 +79,7 @@ Map<String, Object?>? trackerOf(
 /// the nearest place outside the Hollow Halls with something still missing.
 ({List<Map<String, Object?>> counts, Map<String, Object?>? nearest})
 _completion(GameDb db, LiveState state, PlayerPos? here) {
-  final k = state.knowledge;
+  final k = state.ownKnowledge;
   final pages = [for (final d in db.lore) ...d.pages];
   final finds = HallFinds(db, state);
   final uniques = <String>{}, had = <String>{};

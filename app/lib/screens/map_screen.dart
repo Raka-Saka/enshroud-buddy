@@ -1270,7 +1270,10 @@ class _MapScreenState extends State<MapScreen> {
         hideDone = false;
       });
       controller.move(gridToLatLng(picked.x, picked.y), 5);
-      showPoi(picked, s != null && widget.db.poiDone(picked, s.knowledge));
+      showPoi(
+        picked,
+        s != null && widget.db.poiDone(picked, s.knowledge, s.ownKnowledge),
+      );
     }
   }
 
@@ -1615,7 +1618,8 @@ class _MapScreenState extends State<MapScreen> {
       if (!visible) continue;
       // a page read, or loot the character has anywhere, is done; in the open hall, what's missing stands out
       final had = finds.had(p);
-      final done = had ?? (s != null && widget.db.poiDone(p, known));
+      final done =
+          had ?? (s != null && widget.db.poiDone(p, known, s.ownKnowledge));
       if (done && hideDone) continue;
       // in the open hall, and for a searched item or set, what's missing carries its name
       final missing = (mine || lootItems != null) && had == false;

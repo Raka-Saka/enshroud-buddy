@@ -1000,7 +1000,7 @@ class _MentionSheet extends StatelessWidget {
   (String, String?, List<Widget>) _place(BuildContext context, LiveState? s) {
     final p = m.place!;
     final region = db.regionAt(p.x, p.y);
-    final done = s == null ? null : db.poiDone(p, s.knowledge);
+    final done = s == null ? null : db.poiDone(p, s.knowledge, s.ownKnowledge);
     return (
       [
         if (p.kind != null) gt(p.kind!),
