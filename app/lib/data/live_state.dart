@@ -742,6 +742,7 @@ class Live extends ChangeNotifier {
   /// sent when it changes, and again once the link comes back if it was missed.
   final _overlay = <String, String>{};
   final _overlayUnsent = <String>{};
+  Object? _boot;
 
   void setTarget(Map<String, Object?>? t) => _overlaySet('/target', t);
   void setTracker(Map<String, Object?>? t) => _overlaySet('/tracker', t);
@@ -926,6 +927,11 @@ class Live extends ChangeNotifier {
       _failures = 0;
       updateNews();
       _fetchFog();
+      // a restarted agent (its "boot" changed) has forgotten the target, the tracker and the hunt
+      if (health['boot'] != _boot) {
+        if (_boot != null) _overlayUnsent.addAll(_overlay.keys);
+        _boot = health['boot'];
+      }
       _overlayPushAll();
       if (_posTimer == null) _pollPos();
     } catch (e) {

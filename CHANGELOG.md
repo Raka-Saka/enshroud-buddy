@@ -3,6 +3,14 @@
 Newest first. Each version is a [release](https://github.com/Raka-Saka/enshroud-buddy/releases) with the PC
 program (`EnshroudBuddy.exe`) and the Android app (`EnshroudBuddy.apk`).
 
+## 0.43.3 (2026-11-21)
+
+- Fixed: the guide over the game could vanish behind the game's window (seen after the game switched between
+  windowed and fullscreen) and stay there; it now comes back to the front within a second. Needs the new PC
+  program.
+- Fixed: after the PC program restarted, the guide over the game stayed empty until the plan or the target
+  changed on the phone; the phone now sends them again. Needs both the new PC program and the new app.
+
 ## 0.43.2 (2026-11-17)
 
 - Fixed: on a world shared by several characters, one character's finds counted for all of them, so hunts

@@ -272,6 +272,7 @@ user32.UpdateLayeredWindow.argtypes = [wt.HWND, wt.HDC, ctypes.POINTER(wt.POINT)
 WS_POPUP = 0x80000000
 WS_EX = 0x00000008 | 0x00000020 | 0x00000080 | 0x00080000 | 0x08000000  # topmost, transparent, tool, layered, noactivate
 SWP = 0x0001 | 0x0004 | 0x0010  # no size, no z-order, no activate
+HWND_TOPMOST = wt.HWND(-1)
 
 
 class Window:
@@ -286,12 +287,21 @@ class Window:
                                            0, 0, 1, 1, None, None, hinst, None)
         self.shown = False
         self.size = (0, 0)
+        self.fronted = 0.0
 
     def pump(self):
         msg = wt.MSG()
         while user32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 1):  # PM_REMOVE
             user32.TranslateMessage(ctypes.byref(msg))
             user32.DispatchMessageW(ctypes.byref(msg))
+        if self.shown and time.monotonic() - self.fronted > 1:
+            self.front()
+
+    def front(self):
+        """Above the other windows again: the game's window can end up over this one (seen after it switched
+        between windowed and fullscreen), though Windows still calls this one always-on-top."""
+        user32.SetWindowPos(self.hwnd, HWND_TOPMOST, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)  # no size, move, activate
+        self.fronted = time.monotonic()
 
     def paint(self, img, x, y):
         """Shows img (RGBA) with its top left at screen pixel (x, y)."""
@@ -322,6 +332,8 @@ class Window:
         if on != self.shown:
             user32.ShowWindow(self.hwnd, 4 if on else 0)  # SW_SHOWNOACTIVATE / SW_HIDE
             self.shown = on
+            if on:
+                self.front()
 
     def close(self):
         user32.DestroyWindow(self.hwnd)

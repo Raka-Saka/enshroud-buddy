@@ -417,6 +417,9 @@ class Guard:
         return ok
 
 
+BOOT = int(time.time())  # when this agent started
+
+
 def agent_version():
     """This agent's version: the app's, as both are released together (app/pubspec.yaml, bundled in the exe)."""
     try:
@@ -526,7 +529,10 @@ def make_handler(agent, key):
             with agent.lock:
                 routes = {
                     "/state": (agent.state_json, "application/json; charset=utf-8"),
-                    "/health": (json.dumps({**agent.health, "version": agent_version()}).encode(), "application/json"),
+                    # boot: a restarted agent has forgotten the target, the tracker and the hunt; the phone
+                    # sends them again when it changes
+                    "/health": (json.dumps({**agent.health, "version": agent_version(), "boot": BOOT}).encode(),
+                                "application/json"),
                     "/fog.png": (agent.fog_png, "image/png"),
                     "/fog_overlay.png": (agent.fog_overlay_png, "image/png"),
                     "/history": (agent.history.json(), "application/json"),
